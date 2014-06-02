@@ -3,11 +3,11 @@ Gitify
 
 Experiment to allow versioning/building a MODX site through Git.
 
-The goal of Gitify is to provide a two-way sync of data typically stored in the MODX database with Git. To do this, it creates a representation of xPDOObject's in files. These files follow a certain a  human and machine friendly format with simple JSON at the top of the file, and the content (if there's any specific content field) below that. The configuration, which determines what data is written to file, is stored in a .gitify file in the project root.
+The goal of Gitify is to provide a two-way sync of data typically stored in the MODX database with Git. To do this, it creates a representation of xPDOObject's in files. These files follow a certain a [human and machine friendly format](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7) with simple JSON at the top of the file, and the content (if there's any specific content field) below that. The configuration, which determines what data is written to file, is stored in a .gitify file in the project root.
 
 ## Creating a new Project
 
-To create a new project, you can manually create a .gitify file, or run `php Gitify.php init [directory]` where `[directory]` is empty, or a directory relative to the position of the Gitify.php file. The .gitify file will be created in that directory. There needs to be config.core.php file in the same directory as the .gitify file, so either initialise Gitify in the root of a MODX site, or add the config.core.php file to point to a MODX core.
+To create a new project, you can manually create a .gitify file, or run `php Gitify.php init [directory]` where `[directory]` is empty, or a directory relative to the position of the Gitify.php file. The .gitify file will be created in that directory. There needs to be config.core.php file in the same directory as the .gitify file, so either initialise Gitify in the root of a MODX site, or add the config.core.php filegit push to point to a MODX core.
 
 To do:
 
