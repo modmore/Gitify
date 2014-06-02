@@ -7,7 +7,7 @@ The goal of Gitify is to provide a two-way sync of data typically stored in the 
 
 ## Creating a new Project
 
-To create a new project, you can manually create a .gitify file, or run `php Gitify.php init [directory]` where `[directory]` is empty, or a directory relative to the position of the Gitify.php file. The .gitify file will be created in that directory. There needs to be config.core.php file in the same directory as the .gitify file, so either initialise Gitify in the root of a MODX site, or add the config.core.php filegit push to point to a MODX core.
+To create a new project, you can manually create a .gitify file, or run `php Gitify.php init [directory]` where `[directory]` is empty, or a directory relative to the position of the Gitify.php file. The .gitify file will be created in that directory. There needs to be config.core.php file in the same directory as the .gitify file, so either initialise Gitify in the root of a MODX site, or add the config.core.php file to point to a MODX core.
 
 To do:
 
