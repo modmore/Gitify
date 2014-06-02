@@ -66,11 +66,13 @@ switch ($command) {
                 ),
                 'snippets' => array(
                     'class' => 'modSnippet',
-                    'primary' => 'name'
+                    'primary' => 'name',
+                    'extension' => '.php'
                 ),
                 'plugins' => array(
                     'class' => 'modPlugin',
-                    'primary' => 'name'
+                    'primary' => 'name',
+                    'extension' => '.php'
                 ),
             )
         );
