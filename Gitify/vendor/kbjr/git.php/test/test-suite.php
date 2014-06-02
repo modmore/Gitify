@@ -16,7 +16,7 @@
 define("DIR", dirname(__FILE__));
 
 // include the git library
-require DIR."/../Git.php";
+require DIR . "/../Git.php";
 
 $Git_Tests = array(
 	
