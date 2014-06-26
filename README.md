@@ -32,3 +32,44 @@ When you have the files, you can make edits and push them to a repository if you
 Building has not yet been added, but it will be along the lines of `php Gitify.php build [directory]`. That process will set up all the database records, updating changes, and clearing the cache. It will also try to handle possible ID issues for resources, where multiple resources exist with the same ID due to branch merges.
 
 
+## The .gitify File
+
+To define what to export, to where and how, we're using a `.gitify` file formatted in YAML. Alongside the .gitify file there needs to be a config.core.php file to point Gitify to the MODX installation. The `Gitify.php` file needs to be in the same directory as the `.gitify` file, or in a higher directory when passing the directory parameter to `php Gitify.php [init|load|build] [directory]`.
+
+An example gitify (created by default when calling `php Gitify.php init`):
+
+```` yaml
+name: Project Name
+data:
+  content:
+    type: content
+    exclude_keys: [createdby, createdon, editedby, editedon]
+  categories:
+    class: modCategory
+    primary: category
+  templates:
+    class: modTemplate
+    primary: name
+  template_variables:
+    class: modTemplateVar
+    primary: name
+  chunks:
+    class: modChunk
+    primary: name
+  snippets:
+    class: modSnippet
+    primary: name
+    extension: .php
+  plugins:
+    class: modPlugin
+    primary: name
+    extension: .php
+````
+
+The .gitify file structure is real simple. There are root notes for `name` (the project name) and `data`. `data` contains an array of directories to create. These directories then specify either a `type` (i.e. `content`), or a `class`. The `primary` field determines the key to use in the name of the generated files. This defaults to `id`, but in many cases you may want to use the `name` as that is more human friendly.
+
+By default files will be created with a `.yaml` extension, but if you want you can override that with a `extension` property. This can help with certain data and syntax highlighting in IDEs.
+
+When a certain class is not part of the core models, you can define a `package` as well. This will run `$modx->addPackage` before attempting to load the data. The path is determined by looking at a `[package].core_path` setting suffixed with `model/`, or a defined `package_path` property.
+
+By adding a `where` property you can filter the objects that will be loaded.

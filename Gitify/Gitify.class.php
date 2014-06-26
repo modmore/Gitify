@@ -1,7 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/vendor/kbjr/git.php/Git.php';
-require_once dirname(__FILE__) . '/vendor/GerHobbelt/nicejson-php/nicejson.php';
+require_once dirname(__FILE__) . '/vendor/mustangostang/spyc/Spyc.php';
 
 /**
  * Class Gitify
@@ -11,19 +11,48 @@ class Gitify
     public $git;
     /** @var modX|null */
     public $modx;
+    /** @var Spyc|null */
+    public $spyc;
 
     public $sep = "\n-----\n";
 
+    /**
+     * Creates a new Gitify instance, creating local Git and Spyc (YAML) instances.
+     */
     public function __construct()
     {
         $this->git = new Git();
+        $this->spyc = new Spyc();
     }
 
-    public function toJSON(array $data = array())
+    /**
+     * Takes in an array of data, and turns it into blissful YAML using Spyc.
+     *
+     * @param array $data
+     * @return string
+     */
+    public function toYAML(array $data = array())
     {
-        return json_format($data);
+        return $this->spyc->dump($data, false, false, true);
     }
 
+    /**
+     * Takes YAML, and turns it into an array using Spyc.
+     *
+     * @param string $input
+     * @return array
+     */
+    public function fromYAML($input = '')
+    {
+        return $this->spyc->load($input);
+    }
+
+    /**
+     * Loads a new modX instance
+     *
+     * @param $root
+     * @return bool
+     */
     public function loadMODX($root)
     {
         if ($this->modx && $this->modx->config['base_path'] == $root) {

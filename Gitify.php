@@ -47,7 +47,10 @@ switch ($command) {
             'name' => $name,
 
             'data' => array(
-                'content' => 'content',
+                'content' => array(
+                    'type' => 'content',
+                    'exclude_keys' => array('createdby', 'createdon', 'editedby', 'editedon')
+                ),
                 'categories' => array(
                     'class' => 'modCategory',
                     'primary' => 'category'
@@ -77,9 +80,9 @@ switch ($command) {
             )
         );
 
-        $json = $gitify->toJSON($project);
+        $yaml = $gitify->toYAML($project);
 
-        file_put_contents($project_path . '/.gitify', $json);
+        file_put_contents($project_path . '/.gitify', $yaml);
         echo "Created new Gitify project in $project_path\n";
 
         /*
@@ -117,7 +120,7 @@ switch ($command) {
             exit(1);
         }
 
-        $project = json_decode(file_get_contents($project_path . '.gitify'), true);
+        $project = $gitify->fromYAML(file_get_contents($project_path . '.gitify'), true);
         if (!$project || !is_array($project)) {
             echo "Error: $project_path.gitify file is not valid JSON, or is empty.\n";
             exit (1);
