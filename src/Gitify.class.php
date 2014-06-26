@@ -72,4 +72,31 @@ class Gitify
 
         return true;
     }
+
+    public function echoInfo ($msg, $lineEnd = true)
+    {
+        echo '|' . date('G:i:s') . '| ' . $msg;
+        if ($lineEnd) echo "\n";
+    }
+
+    /**
+     * Asks a question on the php command line
+     *
+     * @param $question
+     * @param string $default
+     * @param bool $formStyle
+     * @return string
+     */
+    public function askQuestion($question, $default = '', $formStyle = false) {
+        if ($formStyle) {
+            $question = str_pad($question, 40, ' ', STR_PAD_RIGHT);
+        }
+        $this->echoInfo('> ' . $question, false);
+        $handle = fopen("php://stdin", "r");
+        $return = fgets($handle);
+        $return = trim($return);
+
+        if (empty($return)) return $default;
+        return $return;
+    }
 }

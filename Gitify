@@ -1,6 +1,15 @@
 #!/usr/bin/env php
 <?php
 $fn = 'Gitify';
+$help = "Usage: $fn [command] [options]
+
+Commands:
+    init            starts a new Gitify project, creating a .gitify configuration
+                    file and optionally installing MODX
+    load            loads the MODX site into the repository per the .gitify configuration file
+    build           builds the site from the repository into MODX
+    install-modx    installs the latest MODX version into the current directory
+";
 
 // This file would be something you could run from the command line
 // For example:
@@ -9,108 +18,33 @@ $fn = 'Gitify';
 //
 // which would then build a new MODX site based on what's contained in the gitify repo.
 if ($argc < 2) {
-    echo "Usage: $fn [command] [options]
-
-Commands:
-    init: starts a new Gitify project
-    build: builds the site into MODX
-    load: loads the site into the repository
-";
+    echo $help;
     exit(1);
 }
+
+
+if (version_compare(phpversion(),'5.3.0') >= 0) {
+    $tz = @ini_get('date.timezone');
+    if (empty($tz)) {
+        date_default_timezone_set(@date_default_timezone_get());
+    }
+}
+
 
 require_once dirname(__FILE__) . '/src/Gitify.class.php';
 $gitify = new Gitify();
 
 $command = $argv[1];
+$cwd = getcwd() . DIRECTORY_SEPARATOR;
 
 switch ($command) {
     // starts a new Gitify project
     case 'init':
-        if (file_exists($project_path . '.gitify')) {
-            echo "Error: there already is a Gitify project in $project_path";
-            exit(1);
-        }
-
-        echo "Please enter a name for the Project: ";
-        $handle = fopen("php://stdin", "r");
-        $line = fgets($handle);
-        $name = trim($line);
-
-        echo "Please enter a directory to store the data in: ";
-        $handle = fopen("php://stdin", "r");
-        $line = fgets($handle);
-        $directory = trim($line);
-        $directory = rtrim($line, '/') . '/';
-
-        $cwd = getcwd();
-
-        $project_path = $cwd . $directory;
-        if (!is_dir($project_path)) {
-            echo "Creating new directory $project_path\n";
-            mkdir($project_path);
-        }
-
-        $project = array(
-            'name' => $name,
-
-            'data_directory' => $directory,
-
-            'data' => array(
-                'content' => array(
-                    'type' => 'content',
-                    'exclude_keys' => array('createdby', 'createdon', 'editedby', 'editedon')
-                ),
-                'categories' => array(
-                    'class' => 'modCategory',
-                    'primary' => 'category'
-                ),
-                'templates' => array(
-                    'class' => 'modTemplate',
-                    'primary' => 'name'
-                ),
-                'template_variables' => array(
-                    'class' => 'modTemplateVar',
-                    'primary' => 'name'
-                ),
-                'chunks' => array(
-                    'class' => 'modChunk',
-                    'primary' => 'name'
-                ),
-                'snippets' => array(
-                    'class' => 'modSnippet',
-                    'primary' => 'name',
-                    'extension' => '.php'
-                ),
-                'plugins' => array(
-                    'class' => 'modPlugin',
-                    'primary' => 'name',
-                    'extension' => '.php'
-                ),
-            )
-        );
-
-        $yaml = $gitify->toYAML($project);
-
-        file_put_contents($project_path . '/.gitify', $yaml);
-        echo "Created new Gitify project in $project_path\n";
-
-        /*
-         * @todo allow installing a new MODX from the command line
-         * @see https://github.com/bertoost/MODX-Installers/blob/master/install-core.php
-        if (!file_exists($project_path . '/config.core.php')) {
-            echo "Could not find a config.core.php file. Do you wish to install MODX? If so, enter the version number like 2.2.14-pl. If not, leave empty.: ";
-            $handle = fopen("php://stdin", "r");
-            $line = fgets($handle);
-            $version = trim($line);
-
-            if (!empty($version)) {
-
-            }
-        }
-        */
-
-        exit(0);
+        require_once dirname(__FILE__) . '/src/GitifyInit.class.php';
+        $runner = new GitifyInit();
+        $runner->run(array(
+            'cwd' => $cwd,
+        ));
 
         break;
 
@@ -121,8 +55,6 @@ switch ($command) {
 
     // Load the site into Git
     case 'load':
-        $cwd = getcwd() . DIRECTORY_SEPARATOR;
-
         if (!file_exists($cwd . '.gitify')) {
             echo "Directory is not a Gitify directory: $cwd\n";
             exit(1);
@@ -142,4 +74,18 @@ switch ($command) {
         $runner->run($project);
 
         break;
+
+    // starts a new Gitify project
+    case 'install-modx':
+        require_once dirname(__FILE__) . '/src/GitifyInstallMODX.class.php';
+        $runner = new GitifyInstallMODX();
+        $runner->run(array(
+            'cwd' => $cwd,
+        ));
+
+        break;
+
+    default:
+        echo $help;
+        exit(1);
 }
