@@ -5,19 +5,50 @@ Experiment to allow versioning/building a MODX site through Git.
 
 The goal of Gitify is to provide a two-way sync of data typically stored in the MODX database with Git. To do this, it creates a representation of xPDOObject's in files. These files follow a certain a [human and machine friendly format](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7) with simple JSON at the top of the file, and the content (if there's any specific content field) below that. The configuration, which determines what data is written to file, is stored in a .gitify file in the project root.
 
+## Installation
+
+To get started with Gitify, it's easiest to set up a local clone of this repository. After that, make the Gitify file executable.
+
+```` shell
+$ git clone https://github.com/modmore/Gitify.git Gitify
+$ cd Gitify
+$ chmod +x Gitify
+````
+
+At this point you should be able to type `./Gitify` and get a response like the following:
+
+````
+Usage: Gitify [command] [options]
+
+Commands:
+    init: starts a new Gitify project
+    build: builds the site into MODX
+    load: loads the site into the repository
+````
+
+If that's working as expected, you will probably want to add the Gitify executable to your PATH so you can run Gitify in any directory. Edit your .bash_profile and add the following:
+
+````
+export PATH=/path/to/Gitify/Gitify:$PATH
+````
+
+Restart your terminal and you should be good to go.
+
 ## Creating a new Project
 
-To create a new project, you can manually create a .gitify file, or run `php Gitify.php init [directory]` where `[directory]` is empty, or a directory relative to the position of the Gitify.php file. The .gitify file will be created in that directory. There needs to be config.core.php file in the same directory as the .gitify file, so either initialise Gitify in the root of a MODX site, or add the config.core.php file to point to a MODX core.
+To create a new project, you can manually create a .gitify file, but it's easiest to run `Gitify init. You will be asked to provide a project name and a directory (relative to the working directory) to output the data to. The .gitify file will be created in the directory you called Gitify from.
+
+There needs to be config.core.php file in the same directory as the .gitify file, so either initialise Gitify in the root of a MODX site, or add the config.core.php file to point to a MODX core. You can also add a `path` property to the .gitify file that points to a MODX root.
 
 To do:
 
-* The `php Gitify.php init` command will also need to offer to install a clean MODX install, to speed up along the process.
+* The `Gitify init` command will also need to offer to install a clean MODX install, to speed up along the process.
 * Offer interactive shell options to tweak the generated .gitify file
 * Make .gitify more powerful with more configuration, such as filters
 
 ## Load to File
 
-When you added the .gitify file, you can tell Gitify to load the data to file. Simply run `php Gitify.php load [directory]` and you'll see the file representation of the various database objects.
+When you added the .gitify file, you can tell Gitify to load the data to file. Simply run `Gitify load` and you'll see the file representation of the various database objects show up in the data directory specified.
 
 To do:
 
@@ -29,17 +60,18 @@ To do:
 
 When you have the files, you can make edits and push them to a repository if you want, but with that you'll also need to be able of installing them in MODX sites. This is the build.
 
-Building has not yet been added, but it will be along the lines of `php Gitify.php build [directory]`. That process will set up all the database records, updating changes, and clearing the cache. It will also try to handle possible ID issues for resources, where multiple resources exist with the same ID due to branch merges.
+Building has not yet been added, but it will be along the lines of `Gitify build`. That process will set up all the database records, updating changes, and clearing the cache. It will also try to handle possible ID issues for resources, where multiple resources exist with the same ID due to branch merges.
 
 
 ## The .gitify File
 
-To define what to export, to where and how, we're using a `.gitify` file formatted in YAML. Alongside the .gitify file there needs to be a config.core.php file to point Gitify to the MODX installation. The `Gitify.php` file needs to be in the same directory as the `.gitify` file, or in a higher directory when passing the directory parameter to `php Gitify.php [init|load|build] [directory]`.
+To define what to export, to where and how, we're using a `.gitify` file formatted in YAML.
 
 An example gitify (created by default when calling `php Gitify.php init`):
 
 ```` yaml
 name: Project Name
+data_directory: project_data_directory/
 data:
   content:
     type: content
@@ -66,7 +98,7 @@ data:
     extension: .php
 ````
 
-The .gitify file structure is real simple. There are root notes for `name` (the project name) and `data`. `data` contains an array of directories to create. These directories then specify either a `type` (i.e. `content`), or a `class`. The `primary` field determines the key to use in the name of the generated files. This defaults to `id`, but in many cases you may want to use the `name` as that is more human friendly.
+The .gitify file structure is real simple. There are root notes for `name` (the project name), `data_directory` (the relative path where to store the files) and `data`. `data` contains an array of directories to create. These directories then specify either a `type` that has special processing going on (i.e. `content`), or a `class`. The `primary` field determines the key to use in the name of the generated files. This defaults to `id`, but in many cases you may want to use the `name` as that is more human friendly.
 
 By default files will be created with a `.yaml` extension, but if you want you can override that with a `extension` property. This can help with certain data and syntax highlighting in IDEs.
 

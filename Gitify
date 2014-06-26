@@ -1,5 +1,6 @@
+#!/usr/bin/env php
 <?php
-$fn = 'Gitify.php';
+$fn = 'Gitify';
 
 // This file would be something you could run from the command line
 // For example:
@@ -8,16 +9,17 @@ $fn = 'Gitify.php';
 //
 // which would then build a new MODX site based on what's contained in the gitify repo.
 if ($argc < 2) {
-    echo "Usage: php $fn [command] [options]
-    Commands:
-        init: starts a new Gitify project
-        build [environment]: builds the site into MODX
-        load [environment]: loads the entire site into the repository
+    echo "Usage: $fn [command] [options]
+
+Commands:
+    init: starts a new Gitify project
+    build: builds the site into MODX
+    load: loads the site into the repository
 ";
     exit(1);
 }
 
-require_once dirname(__FILE__) . '/Gitify/Gitify.class.php';
+require_once dirname(__FILE__) . '/src/Gitify.class.php';
 $gitify = new Gitify();
 
 $command = $argv[1];
@@ -25,26 +27,34 @@ $command = $argv[1];
 switch ($command) {
     // starts a new Gitify project
     case 'init':
-        echo "Please enter a name for the Project: ";
-        $handle = fopen("php://stdin", "r");
-        $line = fgets($handle);
-        $name = trim($line);
-
-        $cwd = getcwd();
-        $path = (isset($argv[2]) && !empty($argv[2])) ?  DIRECTORY_SEPARATOR . $argv[2] : '';
-
-        $project_path = $cwd . $path;
-        if (!is_dir($project_path)) {
-            echo "Creating new directory $project_path\n";
-            mkdir($project_path);
-        }
         if (file_exists($project_path . '.gitify')) {
             echo "Error: there already is a Gitify project in $project_path";
             exit(1);
         }
 
+        echo "Please enter a name for the Project: ";
+        $handle = fopen("php://stdin", "r");
+        $line = fgets($handle);
+        $name = trim($line);
+
+        echo "Please enter a directory to store the data in: ";
+        $handle = fopen("php://stdin", "r");
+        $line = fgets($handle);
+        $directory = trim($line);
+        $directory = rtrim($line, '/') . '/';
+
+        $cwd = getcwd();
+
+        $project_path = $cwd . $directory;
+        if (!is_dir($project_path)) {
+            echo "Creating new directory $project_path\n";
+            mkdir($project_path);
+        }
+
         $project = array(
             'name' => $name,
+
+            'data_directory' => $directory,
 
             'data' => array(
                 'content' => array(
@@ -111,27 +121,25 @@ switch ($command) {
 
     // Load the site into Git
     case 'load':
-        $cwd = getcwd();
-        $path = (isset($argv[2]) && !empty($argv[2])) ?  DIRECTORY_SEPARATOR . $argv[2] : '';
-        $project_path = $cwd . $path . DIRECTORY_SEPARATOR;
+        $cwd = getcwd() . DIRECTORY_SEPARATOR;
 
-        if (!file_exists($project_path . '.gitify')) {
-            echo "Directory is not a Gitify directory: $project_path\n";
+        if (!file_exists($cwd . '.gitify')) {
+            echo "Directory is not a Gitify directory: $cwd\n";
             exit(1);
         }
 
-        $project = $gitify->fromYAML(file_get_contents($project_path . '.gitify'), true);
+        $project = $gitify->fromYAML(file_get_contents($cwd . '.gitify'), true);
         if (!$project || !is_array($project)) {
-            echo "Error: $project_path.gitify file is not valid JSON, or is empty.\n";
+            echo "Error: $cwd.gitify file is not valid YAML, or is empty.\n";
             exit (1);
         }
-        $project['path'] = $project_path;
 
+        $project['cwd'] = $cwd;
+        if (!isset($project['path'])) $project['path'] = $cwd;
 
-        require_once dirname(__FILE__) . '/Gitify/GitifyLoad.class.php';
+        require_once dirname(__FILE__) . '/src/GitifyLoad.class.php';
         $runner = new GitifyLoad();
         $runner->run($project);
-
 
         break;
 }

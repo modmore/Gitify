@@ -28,7 +28,7 @@ class GitifyLoad extends Gitify
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
                     echo date('H:i:s') . " - Loading content into $folder/...\n";
-                    $this->loadContent($project['path'] . $folder, $type);
+                    $this->loadContent($project['data_directory'] . $folder, $type);
 
                     break;
 
@@ -37,7 +37,7 @@ class GitifyLoad extends Gitify
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
                     }
-                    $this->loadObjects($project['path'] . $folder, $type);
+                    $this->loadObjects($project['data_directory'] . $folder, $type);
 
                     break;
             }
