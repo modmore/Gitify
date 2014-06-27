@@ -85,7 +85,7 @@ class GitifyInit extends Gitify
                 ),
                 'templates' => array(
                     'class' => 'modTemplate',
-                    'primary' => 'name'
+                    'primary' => 'templatename'
                 ),
                 'template_variables' => array(
                     'class' => 'modTemplateVar',
