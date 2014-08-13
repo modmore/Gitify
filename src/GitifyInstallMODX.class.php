@@ -63,6 +63,7 @@ class GitifyInstallMODX extends Gitify {
         $dbUser = $this->askQuestion('Database User [root]: ', 'root', true);
         $dbPass = $this->askQuestion('Database Password: ', '', true);
         $host = $this->askQuestion('Web Hostname [' . gethostname() . ']: ', gethostname(), true);
+        $host = rtrim(trim($host), '/');
         $subdir = $this->askQuestion('Web Base Url/Subdirectory: ', '', true);
         $subdir = '/' . trim($subdir, '/') . '/';
         $subdir = str_replace('//','/', $subdir);
@@ -102,7 +103,7 @@ class GitifyInstallMODX extends Gitify {
             <context_connectors_path>{$directory}connectors/</context_connectors_path>
             <context_connectors_url>{$subdir}connectors/</context_connectors_url>
             <context_web_path>{$directory}</context_web_path>
-            <context_web_url>{$subdir}/</context_web_url>
+            <context_web_url>{$subdir}</context_web_url>
             <remove_setup_directory>1</remove_setup_directory>
         </modx>";
 
