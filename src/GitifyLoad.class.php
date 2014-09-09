@@ -74,7 +74,7 @@ class GitifyLoad extends Gitify
 
                 // Somewhat normalize uris into something we can use as file path that makes (human) sense
                 $uri = $resource->uri;
-                if ($resource->isfolder) {
+                if (substr($uri, -1) == '/') {
                     // Trim the trailing slash
                     $uri = rtrim($uri, '/');
                 }
