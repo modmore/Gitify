@@ -13,6 +13,8 @@ class Gitify
     public $modx;
     /** @var Spyc|null */
     public $spyc;
+    /** @var array */
+    public $argv;
 
     public $sep = "\n-----\n";
 
@@ -23,6 +25,9 @@ class Gitify
     {
         $this->git = new Git();
         $this->spyc = new Spyc();
+
+        global $argv;
+        $this->argv = $argv;
     }
 
     /**
@@ -75,7 +80,7 @@ class Gitify
 
     public function echoInfo ($msg, $lineEnd = true)
     {
-        echo '|' . date('G:i:s') . '| ' . $msg;
+        echo '|' . date('H:i:s') . '| ' . $msg;
         if ($lineEnd) echo "\n";
     }
 
@@ -98,5 +103,18 @@ class Gitify
 
         if (empty($return)) return $default;
         return $return;
+    }
+
+    /**
+     * Checks for a command line flag/option
+     *
+     * @param $shortFlag
+     * @param null $longFlag
+     * @return bool
+     */
+    public function hasOption($shortFlag, $longFlag = null) {
+        if (in_array('-' . $shortFlag, $this->argv)) return true;
+        if (!empty($longFlag) && in_array('-' . $longFlag, $this->argv)) return true;
+        return false;
     }
 }

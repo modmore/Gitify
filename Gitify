@@ -50,6 +50,23 @@ switch ($command) {
 
     // build the site in MODX
     case 'build':
+        if (!file_exists($cwd . '.gitify')) {
+            echo "Directory is not a Gitify directory: $cwd\n";
+            exit(1);
+        }
+
+        $project = $gitify->fromYAML(file_get_contents($cwd . '.gitify'), true);
+        if (!$project || !is_array($project)) {
+            echo "Error: $cwd.gitify file is not valid YAML, or is empty.\n";
+            exit (1);
+        }
+
+        $project['cwd'] = $cwd;
+        if (!isset($project['path'])) $project['path'] = $cwd;
+
+        require_once dirname(__FILE__) . '/src/GitifyBuild.class.php';
+        $runner = new GitifyBuild();
+        $runner->run($project);
 
         break;
 

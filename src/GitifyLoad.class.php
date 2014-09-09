@@ -103,13 +103,16 @@ class GitifyLoad extends Gitify
      */
     public function loadObjects($folder, array $options = array())
     {
-        // Empty the current data
-        $this->modx->getCacheManager()->deleteTree($folder, array('extensions' => ''));
+        // Read the current files
+        $before = $this->getAllFiles($folder);
+        $after = array();
 
         // Grab the stuff
         $c = $this->modx->newQuery($options['class']);
         if (isset($options['where'])) $c->where(array($options['where']));
         $collection = $this->modx->getCollection($options['class'], $c);
+
+        $this->modx->getCacheManager();
 
         // Loop over stuff
         $pk = isset($options['primary']) ? $options['primary'] : '';
@@ -120,7 +123,16 @@ class GitifyLoad extends Gitify
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
-            $this->modx->getCacheManager()->writeFile($fn, $file);
+            $after[] = $fn;
+
+            if (file_get_contents($fn) != $file) {
+                $this->modx->cacheManager->writeFile($fn, $file);
+            }
+        }
+
+        $old = array_diff($before, $after);
+        foreach ($old as $oldFile) {
+            unlink($oldFile);
         }
     }
 
@@ -132,7 +144,7 @@ class GitifyLoad extends Gitify
     public function generate($object, array $options = array())
     {
         $fieldMeta = $object->_fieldMeta;
-        $data = $object->toArray();
+        $data = $object->toArray('', true, true);
 
         // If there's a dedicated content field, we put that below the yaml for easier managing
         $content = '';
@@ -145,19 +157,17 @@ class GitifyLoad extends Gitify
                 }
             }
         }
-
         // Strip out keys that have the same value as the default, or are excluded per the .gitify
         $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
         foreach ($data as $key => $value) {
             if (
-                (isset($fieldMeta[$key]['default']) && $value === $fieldMeta[$key]['default'])
+                (isset($fieldMeta[$key]['default']) && $value === $fieldMeta[$key]['default']) //@fixme
                 || in_array($key, $excludes)
             )
             {
                 unset($data[$key]);
             }
         }
-
 
         $data = $this->expandJSON($data);
 
@@ -199,12 +209,26 @@ class GitifyLoad extends Gitify
         foreach ($data as $key => $value) {
             if (!empty($value) && is_string($value) && (strpos($value, '{') !== -1)) {
                 $json = $this->modx->fromJSON($value);
-                if (is_array($json)) $data[$key] = $json;
+                if (is_array($json)) $data[$key] = $this->expandJSON($json);
             }
             elseif (is_array($value)) {
                 $data[$key] = $this->expandJSON($value);
             }
         }
         return $data;
+    }
+
+    public function getAllFiles($folder)
+    {
+        $files = array();
+        $di = new RecursiveDirectoryIterator($folder, RecursiveDirectoryIterator::SKIP_DOTS);
+        $it = new RecursiveIteratorIterator($di);
+
+        foreach($it as $file)
+        {
+            /** @var SplFileInfo $file */
+            $files[] = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
+        }
+        return $files;
     }
 }
