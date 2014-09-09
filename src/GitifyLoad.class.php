@@ -150,7 +150,7 @@ class GitifyLoad extends Gitify
         $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
         foreach ($data as $key => $value) {
             if (
-                (isset($fieldMeta[$key]['default']) && $value == $fieldMeta[$key]['default'])
+                (isset($fieldMeta[$key]['default']) && $value === $fieldMeta[$key]['default'])
                 || in_array($key, $excludes)
             )
             {
