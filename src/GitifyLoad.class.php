@@ -104,7 +104,7 @@ class GitifyLoad extends Gitify
     public function loadObjects($folder, array $options = array())
     {
         // Read the current files
-        $before = $this->getAllFiles($folder);
+        $before = $this->getAllFiles($options['path'] . $folder);
         $after = array();
 
         // Grab the stuff
@@ -221,8 +221,12 @@ class GitifyLoad extends Gitify
     public function getAllFiles($folder)
     {
         $files = array();
-        $di = new RecursiveDirectoryIterator($folder, RecursiveDirectoryIterator::SKIP_DOTS);
-        $it = new RecursiveIteratorIterator($di);
+        try {
+            $di = new RecursiveDirectoryIterator($folder, RecursiveDirectoryIterator::SKIP_DOTS);
+            $it = new RecursiveIteratorIterator($di);
+        } catch (Exception $e) {
+            return array();
+        }
 
         foreach($it as $file)
         {
