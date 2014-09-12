@@ -8,6 +8,8 @@ class GitifyBuild extends Gitify
 
     public $verbose = true;
 
+    public $categories = array();
+
     /**
      * Runs the GitifyBuild command
      *
@@ -242,6 +244,15 @@ class GitifyBuild extends Gitify
             $object = $this->modx->newObject($class);
             $new = true;
         }
+
+        if ($object instanceof modElement && !($object instanceof modCategory)) {
+            // Handle string-based categories automagically
+            if (isset($data['category']) && !empty($data['category']) && !is_numeric($data['category'])) {
+                $catName = $data['category'];
+                $data['category'] = $this->getCategoryId($catName);
+            }
+        }
+
         $object->fromArray($data, '', true, true);
 
         if ($object->save()) {
@@ -250,5 +261,34 @@ class GitifyBuild extends Gitify
                 $this->echoInfo("{$new} {$class}: {$data[$primaryKey]}");
             }
         }
+    }
+
+    /**
+     * Grabs a category ID (or creates one!) for a category name
+     *
+     * @param $name
+     * @return int
+     */
+    public function getCategoryId($name)
+    {
+        // Hashing it as md5 to make sure invalid characters don't mess with our array
+        if (isset($this->categories[md5($name)])) {
+            return $this->categories[md5($name)];
+        }
+        $category = $this->modx->getObject('modCategory', array('category' => $name));
+        if (!$category) {
+            $category = $this->modx->newObject('modCategory');
+            $category->fromArray(array(
+                    'category' => $name,
+            ));
+            if (!$category->save()) {
+                return 0;
+            }
+        }
+        if ($category) {
+            $this->categories[md5($name)] = $category->get('id');
+            return $this->categories[md5($name)];
+        }
+        return 0;
     }
 }

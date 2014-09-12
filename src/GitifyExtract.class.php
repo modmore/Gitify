@@ -6,6 +6,8 @@
 class GitifyExtract extends Gitify
 {
 
+    public $categories = array();
+
     /**
      * Runs the GitifyExtract command
      *
@@ -169,6 +171,14 @@ class GitifyExtract extends Gitify
             }
         }
 
+        if ($object instanceof modElement && !($object instanceof modCategory)) {
+            // Handle string-based categories automagically
+            if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
+                $catId = $data['category'];
+                $data['category'] = $this->getCategoryName($catId);
+            }
+        }
+
         $data = $this->expandJSON($data);
 
         $out = $this->toYAML($data);
@@ -234,5 +244,22 @@ class GitifyExtract extends Gitify
             $files[] = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
         }
         return $files;
+    }
+
+    /**
+     * Turns a category ID into a name
+     *
+     * @param $id
+     * @return string
+     */
+    public function getCategoryName($id) {
+        if (isset($this->categories[$id])) return $this->categories[$id];
+
+        $category = $this->modx->getObject('modCategory', $id);
+        if ($category) {
+            $this->categories[$id] = $category->get('category');
+            return $this->categories[$id];
+        }
+        return '';
     }
 }
