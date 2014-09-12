@@ -85,7 +85,8 @@ class GitifyInit extends Gitify
                 ),
                 'templates' => array(
                     'class' => 'modTemplate',
-                    'primary' => 'templatename'
+                    'primary' => 'templatename',
+                    'extension' => '.html',
                 ),
                 'template_variables' => array(
                     'class' => 'modTemplateVar',
@@ -93,7 +94,8 @@ class GitifyInit extends Gitify
                 ),
                 'chunks' => array(
                     'class' => 'modChunk',
-                    'primary' => 'name'
+                    'primary' => 'name',
+                    'extension' => '.html',
                 ),
                 'snippets' => array(
                     'class' => 'modSnippet',
