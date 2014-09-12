@@ -42,22 +42,20 @@ To create a new project, you can manually create a `.gitify` file, but it's easi
 
 There needs to be config.core.php file in the same directory as the `.gitify` file, so either initialise Gitify in the root of a MODX site, or add the config.core.php file to point to a MODX core. You can also add a `path` property to the `.gitify` file that points to a MODX root.
 
-## Load to File
+## Extract to File
 
-When you added the `.gitify` file, you can tell Gitify to load the data to file. Simply run `Gitify load` and you'll see the file representation of the various database objects show up in the data directory specified.
+When you added the `.gitify` file, you can tell Gitify to extract the data to file. Simply run `Gitify extract` and you'll see the file representation of the various database objects show up in the data directory specified.
 
 To do:
 
 * This process will need to be automatically executed when changes are made to resources, elements or other data that is written to file.
-* Changes need to be automatically committed and, if a remote exists, pushed.
-* Make sure nuking files and rebuilding them does not trigger changes to the file that could complicate git merges.
+* Changes may need to be automatically committed and, if a remote exists, pushed.
 
 ## Build to MODX
 
 When you have the files, you can make edits and push them to a repository if you want, but with that you'll also need to be able of installing them in MODX sites. This is the build.
 
-Building has not yet been added, but it will be along the lines of `Gitify build`. That process will set up all the database records, updating changes, and clearing the cache. It will also try to handle possible ID issues for resources, where multiple resources exist with the same ID due to branch merges.
-
+To build, simply call `Gitify build`. If you have a bunch of ID/URI conflicts and you are not getting the expected results, you can force the build to first wipe content by calling `Gitify build -f`.
 
 ## The `.gitify` File
 

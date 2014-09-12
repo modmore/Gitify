@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Class GitifyLoad
+ * Class GitifyExtract
  */
-class GitifyLoad extends Gitify
+class GitifyExtract extends Gitify
 {
 
     /**
-     * Runs the GitifyLoad command
+     * Runs the GitifyExtract command
      *
      * @param array $project
      */

@@ -6,7 +6,7 @@ $help = "Usage: $fn [command] [options]
 Commands:
     init            starts a new Gitify project, creating a .gitify configuration
                     file and optionally installing MODX
-    load            loads the MODX site into the repository per the .gitify configuration file
+    extract         extracts the MODX site into the repository per the .gitify configuration file
     build           builds the site from the repository into MODX
     install-modx    installs the latest MODX version into the current directory
 ";
@@ -71,7 +71,7 @@ switch ($command) {
         break;
 
     // Load the site into Git
-    case 'load':
+    case 'extract':
         if (!file_exists($cwd . '.gitify')) {
             echo "Directory is not a Gitify directory: $cwd\n";
             exit(1);
@@ -86,8 +86,8 @@ switch ($command) {
         $project['cwd'] = $cwd;
         if (!isset($project['path'])) $project['path'] = $cwd;
 
-        require_once dirname(__FILE__) . '/src/GitifyLoad.class.php';
-        $runner = new GitifyLoad();
+        require_once dirname(__FILE__) . '/src/GitifyExtract.class.php';
+        $runner = new GitifyExtract();
         $runner->run($project);
 
         break;
