@@ -114,7 +114,7 @@ class Gitify
      */
     public function hasOption($shortFlag, $longFlag = null) {
         if (in_array('-' . $shortFlag, $this->argv)) return true;
-        if (!empty($longFlag) && in_array('-' . $longFlag, $this->argv)) return true;
+        if (!empty($longFlag) && in_array('--' . $longFlag, $this->argv)) return true;
         return false;
     }
 }

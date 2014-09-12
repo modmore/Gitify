@@ -45,7 +45,12 @@ class GitifyBuild extends Gitify
             }
         }
 
-        echo "Done!\n";
+        if (!$this->hasOption('ncc','no-cache-clear')) {
+            $this->echoInfo('Clearing cache...');
+            $this->modx->getCacheManager()->refresh();
+        }
+
+        $this->echoInfo('Done!');
         exit(0);
     }
 
