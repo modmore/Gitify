@@ -88,7 +88,11 @@ switch ($command) {
 
         require_once dirname(__FILE__) . '/src/GitifyExtract.class.php';
         $runner = new GitifyExtract();
-        $runner->run($project);
+        $success = $runner->run($project);
+        if(!$success) {
+            // something went wrong in run execution
+            exit(1);
+        }
 
         break;
 
