@@ -17,12 +17,12 @@ class GitifyExtract extends Gitify
     {
         if (!file_exists($project['path'] . 'config.core.php')) {
             echo "Error: there does not seem to be a MODX install present here.\n";
-            exit(1);
+            return false;
         }
 
         if (!$this->loadMODX($project['path'])) {
             echo "Error: Could not load the MODX API\n";
-            exit(1);
+            return false;
         }
 
         foreach ($project['data'] as $folder => $type) {
@@ -44,9 +44,8 @@ class GitifyExtract extends Gitify
                     break;
             }
         }
-
         echo "Done!\n";
-        exit(0);
+        return true;
     }
 
     /**
