@@ -36,6 +36,8 @@ export PATH=/path/to/Gitify/Gitify:$PATH
 
 Restart your terminal and you should be good to go.
 
+For successfull installing of MODX by `Gitify install-modx` command you should have installed **unzip** command in your system. For Debian/Ubuntu use `sudo apt-get install unzip`.
+
 ## Creating a new Project
 
 To create a new project, you can manually create a `.gitify` file, but it's easiest to run `Gitify init`. You will be asked to provide a project name, a data directory (relative to the working directory) as well as a few other options as to what to put in the `.gitify` file. The `.gitify` file will be created in the directory you called Gitify from.
