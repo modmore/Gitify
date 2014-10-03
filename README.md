@@ -23,7 +23,7 @@ Usage: Gitify [command] [options]
 Commands:
     init            starts a new Gitify project, creating a `.gitify` configuration
                     file and optionally installing MODX
-    load            loads the MODX site into the repository per the `.gitify` configuration file
+    extract         extracts the MODX site into the repository per the `.gitify` configuration file
     build           builds the site from the repository into MODX
     install-modx    installs the latest MODX version into the current directory
 ````
@@ -35,6 +35,8 @@ export PATH=/path/to/Gitify/Gitify:$PATH
 ````
 
 Restart your terminal and you should be good to go.
+
+For successfull installing of MODX by `Gitify install-modx` command you should have installed **unzip** command in your system. For Debian/Ubuntu use `sudo apt-get install unzip`.
 
 ## Creating a new Project
 

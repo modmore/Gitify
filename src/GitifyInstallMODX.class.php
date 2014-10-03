@@ -19,11 +19,16 @@ class GitifyInstallMODX extends Gitify {
         $this->echoInfo("Downloading latest MODX version...");
         exec('curl -Lo modx.zip http://modx.com/download/latest/ -#');
 
+        if (!file_exists('modx.zip')) {
+            $this->echoInfo('* Looks like the download failed :( Please try running Gitify install-modx again.');
+            exit(1);
+        }
+
         $this->echoInfo("Extracting zip...");
         exec('unzip modx.zip');
 
         $zipdir = exec('ls -F | grep "modx-" | head -1');
-        if($zipdir == '/') {
+        if(empty($zipdir) || $zipdir == '/') {
             $this->echoInfo("* Error: Could not find unzipped MODX folder; perhaps the download failed or unzip is not available on your system.");
             exit(1);
         }
