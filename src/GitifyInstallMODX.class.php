@@ -28,13 +28,15 @@ class GitifyInstallMODX extends Gitify {
         exec('unzip modx.zip');
 
         $zipdir = exec('ls -F | grep "modx-" | head -1');
+
         if(empty($zipdir) || $zipdir == '/') {
             $this->echoInfo("* Error: Could not find unzipped MODX folder; perhaps the download failed or unzip is not available on your system.");
             exit(1);
         }
         else {
             $this->echoInfo("Moving unzipped files out of temporary directory...");
-            exec("mv ./{$zipdir}* .; rm -r ./{$zipdir}");
+            exec("mv ./{$zipdir}* .");
+            exec("rm -r ./{$zipdir}");
 
             if (!unlink('modx.zip')) {
                 $this->echoInfo("* Warning: could not clean up download.");
@@ -44,7 +46,10 @@ class GitifyInstallMODX extends Gitify {
 
             $tz = date_default_timezone_get();
             $this->echoInfo("Running MODX Setup...");
-            exec("php -d date.timezone={$tz} {$directory}setup/index.php --installmode=new --config={$directory}config.xml");
+
+            $pwd = exec('pwd') . '/';
+
+            exec("php -d date.timezone={$tz} {$pwd}setup/index.php --installmode=new --config={$pwd}config.xml");
 
             if(!unlink('config.xml')) {
                 $this->echoInfo("* Warning: could not clean up setup config file, please remove this manually.");

@@ -35,7 +35,7 @@ require_once dirname(__FILE__) . '/src/Gitify.class.php';
 $gitify = new Gitify();
 
 $command = $argv[1];
-$cwd = getcwd() . DIRECTORY_SEPARATOR;
+$cwd = getcwd() . '/';
 
 switch ($command) {
     // starts a new Gitify project
