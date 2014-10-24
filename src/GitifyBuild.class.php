@@ -195,8 +195,14 @@ class GitifyBuild extends Gitify
     public function buildObjects($folder, $type)
     {
         $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
-        $directory = new DirectoryIterator($folder);
 
+        if (!file_exists($folder)) {
+            $this->echoInfo('Skipping : no content folder found');
+
+            return;
+        }
+
+        $directory = new DirectoryIterator($folder);
 
         foreach ($directory as $file) {
             /** @var SplFileInfo $file */
