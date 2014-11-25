@@ -183,7 +183,7 @@ class GitifyExtract extends Gitify
         $out = $this->toYAML($data);
 
         if (!empty($content)) {
-            $out .= $this->sep;
+            $out .= $this->contentSeparator;
             $out .= $content;
         }
         return $out;

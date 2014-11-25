@@ -17,7 +17,7 @@ class Gitify extends Application
      */
     public $contentSeparator = "\n-----\n";
     /**
-     * @var modX
+     * @var \modX
      */
     public $modx;
     /**
@@ -50,42 +50,41 @@ class Gitify extends Application
     /**
      * Loads a new modX instance
      *
-     * @return bool
+     * @throws \RuntimeException
+     * @return \modX
      */
     public function loadMODX()
     {
         if ($this->modx) {
-            return true;
+            return $this->modx;
         }
 
         if (!file_exists(GITIFY_WORKING_DIR . 'config.core.php')) {
-            return false;
+            throw new \RuntimeException('There does not seem to be a MODX installation here. ');
         }
 
         require_once(GITIFY_WORKING_DIR . 'config.core.php');
         require_once(MODX_CORE_PATH . 'model/modx/modx.class.php');
 
-        $this->modx = new modX();
+        $this->modx = new \modX();
         $this->modx->initialize('mgr');
         $this->modx->getService('error', 'error.modError', '', '');
 
-        return true;
+        return $this->modx;
     }
 
     /**
-     * @return bool|array
+     * @throws \RuntimeException
      */
     public function loadConfig()
     {
         if (!file_exists(GITIFY_WORKING_DIR . '.gitify')) {
-            echo "Directory is not a Gitify directory: " . GITIFY_WORKING_DIR ."\n";
-            return false;
+            throw new \RuntimeException("Directory is not a Gitify directory: " . GITIFY_WORKING_DIR);
         }
 
         $config = $this->fromYAML(file_get_contents(GITIFY_WORKING_DIR . '.gitify'));
         if (!$config || !is_array($config)) {
-            echo "Error: " . GITIFY_WORKING_DIR . ".gitify file is not valid YAML, or is empty.\n";
-            return false;
+            throw new \RuntimeException("Error: " . GITIFY_WORKING_DIR . ".gitify file is not valid YAML, or is empty.");
         }
 
         $this->config = $config;

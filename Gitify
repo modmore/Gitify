@@ -15,7 +15,9 @@ if (!defined('GITIFY_WORKING_DIR')) {
 
 use modmore\Gitify\Gitify;
 use modmore\Gitify\Command\InitCommand;
+use modmore\Gitify\Command\BuildCommand;
 
 $application = new Gitify();
 $application->add(new InitCommand);
+$application->add(new BuildCommand);
 $application->run();

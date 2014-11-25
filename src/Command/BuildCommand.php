@@ -1,58 +1,77 @@
 <?php
+namespace modmore\Gitify\Command;
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\Console\Question\Question;
 
 /**
- * Class GitifyBuild
+ * Class BuildCommand
+ *
+ * Builds a MODX site from the files and configuration.
+ *
+ * @package modmore\Gitify\Command
  */
-class GitifyBuild extends Gitify
+class BuildCommand extends Command
 {
+    protected function configure()
+    {
+        $this
+        ->setName('build')
+        ->setDescription('Builds a MODX site from the files and configuration.')
 
-    public $verbose = true;
-
-    public $categories = array();
+        ->addOption(
+            'overwrite',
+            null,
+            InputOption::VALUE_NONE,
+            'When a .gitify file already exists, and this flag is set, it will be overwritten.'
+        )
+        ;
+    }
 
     /**
-     * Runs the GitifyBuild command
+     * Runs the command.
      *
-     * @param array $project
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
      */
-    public function run(array $project = array())
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!file_exists($project['path'] . 'config.core.php')) {
-            echo "Error: there does not seem to be a MODX install present here.\n";
-            exit(1);
-        }
+        $modx = $this->getApplication()->loadMODX();
+        $config = $this->getApplication()->loadConfig();
 
-        if (!$this->loadMODX($project['path'])) {
-            echo "Error: Could not load the MODX API\n";
-            exit(1);
-        }
-
-        foreach ($project['data'] as $folder => $type) {
+        
+        foreach ($config['data'] as $folder => $type) {
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
-                    $this->echoInfo("- Building content from $folder/...");
-                    $this->buildContent($project['data_directory'] . $folder, $type);
+                    $output->writeln("- Building content from $folder/...");
+                    $this->buildContent($input, $output, $config['data_directory'] . $folder, $type);
 
                     break;
 
                 case (!empty($type['class'])):
-                    $this->echoInfo(" - Building {$type['class']} from {$folder}/...");
+                    $output->writeln(" - Building {$type['class']} from {$folder}/...");
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
                     }
-                    $this->buildObjects($project['data_directory'] . $folder, $type);
+                    $this->buildObjects($config['data_directory'] . $folder, $type);
 
                     break;
             }
         }
 
-        if (!$this->hasOption('ncc','no-cache-clear')) {
-            $this->echoInfo('Clearing cache...');
+        if (!$input->getOption('ncc','no-cache-clear')) {
+            $output->writeln('Clearing cache...');
             $this->modx->getCacheManager()->refresh();
         }
 
-        $this->echoInfo('Done!');
+        $output->writeln('Done!');
         exit(0);
     }
 
@@ -68,7 +87,7 @@ class GitifyBuild extends Gitify
         $directory = new DirectoryIterator($folder);
 
         if ($this->hasOption('f')) {
-            $this->echoInfo('Forcing build, removing prior Resources...');
+            $output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
         }
 
@@ -80,17 +99,17 @@ class GitifyBuild extends Gitify
             if (substr($name, 0, 1) == '.') continue;
 
             if (!$info->isDir()) {
-                //$this->echoInfo('Expecting directory, got ' . $info->getType() . ': ' . $name);
+                //$output->writeln('Expecting directory, got ' . $info->getType() . ': ' . $name);
                 continue;
             }
 
             $context = $this->modx->getObject('modContext', array('key' => $name));
             if (!$context) {
-                $this->echoInfo('Context ' . $name . ' does not exist. Perhaps you\'re missing contexts data?');
+                $output->writeln('Context ' . $name . ' does not exist. Perhaps you\'re missing contexts data?');
                 continue;
             }
 
-            $this->echoInfo('Building context ' . $name . '...');
+            $output->writeln('Building context ' . $name . '...');
 
             $path = $info->getRealPath();
             $this->buildResources($name, new RecursiveDirectoryIterator($path));
@@ -181,7 +200,7 @@ class GitifyBuild extends Gitify
         if ($object->save()) {
             if ($this->verbose) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $this->echoInfo("{$new} resource from {$method}: {$data[$method]}");
+                $output->writeln("{$new} resource from {$method}: {$data[$method]}");
             }
         }
     }
@@ -206,7 +225,7 @@ class GitifyBuild extends Gitify
             if (substr($name, 0, 1) == '.') continue;
 
             if (!$file->isFile()) {
-                $this->echoInfo('Skipping ' . $file->getType() . ': ' . $name);
+                $output->writeln('Skipping ' . $file->getType() . ': ' . $name);
                 continue;
             }
 
@@ -258,7 +277,7 @@ class GitifyBuild extends Gitify
         if ($object->save()) {
             if ($this->verbose) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $this->echoInfo("{$new} {$class}: {$data[$primaryKey]}");
+                $output->writeln("{$new} {$class}: {$data[$primaryKey]}");
             }
         }
     }
