@@ -5,7 +5,7 @@
  */
 class GitifyExtract extends Gitify
 {
-
+	private $contentTypeExceptions = array("pdf");
     public $categories = array();
 
     /**
@@ -144,20 +144,27 @@ class GitifyExtract extends Gitify
      */
     public function generate($object, array $options = array())
     {
+    	$isException = false;
         $fieldMeta = $object->_fieldMeta;
         $data = $object->toArray('', true, true);
+        
+        $contentType = explode('/',$object->contentType);
+        $contentTypeExt = array_pop($contentType);
+        
+        if( !($isException = in_array($contentTypeExt, $this->contentTypeExceptions)) ) {
+        	// If there's a dedicated content field, we put that below the yaml for easier managing
+        	$content = '';
+        	if (method_exists($object, 'getContent')) {
+            	$content = $object->getContent();
 
-        // If there's a dedicated content field, we put that below the yaml for easier managing
-        $content = '';
-        if (method_exists($object, 'getContent')) {
-            $content = $object->getContent();
-
-            if (!empty($content)) {
-                foreach ($data as $key => $value) {
-                    if ($value == $content) unset($data[$key]);
-                }
-            }
+            	if (!empty($content)) {
+             	   foreach ($data as $key => $value) {
+                    	if ($value == $content) unset($data[$key]);
+                	}
+            	}
+        	}
         }
+        
         // Strip out keys that have the same value as the default, or are excluded per the .gitify
         $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
         foreach ($data as $key => $value) {
