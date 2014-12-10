@@ -12,7 +12,9 @@ class GitifyInit extends Gitify
      */
     public function run(array $options = array())
     {
-        if (file_exists($options['cwd'] . '.gitify')) {
+    	$config = parent::getConfig($this->argv);
+    	
+        if (file_exists($options['cwd'] . $config)) {
             $this->echoInfo("* Error: there already is a Gitify project in {$options['cwd']}");
             exit(1);
         }
@@ -32,7 +34,7 @@ class GitifyInit extends Gitify
         $options = $this->getDefaultOptions($name, $directory);
         $yaml = $this->toYAML($options);
 
-        file_put_contents($cwd . '.gitify', $yaml);
+        file_put_contents($cwd . $config, $yaml);
 
         $this->echoInfo("Created new Gitify project in $cwd");
 

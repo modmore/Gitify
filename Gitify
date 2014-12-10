@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 $fn = 'Gitify';
-$help = "Usage: $fn [command] [options]
+$help = "Usage: $fn [command] [options] [config]
 
 Commands:
     init            starts a new Gitify project, creating a .gitify configuration
@@ -37,6 +37,8 @@ $gitify = new Gitify();
 $command = $argv[1];
 $cwd = getcwd() . DIRECTORY_SEPARATOR;
 
+$config = Gitify::getConfig($argv);
+
 switch ($command) {
     // starts a new Gitify project
     case 'init':
@@ -50,12 +52,12 @@ switch ($command) {
 
     // build the site in MODX
     case 'build':
-        if (!file_exists($cwd . '.gitify')) {
+        if (!file_exists($cwd . $config)) {
             echo "Directory is not a Gitify directory: $cwd\n";
             exit(1);
         }
 
-        $project = $gitify->fromYAML(file_get_contents($cwd . '.gitify'), true);
+        $project = $gitify->fromYAML(file_get_contents($cwd . $config), true);
         if (!$project || !is_array($project)) {
             echo "Error: $cwd.gitify file is not valid YAML, or is empty.\n";
             exit (1);
@@ -72,12 +74,12 @@ switch ($command) {
 
     // Load the site into Git
     case 'extract':
-        if (!file_exists($cwd . '.gitify')) {
+        if (!file_exists($cwd . $config)) {
             echo "Directory is not a Gitify directory: $cwd\n";
             exit(1);
         }
 
-        $project = $gitify->fromYAML(file_get_contents($cwd . '.gitify'), true);
+        $project = $gitify->fromYAML(file_get_contents($cwd . $config), true);
         if (!$project || !is_array($project)) {
             echo "Error: $cwd.gitify file is not valid YAML, or is empty.\n";
             exit (1);
