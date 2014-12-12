@@ -122,6 +122,8 @@ class GitifyExtract extends Gitify
             $file = $this->generate($object, $options);
             $path = empty($pk) ? $object->getPrimaryKey() : $object->get($pk);
 
+            $path = iconv('UTF-8', 'ISO-8859-9//TRANSLIT', $path);
+
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
             $after[] = $fn;
