@@ -5,7 +5,7 @@
  */
 class GitifyExtract extends Gitify
 {
-	private $contentTypeExceptions = array("pdf");
+    private $contentTypeExceptions = array("pdf");
     public $categories = array();
 
     /**
@@ -120,7 +120,17 @@ class GitifyExtract extends Gitify
         foreach ($collection as $object) {
             /** @var xPDOObject $object */
             $file = $this->generate($object, $options);
-            $path = empty($pk) ? $object->getPrimaryKey() : $object->get($pk);
+            if( empty($pk) ) {
+                $path = $object->getPrimaryKey();
+            } else if (is_array($pk)) {
+                $paths = array();
+                foreach ($pk as $pkVal) {
+                    $paths[] = $object->get($pkVal);
+                }
+                $path = implode('.',$paths);
+            } else {
+                $path = $object->get($pk);
+            }
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
@@ -144,7 +154,7 @@ class GitifyExtract extends Gitify
      */
     public function generate($object, array $options = array())
     {
-    	$isException = false;
+        $isException = false;
         $fieldMeta = $object->_fieldMeta;
         $data = $object->toArray('', true, true);
         
@@ -152,17 +162,17 @@ class GitifyExtract extends Gitify
         $contentTypeExt = array_pop($contentType);
         
         if( !($isException = in_array($contentTypeExt, $this->contentTypeExceptions)) ) {
-        	// If there's a dedicated content field, we put that below the yaml for easier managing
-        	$content = '';
-        	if (method_exists($object, 'getContent')) {
-            	$content = $object->getContent();
+            // If there's a dedicated content field, we put that below the yaml for easier managing
+            $content = '';
+            if (method_exists($object, 'getContent')) {
+                $content = $object->getContent();
 
-            	if (!empty($content)) {
-             	   foreach ($data as $key => $value) {
-                    	if ($value == $content) unset($data[$key]);
-                	}
-            	}
-        	}
+                if (!empty($content)) {
+                    foreach ($data as $key => $value) {
+                        if ($value == $content) unset($data[$key]);
+                    }
+                }
+            }
         }
         
         // Strip out keys that have the same value as the default, or are excluded per the .gitify

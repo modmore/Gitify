@@ -12,8 +12,8 @@ class GitifyInit extends Gitify
      */
     public function run(array $options = array())
     {
-    	$config = parent::getConfig($this->argv);
-    	
+        $config = parent::getConfig($this->argv);
+        
         if (file_exists($options['cwd'] . $config)) {
             $this->echoInfo("* Error: there already is a Gitify project in {$options['cwd']}");
             exit(1);

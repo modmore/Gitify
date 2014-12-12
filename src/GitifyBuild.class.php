@@ -235,9 +235,16 @@ class GitifyBuild extends Gitify
     public function buildSingleObject($data, $type) {
         $primaryKey = !empty($type['primary']) ? $type['primary'] : 'id';
         $class = $type['class'];
-
-        $primary = array($primaryKey => $data[$primaryKey]);
-
+        
+        if (is_array($primaryKey)) {
+            $primary = array();
+            foreach ($primaryKey as $pkVal) {
+                $primary[$pkVal] = $data[$pkVal];
+            }
+        } else {
+            $primary = array($primaryKey => $data[$primaryKey]);
+        }
+        
         $new = false;
         $object = $this->modx->getObject($class, $primary);
         if (!($object instanceof xPDOObject)) {
