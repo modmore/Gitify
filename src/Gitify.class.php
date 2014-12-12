@@ -29,6 +29,24 @@ class Gitify
         global $argv;
         $this->argv = $argv;
     }
+    
+     /**
+     * Check for config
+     *
+     */
+    public static function getConfig($argv)
+    {
+        $config = '.gitify';
+        if (in_array('-c', $argv)) {
+            $c = array_search('-c',$argv);
+            if( !$argv[($c+1)] ) {
+                echo "Config not specified, using default (.gitify)\n";
+            } else {
+                $config = $argv[($c+1)];
+            }
+        };
+        return $config;
+    }
 
     /**
      * Takes in an array of data, and turns it into blissful YAML using Spyc.
