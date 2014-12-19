@@ -150,6 +150,10 @@ class ExtractCommand extends BaseCommand
             /** @var xPDOObject $object */
             $file = $this->generate($object, $options);
             $path = empty($pk) ? $object->getPrimaryKey() : $object->get($pk);
+            $path = modResource::filterPathSegment($this->modx, $path, array(
+                    'friendly_alias_lowercase_only' => false,
+                )
+            );
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
