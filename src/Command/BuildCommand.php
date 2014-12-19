@@ -1,6 +1,14 @@
 <?php
 namespace modmore\Gitify\Command;
 
+use DirectoryIterator;
+use modCategory;
+use modElement;
+use modmore\Gitify\Gitify;
+use modResource;
+use modX;
+use RecursiveDirectoryIterator;
+use SplFileInfo;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -8,6 +16,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
+use xPDOObject;
 
 /**
  * Class BuildCommand
@@ -18,18 +27,34 @@ use Symfony\Component\Console\Question\Question;
  */
 class BuildCommand extends Command
 {
+    /** @var modX */
+    public $modx;
+    public $config = array();
+    public $categories = array();
+    /** InputInterface $input */
+    public $input;
+    /** \Symfony\Component\Console\Output\OutputInterface $output */
+    public $output;
+
     protected function configure()
     {
         $this
-        ->setName('build')
-        ->setDescription('Builds a MODX site from the files and configuration.')
+            ->setName('build')
+            ->setDescription('Builds a MODX site from the files and configuration.')
 
-        ->addOption(
-            'overwrite',
-            null,
-            InputOption::VALUE_NONE,
-            'When a .gitify file already exists, and this flag is set, it will be overwritten.'
-        )
+            ->addOption(
+                'skip-clear-cache',
+                null,
+                InputOption::VALUE_NONE,
+                'When specified, it will skip clearing the cache after building.'
+            )
+
+            ->addOption(
+                'force',
+                'f',
+                InputOption::VALUE_NONE,
+                'When specified, all existing content will be removed before rebuilding. Can be useful when having dealt with complex conflicts.'
+            )
         ;
     }
 
@@ -42,16 +67,18 @@ class BuildCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $modx = $this->getApplication()->loadMODX();
-        $config = $this->getApplication()->loadConfig();
+        $this->modx = $this->getApplication()->loadMODX();
+        $this->config = $this->getApplication()->loadConfig();
+        $this->input =& $input;
+        $this->output =& $output;
 
         
-        foreach ($config['data'] as $folder => $type) {
+        foreach ($this->config['data'] as $folder => $type) {
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
                     $output->writeln("- Building content from $folder/...");
-                    $this->buildContent($input, $output, $config['data_directory'] . $folder, $type);
+                    $this->buildContent($this->config['data_directory'] . $folder, $type);
 
                     break;
 
@@ -60,19 +87,19 @@ class BuildCommand extends Command
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
                     }
-                    $this->buildObjects($config['data_directory'] . $folder, $type);
+                    $this->buildObjects($this->config['data_directory'] . $folder, $type);
 
                     break;
             }
         }
 
-        if (!$input->getOption('ncc','no-cache-clear')) {
+        if (!$input->getOption('skip-clear-cache')) {
             $output->writeln('Clearing cache...');
             $this->modx->getCacheManager()->refresh();
         }
 
         $output->writeln('Done!');
-        exit(0);
+        return 0;
     }
 
     /**
@@ -86,8 +113,8 @@ class BuildCommand extends Command
         $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
         $directory = new DirectoryIterator($folder);
 
-        if ($this->hasOption('f')) {
-            $output->writeln('Forcing build, removing prior Resources...');
+        if ($this->input->getOption('force')) {
+            $this->output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
         }
 
@@ -105,11 +132,11 @@ class BuildCommand extends Command
 
             $context = $this->modx->getObject('modContext', array('key' => $name));
             if (!$context) {
-                $output->writeln('Context ' . $name . ' does not exist. Perhaps you\'re missing contexts data?');
+                $this->output->writeln('Context ' . $name . ' does not exist. Perhaps you\'re missing contexts data?');
                 continue;
             }
 
-            $output->writeln('Building context ' . $name . '...');
+            $this->output->writeln('Building context ' . $name . '...');
 
             $path = $info->getRealPath();
             $this->buildResources($name, new RecursiveDirectoryIterator($path));
@@ -154,9 +181,9 @@ class BuildCommand extends Command
         foreach ($resources as $resource) {
             $file = file_get_contents($resource->getRealPath());
 
-            list($rawData, $content) = explode($this->contentSeparator, $file);
+            list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
-            $data = $this->fromYAML($rawData);
+            $data = Gitify::fromYAML($rawData);
             if (!empty($content)) {
                 $data['content'] = $content;
             }
@@ -198,9 +225,9 @@ class BuildCommand extends Command
         $object->fromArray($data, '', true, true);
 
         if ($object->save()) {
-            if ($this->verbose) {
+            if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $output->writeln("{$new} resource from {$method}: {$data[$method]}");
+                $this->output->writeln("{$new} resource from {$method}: {$data[$method]}");
             }
         }
     }
@@ -213,7 +240,7 @@ class BuildCommand extends Command
      */
     public function buildObjects($folder, $type)
     {
-        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
+        $folder = GITIFY_WORKING_DIR . $folder;
         $directory = new DirectoryIterator($folder);
 
 
@@ -225,7 +252,7 @@ class BuildCommand extends Command
             if (substr($name, 0, 1) == '.') continue;
 
             if (!$file->isFile()) {
-                $output->writeln('Skipping ' . $file->getType() . ': ' . $name);
+                $this->output->writeln('Skipping ' . $file->getType() . ': ' . $name);
                 continue;
             }
 
@@ -233,10 +260,10 @@ class BuildCommand extends Command
             $fileContents = file_get_contents($file->getRealPath());
 
             // Get the raw data, and the content
-            list($rawData, $content) = explode($this->contentSeparator, $fileContents);
+            list($rawData, $content) = explode(Gitify::$contentSeparator, $fileContents);
 
             // Turn the raw YAML data into an array
-            $data = $this->fromYAML($rawData);
+            $data = Gitify::fromYAML($rawData);
             if (!empty($content)) {
                 $data['content'] = $content;
             }
@@ -265,7 +292,7 @@ class BuildCommand extends Command
         }
 
         if ($object instanceof modElement && !($object instanceof modCategory)) {
-            // Handle string-based categories automagically
+            // Handle string-based category names automagically
             if (isset($data['category']) && !empty($data['category']) && !is_numeric($data['category'])) {
                 $catName = $data['category'];
                 $data['category'] = $this->getCategoryId($catName);
@@ -275,9 +302,9 @@ class BuildCommand extends Command
         $object->fromArray($data, '', true, true);
 
         if ($object->save()) {
-            if ($this->verbose) {
+            if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $output->writeln("{$new} {$class}: {$data[$primaryKey]}");
+                $this->output->writeln("{$new} {$class}: {$data[$primaryKey]}");
             }
         }
     }

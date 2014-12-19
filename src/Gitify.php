@@ -15,7 +15,7 @@ class Gitify extends Application
      *
      * @var string
      */
-    public $contentSeparator = "\n-----\n";
+    public static $contentSeparator = "\n-----\n";
     /**
      * @var \modX
      */
@@ -31,7 +31,7 @@ class Gitify extends Application
      * @param array $data
      * @return string
      */
-    public function toYAML(array $data = array())
+    public static function toYAML(array $data = array())
     {
         return Yaml::dump($data, 4);
     }
@@ -42,7 +42,7 @@ class Gitify extends Application
      * @param string $input
      * @return array
      */
-    public function fromYAML($input = '')
+    public static function fromYAML($input = '')
     {
         return Yaml::parse($input);
     }
