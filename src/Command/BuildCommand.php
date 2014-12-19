@@ -1,22 +1,21 @@
 <?php
 namespace modmore\Gitify\Command;
 
-use DirectoryIterator;
-use modCategory;
-use modElement;
+use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
-use modResource;
-use modX;
-use RecursiveDirectoryIterator;
-use SplFileInfo;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
+
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
+
 use xPDOObject;
+use modResource;
+use modCategory;
+use modElement;
+
+use DirectoryIterator;
+use RecursiveDirectoryIterator;
+use SplFileInfo;
 
 /**
  * Class BuildCommand
@@ -25,16 +24,9 @@ use xPDOObject;
  *
  * @package modmore\Gitify\Command
  */
-class BuildCommand extends Command
+class BuildCommand extends BaseCommand
 {
-    /** @var modX */
-    public $modx;
-    public $config = array();
     public $categories = array();
-    /** InputInterface $input */
-    public $input;
-    /** \Symfony\Component\Console\Output\OutputInterface $output */
-    public $output;
 
     protected function configure()
     {
@@ -67,12 +59,6 @@ class BuildCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->modx = $this->getApplication()->loadMODX();
-        $this->config = $this->getApplication()->loadConfig();
-        $this->input =& $input;
-        $this->output =& $output;
-
-        
         foreach ($this->config['data'] as $folder => $type) {
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):

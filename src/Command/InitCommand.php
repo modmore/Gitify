@@ -1,7 +1,8 @@
 <?php
 namespace modmore\Gitify\Command;
 
-use Symfony\Component\Console\Command\Command;
+use modmore\Gitify\Gitify;
+use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,8 +17,11 @@ use Symfony\Component\Console\Question\Question;
  *
  * @package modmore\Gitify\Command
  */
-class InitCommand extends Command
+class InitCommand extends BaseCommand
 {
+    public $loadConfig = false;
+    public $loadMODX = false;
+
     protected function configure()
     {
         $this
@@ -142,7 +146,7 @@ class InitCommand extends Command
         /**
          * Turn the configuration into YAML, and write the file.
          */
-        $config = $this->getApplication()->toYAML($data);
+        $config = Gitify::toYAML($data);
         file_put_contents(GITIFY_WORKING_DIR . '.gitify', $config);
         $output->writeln('<info>Gitify Project initiated and .gitify file written.</info>');
 

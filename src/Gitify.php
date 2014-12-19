@@ -19,11 +19,7 @@ class Gitify extends Application
     /**
      * @var \modX
      */
-    public $modx;
-    /**
-     * @var array
-     */
-    public $config;
+    public static $modx;
 
     /**
      * Takes in an array of data, and turns it into blissful YAML using Spyc.
@@ -53,10 +49,10 @@ class Gitify extends Application
      * @throws \RuntimeException
      * @return \modX
      */
-    public function loadMODX()
+    public static function loadMODX()
     {
-        if ($this->modx) {
-            return $this->modx;
+        if (self::$modx) {
+            return self::$modx;
         }
 
         if (!file_exists(GITIFY_WORKING_DIR . 'config.core.php')) {
@@ -66,28 +62,29 @@ class Gitify extends Application
         require_once(GITIFY_WORKING_DIR . 'config.core.php');
         require_once(MODX_CORE_PATH . 'model/modx/modx.class.php');
 
-        $this->modx = new \modX();
-        $this->modx->initialize('mgr');
-        $this->modx->getService('error', 'error.modError', '', '');
+        $modx = new \modX();
+        $modx->initialize('mgr');
+        $modx->getService('error', 'error.modError', '', '');
 
-        return $this->modx;
+        self::$modx = $modx;
+
+        return $modx;
     }
 
     /**
      * @throws \RuntimeException
      */
-    public function loadConfig()
+    public static function loadConfig()
     {
         if (!file_exists(GITIFY_WORKING_DIR . '.gitify')) {
             throw new \RuntimeException("Directory is not a Gitify directory: " . GITIFY_WORKING_DIR);
         }
 
-        $config = $this->fromYAML(file_get_contents(GITIFY_WORKING_DIR . '.gitify'));
+        $config = Gitify::fromYAML(file_get_contents(GITIFY_WORKING_DIR . '.gitify'));
         if (!$config || !is_array($config)) {
             throw new \RuntimeException("Error: " . GITIFY_WORKING_DIR . ".gitify file is not valid YAML, or is empty.");
         }
 
-        $this->config = $config;
-        return $this->config;
+        return $config;
     }
 }
