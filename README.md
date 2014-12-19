@@ -3,32 +3,51 @@ Gitify
 
 Experiment to allow versioning/building a MODX site through Git.
 
-The goal of Gitify is to provide a two-way sync of data typically stored in the MODX database with Git. To do this, it creates a representation of xPDOObject's in files. These files follow a certain a [human and machine friendly format](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7) with simple JSON at the top of the file, and the content (if there's any specific content field) below that. The configuration, which determines what data is written to file, is stored in a `.gitify` file in the project root.
+The goal of Gitify is to provide a **two-way sync** of data typically stored in the MODX database, making it versionable with Git. To do this, it creates a representation of MODX objects in files. These files follow a certain a [human and machine friendly format](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7), built from a block of YAML, followed by a separator, and then the main content (if there's a specific content field) below that.
+
+The project configuration, which determines what data is written to file and build to the database, is stored in a `.gitify` file in the project root.
 
 ## Installation
 
-To get started with Gitify, it's easiest to set up a local clone of this repository. After that, make the Gitify file executable.
+New as of v0.2 is that dependencies are managed via [Composer](https://getcomposer.org/), most notably it has been rebuilt on top of Symfony's Console component to provide a more feature-packed base to build from. [Follow these instructions if you haven't installed Composer before](https://getcomposer.org/doc/00-intro.md)
+
+To get started with Gitify, it's easiest to set up a local clone of this repository. After that, run Composer to download the dependencies, and finally make the Gitify file executable to run it.
 
 ```` shell
 $ git clone https://github.com/modmore/Gitify.git Gitify
 $ cd Gitify
+$ composer install
 $ chmod +x Gitify
 ````
 
 At this point you should be able to type `./Gitify` and get a response like the following:
 
-````
-Usage: Gitify [command] [options]
+```` shell
+Gitify version 0.2.0
 
-Commands:
-    init            starts a new Gitify project, creating a `.gitify` configuration
-                    file and optionally installing MODX
-    extract         extracts the MODX site into the repository per the `.gitify` configuration file
-    build           builds the site from the repository into MODX
-    install-modx    installs the latest MODX version into the current directory
+Usage:
+  [options] command [arguments]
+
+Options:
+  --help           -h Display this help message.
+  --quiet          -q Do not output any message.
+  --verbose        -v|vv|vvv Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
+  --version        -V Display this application version.
+  --ansi              Force ANSI output.
+  --no-ansi           Disable ANSI output.
+  --no-interaction -n Do not ask any interactive question.
+
+Available commands:
+  build          Builds a MODX site from the files and configuration.
+  extract        Extracts data from the MODX site, and stores it in human readable files for editing and committing to a VCS.
+  help           Displays help for a command
+  init           Generates the .gitify file to set up a new Gitify project. Optionally installs MODX as well.
+  list           Lists commands
+install
+  install:modx   Downloads, configures and installs a fresh MODX installation.
 ````
 
-If that's working as expected, you will probably want to add the Gitify executable to your PATH so you can run Gitify in any directory. Edit your .bash_profile and add the following:
+If that's working as expected, the next step is to add the Gitify executable to your PATH so you can run Gitify in any directory. Edit your `~/.bash_profile` and add the following, with the right path of course:
 
 ````
 export PATH=/path/to/Gitify/Gitify:$PATH
@@ -36,28 +55,27 @@ export PATH=/path/to/Gitify/Gitify:$PATH
 
 Restart your terminal and you should be good to go.
 
-For successfull installing of MODX by `Gitify install-modx` command you should have installed **unzip** command in your system. For Debian/Ubuntu use `sudo apt-get install unzip`.
+For successfull installing of MODX by `Gitify install:modx` command you should have installed **unzip** command in your system. For Debian/Ubuntu you can use `sudo apt-get install unzip`.
 
 ## Creating a new Project
 
-To create a new project, you can manually create a `.gitify` file, but it's easiest to run `Gitify init`. You will be asked to provide a project name, a data directory (relative to the working directory) as well as a few other options as to what to put in the `.gitify` file. The `.gitify` file will be created in the directory you called Gitify from.
+To create a new project, you can manually create a `.gitify` file, but it's easiest to run `Gitify init`. You will be asked to provide a data directory (relative to the working directory) as well as a few other options as to what to put in the `.gitify` file. The `.gitify` file will be created in the directory you called Gitify from.
 
-There needs to be config.core.php file in the same directory as the `.gitify` file, so either initialise Gitify in the root of a MODX site, or add the config.core.php file to point to a MODX core. You can also add a `path` property to the `.gitify` file that points to a MODX root.
+There needs to be config.core.php file in the same directory as the `.gitify` file, so either initialise Gitify in the root of a MODX site, add the config.core.php file to point to a MODX core, or run `Gitify install:modx` to set up a fresh MODX installation.
 
 ## Extract to File
 
 When you added the `.gitify` file, you can tell Gitify to extract the data to file. Simply run `Gitify extract` and you'll see the file representation of the various database objects show up in the data directory specified.
 
-To do:
+Wishlist:
 
-* This process will need to be automatically executed when changes are made to resources, elements or other data that is written to file.
-* Changes may need to be automatically committed and, if a remote exists, pushed.
+* Add a plugin (or package) to automatically extract when changes are made from the manager
 
 ## Build to MODX
 
-When you have the files, you can make edits and push them to a repository if you want, but with that you'll also need to be able of installing them in MODX sites. This is the build.
+When you have the files, you can make edits and push them to a repository if you want, but with that you'll also need to be able of installing them in MODX sites. This is the build process, where Gitify takes your files and tries to set them up in your database.
 
-To build, simply call `Gitify build`. If you have a bunch of ID/URI conflicts and you are not getting the expected results, you can force the build to first wipe content by calling `Gitify build -f`.
+To build, simply call `Gitify build`. If you have a bunch of conflicts and you are not getting the expected results, you can force the build (which will then wipe the content first) by calling `Gitify build --force`. By default the command will also clear the MODX cache after building, to skip this specify the `--skip-clear-cache` flag like `Gitify build --skip-clear-cache`.
 
 ## The `.gitify` File
 
@@ -66,38 +84,54 @@ To define what to export, to where and how, we're using a `.gitify` file formatt
 An example `.gitify` may look like this:
 
 ```` yaml
-name: Project Name
-data_directory: project_data_directory/
+data_directory: _data/
 data:
-  content:
-    type: content
-    exclude_keys: [createdby, createdon, editedby, editedon]
-  categories:
-    class: modCategory
-    primary: category
-  templates:
-    class: modTemplate
-    primary: name
-  template_variables:
-    class: modTemplateVar
-    primary: name
-  chunks:
-    class: modChunk
-    primary: name
-  snippets:
-    class: modSnippet
-    primary: name
-    extension: .php
-  plugins:
-    class: modPlugin
-    primary: name
-    extension: .php
+    contexts:
+        class: modContext
+        primary: key
+    content:
+        type: content
+        exclude_keys:
+            - createdby
+            - createdon
+            - editedby
+            - editedon
+    templates:
+        class: modTemplate
+        primary: templatename
+        extension: .html
+    template_variables:
+        class: modTemplateVar
+        primary: name
+    chunks:
+        class: modChunk
+        primary: name
+        extension: .html
+    snippets:
+        class: modSnippet
+        primary: name
+        extension: .php
+    plugins:
+        class: modPlugin
+        primary: name
+        extension: .php
 ````
 
-The `.gitify` file structure is real simple. There are root notes for `name` (the project name), `data_directory` (the relative path where to store the files) and `data`. `data` contains an array of directories to create. These directories then specify either a `type` that has special processing going on (i.e. `content`), or a `class`. The `primary` field determines the key to use in the name of the generated files. This defaults to `id`, but in many cases you may want to use the `name` as that is more human friendly.
+The `.gitify` file structure is real simple. There are root nodes for `data_directory` (the relative path where to store the files) and `data`. `data` contains an array of directories to create. These directories then specify either a `type` that has special processing going on (i.e. `content`), or a `class`. The `primary` field determines the key to use in the name of the generated files. This defaults to `id`, but in many cases you may want to use the `name` as that is more human friendly.
 
 By default files will be created with a `.yaml` extension, but if you want you can override that with a `extension` property. This can help with certain data and syntax highlighting in IDEs.
 
-When a certain class is not part of the core models, you can define a `package` as well. This will run `$modx->addPackage` before attempting to load the data. The path is determined by looking at a `[package].core_path` setting suffixed with `model/`, or a defined `package_path` property.
+When a certain class is not part of the core models, you can define a `package` as well. This will run `$modx->addPackage` before attempting to load the data. The path is determined by looking at a `[package].core_path` setting suffixed with `model/`, `[[++core_path]]components/[package]/model/`or a hardcoded `package_path` property. For example, you could use the following in your `.gitify` file to load [ContentBlocks](http://modmo.re/cb) Layouts &amp; Fields:
 
-By adding a `where` property you can filter the objects that will be loaded.
+```` yaml
+    cb_fields:
+        class: cbField
+        primary: name
+        package: contentblocks
+    cb_layouts:
+        class: cbLayout
+        primary: name
+````
+
+As it'll load the package into memory, it's only required to add the package once. For clarify, it can't hurt to add it to each `data` entry that uses it.
+

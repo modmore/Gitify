@@ -22,7 +22,7 @@ class Gitify extends Application
     public static $modx;
 
     /**
-     * Takes in an array of data, and turns it into blissful YAML using Spyc.
+     * Takes in an array of data, and turns it into blissful YAML using Symfony's YAML component.
      *
      * @param array $data
      * @return string
@@ -33,7 +33,7 @@ class Gitify extends Application
     }
 
     /**
-     * Takes YAML, and turns it into an array using Spyc.
+     * Takes YAML, and turns it into an array using Symfony's YAML component.
      *
      * @param string $input
      * @return array
