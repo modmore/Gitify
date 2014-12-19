@@ -7,14 +7,15 @@ The goal of Gitify is to provide a **two-way sync** of data typically stored in 
 
 The project configuration, which determines what data is written to file and build to the database, is stored in a `.gitify` file in the project root.
 
-- [Installation](#)
-- [Creating a new Project](#)
-- [Extract to File](#)
-- [Build to MODX](#)
-- [The .gitify File](#)
-    - [Third party packages (models)](#)
-    - [Composite Primary Keys](#)
-- [Changes & History](#)
+- [Installation](#installation)
+- [Creating a new Project](#creating-a-new-project)
+- [Extract to File](#extract-to-file)
+- [Build to MODX](#build-to-modx)
+- [The .gitify File](#the-gitify-file)
+    - [Third party packages (models)](#third-party-packages-models)
+    - [Composite Primary Keys](#composite-primary-keys)
+- [Changes & History](#changes--history)
+- [License](#license)
 
 ## Installation
 
@@ -166,3 +167,27 @@ That would grab the category and the name as primary keys, and join them togethe
 Gitify adheres to [semver](http://semver.org). As we are before v1 right now, expect breaking changes and refactorings before the API stabilises.
 
 For changes, please see the commit log or the [Changelog](CHANGELOG.md).
+
+## License
+
+The MIT License (MIT)
+
+Copyright (c) 2014 modmore | More for MODX
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
