@@ -151,3 +151,9 @@ data:
 ````
 
 That would grab the category and the name as primary keys, and join them together with a dot in the file name. This is a pretty bad example, and you shouldn't really use it like this.
+
+## Changes & History
+
+Gitify adheres to [semver](http://semver.org). As we are before v1 right now, expect breaking changes and refactorings before the API stabilises.
+
+For changes, please see the commit log or the [Changelog](CHANGELOG.md).
