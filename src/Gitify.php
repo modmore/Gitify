@@ -15,7 +15,7 @@ class Gitify extends Application
      *
      * @var string
      */
-    public static $contentSeparator = "\n-----\n";
+    public static $contentSeparator = "\n-----\n\n";
     /**
      * @var \modX
      */
