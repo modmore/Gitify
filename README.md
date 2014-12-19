@@ -7,6 +7,15 @@ The goal of Gitify is to provide a **two-way sync** of data typically stored in 
 
 The project configuration, which determines what data is written to file and build to the database, is stored in a `.gitify` file in the project root.
 
+- [Installation](#)
+- [Creating a new Project](#)
+- [Extract to File](#)
+- [Build to MODX](#)
+- [The .gitify File](#)
+    - [Third party packages (models)](#)
+    - [Composite Primary Keys](#)
+- [Changes & History](#)
+
 ## Installation
 
 New as of v0.2 is that dependencies are managed via [Composer](https://getcomposer.org/), most notably it has been rebuilt on top of Symfony's Console component to provide a more feature-packed base to build from. [Follow these instructions if you haven't installed Composer before](https://getcomposer.org/doc/00-intro.md)
