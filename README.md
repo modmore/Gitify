@@ -121,9 +121,12 @@ The `.gitify` file structure is real simple. There are root nodes for `data_dire
 
 By default files will be created with a `.yaml` extension, but if you want you can override that with a `extension` property. This can help with certain data and syntax highlighting in IDEs.
 
+### Third party packages (models)
+
 When a certain class is not part of the core models, you can define a `package` as well. This will run `$modx->addPackage` before attempting to load the data. The path is determined by looking at a `[package].core_path` setting suffixed with `model/`, `[[++core_path]]components/[package]/model/`or a hardcoded `package_path` property. For example, you could use the following in your `.gitify` file to load [ContentBlocks](http://modmo.re/cb) Layouts &amp; Fields:
 
 ```` yaml
+data:
     cb_fields:
         class: cbField
         primary: name
@@ -135,3 +138,16 @@ When a certain class is not part of the core models, you can define a `package` 
 
 As it'll load the package into memory, it's only required to add the package once. For clarify, it can't hurt to add it to each `data` entry that uses it.
 
+### Composite Primary Keys
+
+When an object doesn't have a single primary key, or you want to get fancy, it's possible to define a composite primary key, by setting the `primary` attribute to an array. For example, like this:
+
+```` yaml
+data:
+    chunks:
+        class: modChunk
+        primary: [category, name]
+        extension: .html
+````
+
+That would grab the category and the name as primary keys, and join them together with a dot in the file name. This is a pretty bad example, and you shouldn't really use it like this.

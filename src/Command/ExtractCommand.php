@@ -150,7 +150,22 @@ class ExtractCommand extends BaseCommand
         foreach ($collection as $object) {
             /** @var xPDOObject $object */
             $file = $this->generate($object, $options);
-            $path = empty($pk) ? $object->getPrimaryKey() : $object->get($pk);
+
+            // Grab the primary key on the object, including support for composite primary keys
+            if (empty($pk)) {
+                $path = $object->getPrimaryKey();
+            }
+            elseif (is_array($pk)) {
+                $paths = array();
+                foreach ($pk as $pkVal) {
+                    $paths[] = $object->get($pkVal);
+                }
+                $path = implode('.' , $paths);
+            }
+            else {
+                $path = $object->get($pk);
+            }
+
             $path = modResource::filterPathSegment($this->modx, $path, array(
                     'friendly_alias_lowercase_only' => false,
                 )
