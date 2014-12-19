@@ -4,6 +4,7 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+- Skip modStaticResource in the content extraction to prevent issues with binary file content
 - `[BC]` Apply transliteration and other filters to file names to ensure the names are safe to be used.
 
 ## 0.2 - 2014-12-19

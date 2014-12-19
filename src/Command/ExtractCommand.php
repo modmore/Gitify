@@ -6,6 +6,7 @@ use modContext;
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
 
+use modStaticResource;
 use RecursiveIteratorIterator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -182,9 +183,11 @@ class ExtractCommand extends BaseCommand
         $fieldMeta = $object->_fieldMeta;
         $data = $object->toArray('', true, true);
 
-        // If there's a dedicated content field, we put that below the yaml for easier managing
+        // If there's a dedicated content field, we put that below the yaml for easier managing,
+        // unless the object is a modStaticResource, calling getContent on a static resource can break the
+        // extracting because it tries to return the (possibly binary) file.
         $content = '';
-        if (method_exists($object, 'getContent')) {
+        if (method_exists($object, 'getContent') && !($object instanceof modStaticResource)) {
             $content = $object->getContent();
 
             if (!empty($content)) {
