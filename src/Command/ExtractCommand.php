@@ -1,51 +1,78 @@
 <?php
+namespace modmore\Gitify\Command;
+
+use Exception;
+use modContext;
+use modmore\Gitify\BaseCommand;
+use modmore\Gitify\Gitify;
+
+use RecursiveIteratorIterator;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+use xPDOObject;
+use modResource;
+use modCategory;
+use modElement;
+
+use RecursiveDirectoryIterator;
+use SplFileInfo;
 
 /**
- * Class GitifyExtract
+ * Class BuildCommand
+ *
+ * Builds a MODX site from the files and configuration.
+ *
+ * @package modmore\Gitify\Command
  */
-class GitifyExtract extends Gitify
+class ExtractCommand extends BaseCommand
 {
-
     public $categories = array();
 
-    /**
-     * Runs the GitifyExtract command
-     *
-     * @param array $project
-     */
-    public function run(array $project = array())
+    protected function configure()
     {
-        if (!file_exists($project['path'] . 'config.core.php')) {
-            echo "Error: there does not seem to be a MODX install present here.\n";
-            return false;
-        }
+        $this
+            ->setName('extract')
+            ->setDescription('Extracts data from the MODX site, and stores it in human readable files for editing and committing to a VCS.')
 
-        if (!$this->loadMODX($project['path'])) {
-            echo "Error: Could not load the MODX API\n";
-            return false;
-        }
+            /*->addOption(
+                'skip-clear-cache',
+                null,
+                InputOption::VALUE_NONE,
+                'When specified, it will skip clearing the cache after building.'
+            )*/
+        ;
+    }
 
-        foreach ($project['data'] as $folder => $type) {
+    /**
+     * Runs the command.
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        foreach ($this->config['data'] as $folder => $type) {
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
-                    echo date('H:i:s') . " - Loading content into $folder/...\n";
-                    $this->loadContent($project['data_directory'] . $folder, $type);
+                    $output->writeln("- Extracting content into {$folder}...");
+                    $this->extractContent(GITIFY_WORKING_DIR . $this->config['data_directory'] . $folder, $type);
 
                     break;
 
                 case (!empty($type['class'])):
-                    echo date('H:i:s') . " - Loading " . $type['class'] . " into $folder/...\n";
+                    $output->writeln("- Extracting {$type['class']} into {$folder}...");
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
                     }
-                    $this->loadObjects($project['data_directory'] . $folder, $type);
+                    $this->extractObjects(GITIFY_WORKING_DIR . $this->config['data_directory'] . $folder, $type);
 
                     break;
             }
         }
-        echo "Done!\n";
-        return true;
+        return 0;
     }
 
     /**
@@ -54,7 +81,7 @@ class GitifyExtract extends Gitify
      * @param $folder
      * @param $options
      */
-    public function loadContent($folder, $options)
+    public function extractContent($folder, $options)
     {
         $extension = (isset($options['extension'])) ? $options['extension'] : '.html';
 
@@ -62,24 +89,26 @@ class GitifyExtract extends Gitify
         $this->modx->getCacheManager()->deleteTree($folder, array('extensions' => ''));
 
         // Grab the contexts
-        $contexts = $this->modx->getCollection('modContext');
+        $contexts = $this->modx->getIterator('modContext');
         foreach ($contexts as $context) {
             /** @var modContext $context */
-            $key = $context->get('key');
+            $contextKey = $context->get('key');
 
             // Grab the resources in the context
-            $resources = $this->modx->getCollection('modResource', array('context_key' => $key));
+            $resources = $this->modx->getIterator('modResource', array('context_key' => $contextKey));
             foreach ($resources as $resource) {
                 /** @var modResource $resource */
                 $file = $this->generate($resource, $options);
 
                 // Somewhat normalize uris into something we can use as file path that makes (human) sense
                 $uri = $resource->uri;
-                if (substr($uri, -1) == '/') {
-                    // Trim the trailing slash
+                // Trim trailing slash if there is one
+                if (substr($uri, -1) == '/')
+                {
                     $uri = rtrim($uri, '/');
                 }
-                else {
+                else
+                {
                     // Get rid of the extension by popping off the last part, and adding just the alias back.
                     $uri = explode('/', $uri);
                     array_pop($uri);
@@ -90,8 +119,8 @@ class GitifyExtract extends Gitify
                 if (empty($uri)) $uri = $resource->id;
 
                 // Write the file
-                $fn = $folder . DIRECTORY_SEPARATOR . $key . DIRECTORY_SEPARATOR . $uri . $extension;
-                $this->modx->getCacheManager()->writeFile($fn, $file);
+                $fn = $folder . DIRECTORY_SEPARATOR . $contextKey . DIRECTORY_SEPARATOR . $uri . $extension;
+                $this->modx->cacheManager->writeFile($fn, $file);
             }
         }
     }
@@ -102,7 +131,7 @@ class GitifyExtract extends Gitify
      * @param $folder
      * @param $options
      */
-    public function loadObjects($folder, array $options = array())
+    public function extractObjects($folder, array $options = array())
     {
         // Read the current files
         $before = $this->getAllFiles($options['path'] . $folder);
@@ -115,7 +144,7 @@ class GitifyExtract extends Gitify
 
         $this->modx->getCacheManager();
 
-        // Loop over stuff
+        // Loop over stuff to generate
         $pk = isset($options['primary']) ? $options['primary'] : '';
         foreach ($collection as $object) {
             /** @var xPDOObject $object */
@@ -126,13 +155,15 @@ class GitifyExtract extends Gitify
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
             $after[] = $fn;
 
-            if (file_get_contents($fn) != $file) {
+            if (!file_exists($fn) || file_get_contents($fn) != $file) {
                 $this->modx->cacheManager->writeFile($fn, $file);
             }
         }
 
+        // Clean up removed object files
         $old = array_diff($before, $after);
-        foreach ($old as $oldFile) {
+        foreach ($old as $oldFile)
+        {
             unlink($oldFile);
         }
     }
@@ -158,6 +189,7 @@ class GitifyExtract extends Gitify
                 }
             }
         }
+
         // Strip out keys that have the same value as the default, or are excluded per the .gitify
         $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
         foreach ($data as $key => $value) {
@@ -170,8 +202,8 @@ class GitifyExtract extends Gitify
             }
         }
 
+        // Handle string-based categories automagically on elements
         if ($object instanceof modElement && !($object instanceof modCategory)) {
-            // Handle string-based categories automagically
             if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
                 $catId = $data['category'];
                 $data['category'] = $this->getCategoryName($catId);
@@ -180,11 +212,10 @@ class GitifyExtract extends Gitify
 
         $data = $this->expandJSON($data);
 
-        $out = $this->toYAML($data);
+        $out = Gitify::toYAML($data);
 
         if (!empty($content)) {
-            $out .= $this->sep;
-            $out .= $content;
+            $out .= Gitify::$contentSeparator . $content;
         }
         return $out;
     }
@@ -207,26 +238,11 @@ class GitifyExtract extends Gitify
     }
 
     /**
-     * Takes in an array of data, expanding JSON formatted data into an array to be nicely
-     * transformed into YAML later.
+     * Loops over a folder to get all the files in it. Uses for cleaning up old files.
      *
-     * @param $data
-     * @return mixed
+     * @param $folder
+     * @return array
      */
-    public function expandJSON($data)
-    {
-        foreach ($data as $key => $value) {
-            if (!empty($value) && is_string($value) && (strpos($value, '{') !== -1)) {
-                $json = $this->modx->fromJSON($value);
-                if (is_array($json)) $data[$key] = $this->expandJSON($json);
-            }
-            elseif (is_array($value)) {
-                $data[$key] = $this->expandJSON($value);
-            }
-        }
-        return $data;
-    }
-
     public function getAllFiles($folder)
     {
         $files = array();
@@ -245,6 +261,7 @@ class GitifyExtract extends Gitify
         return $files;
     }
 
+
     /**
      * Turns a category ID into a name
      *
@@ -260,5 +277,26 @@ class GitifyExtract extends Gitify
             return $this->categories[$id];
         }
         return '';
+    }
+
+    /**
+     * Takes in an array of data, expanding JSON formatted data into an array to be nicely
+     * transformed into YAML later.
+     *
+     * @param $data
+     * @return mixed
+     */
+    public function expandJSON($data)
+    {
+        foreach ($data as $key => $value) {
+            if (!empty($value) && is_string($value) && (strpos($value, '{') !== -1)) {
+                $json = $this->modx->fromJSON($value);
+                if (is_array($json)) $data[$key] = $this->expandJSON($json);
+            }
+            elseif (is_array($value)) {
+                $data[$key] = $this->expandJSON($value);
+            }
+        }
+        return $data;
     }
 }

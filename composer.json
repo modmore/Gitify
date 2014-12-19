@@ -1,0 +1,11 @@
+{
+    "require": {
+        "symfony/console": "*",
+        "symfony/yaml": "*",
+        "phpunit/phpunit": "4.3.*"
+    },
+
+    "autoload": {
+        "psr-4": {"modmore\\Gitify\\":"src/"}
+    }
+}
