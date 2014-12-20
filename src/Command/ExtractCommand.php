@@ -196,7 +196,7 @@ class ExtractCommand extends BaseCommand
     public function generate($object, array $options = array())
     {
         $fieldMeta = $object->_fieldMeta;
-        $data = $object->toArray('', true, true);
+        $data = $this->objectToArray($object);
 
         // If there's a dedicated content field, we put that below the yaml for easier managing,
         // unless the object is a modStaticResource, calling getContent on a static resource can break the
@@ -319,6 +319,31 @@ class ExtractCommand extends BaseCommand
                 $data[$key] = $this->expandJSON($value);
             }
         }
+        return $data;
+    }
+
+    /**
+     * Turns the object into an array, and do some more processing depending on the object.
+     *
+     * @param xPDOObject $object
+     * @return array
+     */
+    protected function objectToArray(xPDOObject $object)
+    {
+        $data = $object->toArray('', true, true);
+        switch (true) {
+            case $object instanceof \modResource:
+                /** @var \modResource $object */
+                $tvs = array();
+                $templateVars = $object->getTemplateVars();
+                foreach ($templateVars as $tv) {
+                    /** @var \modTemplateVar $tv */
+                    $tvs[$tv->get('name')] = $tv->get('value');
+                }
+                $data['tvs'] = $tvs;
+                break;
+        }
+
         return $data;
     }
 }

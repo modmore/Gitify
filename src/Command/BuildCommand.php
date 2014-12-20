@@ -190,6 +190,7 @@ class BuildCommand extends BaseCommand
      * @param $data
      */
     public function buildSingleResource($data) {
+        // Figure out the primary key - it's either uri or id in the case of a resource.
         if (!empty($data['uri'])) {
             $primary = array('uri' => $data['uri']);
             $method = 'uri';
@@ -199,17 +200,30 @@ class BuildCommand extends BaseCommand
             $method = 'id';
         }
 
+        // Grab the resource, or create a new one.
         $new = false;
         $object = $this->modx->getObject('modResource', $primary);
         if (!($object instanceof modResource)) {
             $object = $this->modx->newObject('modResource');
             $new = true;
         }
+
+        // Ensure all fields have a value
         foreach ($object->_fieldMeta as $field => $meta) {
             if (!isset($data[$field])) $data[$field] = $meta['default'];
         }
+
+        // Set the fields on the resource
         $object->fromArray($data, '', true, true);
 
+        // Process stored TVs
+        if (isset($data['tvs'])) {
+            foreach($data['tvs'] as $key => $value) {
+                $object->setTVValue($key, $value);
+            }
+        }
+
+        // Save it!
         if ($object->save()) {
             if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
