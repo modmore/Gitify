@@ -211,14 +211,6 @@ class ExtractCommand extends BaseCommand
             }
         }
 
-        // Handle string-based categories automagically on elements
-        if ($object instanceof \modElement && !($object instanceof \modCategory)) {
-            if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
-                $catId = $data['category'];
-                $data['category'] = $this->getCategoryName($catId);
-            }
-        }
-
         $data = $this->expandJSON($data);
 
         $out = Gitify::toYAML($data);
@@ -319,6 +311,7 @@ class ExtractCommand extends BaseCommand
     {
         $data = $object->toArray('', true, true);
         switch (true) {
+            // Handle TVs for resources automatically
             case $object instanceof \modResource:
                 /** @var \modResource $object */
                 $tvs = array();
@@ -328,6 +321,13 @@ class ExtractCommand extends BaseCommand
                     $tvs[$tv->get('name')] = $tv->get('value');
                 }
                 $data['tvs'] = $tvs;
+                break;
+
+            // Handle string-based categories automagically on elements
+            case $object instanceof \modElement && !($object instanceof \modCategory):
+                if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
+                    $data['category'] = $this->getCategoryName($data['category']);
+                }
                 break;
         }
 
