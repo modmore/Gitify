@@ -2,7 +2,9 @@
 namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
@@ -24,12 +26,11 @@ class InstallModxCommand extends BaseCommand
             ->setName('install:modx')
             ->setDescription('Downloads, configures and installs a fresh MODX installation.')
 
-            /*->addOption(
-                'skip-clear-cache',
-                null,
-                InputOption::VALUE_NONE,
-                'When specified, it will skip clearing the cache after building.'
-            )*/
+            ->addArgument(
+                'modx_version',
+                InputArgument::OPTIONAL,
+                'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.'
+            )
         ;
     }
 
@@ -76,8 +77,17 @@ class InstallModxCommand extends BaseCommand
      */
     protected function download()
     {
-        $this->output->writeln("Downloading latest MODX version...");
-        exec('curl -Lo modx.zip http://modx.com/download/latest/ -#');
+        $version = $this->input->getArgument('modx_version');
+
+        if (empty($version) || $version == 'latest') {
+            $url = 'http://modx.com/download/latest/';
+        }
+        else {
+            $url = 'http://modx.com/download/direct/modx-' . $version . '.zip';
+        }
+
+        $this->output->writeln("Downloading MODX from {$url}...");
+        exec('curl -Lo modx.zip ' . $url . ' -#');
 
         if (!file_exists('modx.zip')) {
             $this->output->writeln('<error>Error: Could not download the MODX zip</error>');

@@ -11,6 +11,7 @@ The project configuration, which determines what data is written to file and bui
 - [Creating a new Project](#creating-a-new-project)
 - [Extract to File](#extract-to-file)
 - [Build to MODX](#build-to-modx)
+- [Installing a fresh MODX instance](#installing-a-fresh-modx-instance)
 - [The .gitify File](#the-gitify-file)
     - [Third party packages (models)](#third-party-packages-models)
     - [Composite Primary Keys](#composite-primary-keys)
@@ -86,6 +87,12 @@ Wishlist:
 When you have the files, you can make edits and push them to a repository if you want, but with that you'll also need to be able of installing them in MODX sites. This is the build process, where Gitify takes your files and tries to set them up in your database.
 
 To build, simply call `Gitify build`. If you have a bunch of conflicts and you are not getting the expected results, you can force the build (which will then wipe the content first) by calling `Gitify build --force`. By default the command will also clear the MODX cache after building, to skip this specify the `--skip-clear-cache` flag like `Gitify build --skip-clear-cache`.
+
+## Installing a fresh MODX instance
+
+To quickly set up a fresh MODX installation, use the command `Gitify install:modx` in the folder you want MODX to be installed in. It is possible to choose the version to install, by specifying it as the parameter, for example to install 2.3.1, call `Gitify install:modx 2.3.1-pl`.
+
+Once the MODX zip has been downloaded, it will be extracted and prepared for installation. Gitify will ask you for details about the database, URLs and manager user so be sure to have those ready.
 
 ## The `.gitify` File
 
