@@ -3,19 +3,9 @@ namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use xPDOObject;
-use modResource;
-use modCategory;
-use modElement;
-
-use DirectoryIterator;
-use RecursiveDirectoryIterator;
-use SplFileInfo;
 
 /**
  * Class BuildCommand
@@ -97,7 +87,7 @@ class BuildCommand extends BaseCommand
     public function buildContent($folder, $options)
     {
         $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
-        $directory = new DirectoryIterator($folder);
+        $directory = new \DirectoryIterator($folder);
 
         if ($this->input->getOption('force')) {
             $this->output->writeln('Forcing build, removing prior Resources...');
@@ -105,7 +95,7 @@ class BuildCommand extends BaseCommand
         }
 
         foreach ($directory as $path => $info) {
-            /** @var SplFileInfo $info */
+            /** @var \SplFileInfo $info */
             $name = $info->getBasename();
 
             // Ignore dotfiles/folders
@@ -125,7 +115,7 @@ class BuildCommand extends BaseCommand
             $this->output->writeln('Building context ' . $name . '...');
 
             $path = $info->getRealPath();
-            $this->buildResources($name, new RecursiveDirectoryIterator($path));
+            $this->buildResources($name, new \RecursiveDirectoryIterator($path));
         }
     }
 
@@ -146,12 +136,18 @@ class BuildCommand extends BaseCommand
         $this->modx->addPackage($package, $path);
     }
 
+    /**
+     * Loops over resource files to create the resources.
+     *
+     * @param $context
+     * @param $iterator
+     */
     public function buildResources($context, $iterator)
     {
         $resources = array();
         $parents = array();
         foreach ($iterator as $fileInfo) {
-            /** @var SplFileInfo $fileInfo */
+            /** @var \SplFileInfo $fileInfo */
             if ($fileInfo->isDir()) {
                 if (substr($fileInfo->getBasename(), 0, 1) != '.') {
                     $parents[] = $fileInfo;
@@ -163,7 +159,7 @@ class BuildCommand extends BaseCommand
         }
 
         // create the resources first
-        /** @var SplFileInfo $resource */
+        /** @var \SplFileInfo $resource */
         foreach ($resources as $resource) {
             $file = file_get_contents($resource->getRealPath());
 
@@ -180,7 +176,7 @@ class BuildCommand extends BaseCommand
 
         // Then loop over all subs
         foreach ($parents as $parentResource) {
-            $this->buildResources($context, new RecursiveDirectoryIterator($parentResource.'/'));
+            $this->buildResources($context, new \RecursiveDirectoryIterator($parentResource.'/'));
         }
     }
 
@@ -203,7 +199,7 @@ class BuildCommand extends BaseCommand
         // Grab the resource, or create a new one.
         $new = false;
         $object = $this->modx->getObject('modResource', $primary);
-        if (!($object instanceof modResource)) {
+        if (!($object instanceof \modResource)) {
             $object = $this->modx->newObject('modResource');
             $new = true;
         }
@@ -248,10 +244,10 @@ class BuildCommand extends BaseCommand
             return;
         }
 
-        $directory = new DirectoryIterator($folder);
+        $directory = new \DirectoryIterator($folder);
 
         foreach ($directory as $file) {
-            /** @var SplFileInfo $file */
+            /** @var \SplFileInfo $file */
             $name = $file->getBasename();
 
             // Ignore dotfiles/folders
@@ -300,12 +296,12 @@ class BuildCommand extends BaseCommand
 
         $new = false;
         $object = $this->modx->getObject($class, $primary);
-        if (!($object instanceof xPDOObject)) {
+        if (!($object instanceof \xPDOObject)) {
             $object = $this->modx->newObject($class);
             $new = true;
         }
 
-        if ($object instanceof modElement && !($object instanceof modCategory)) {
+        if ($object instanceof \modElement && !($object instanceof \modCategory)) {
             // Handle string-based category names automagically
             if (isset($data['category']) && !empty($data['category']) && !is_numeric($data['category'])) {
                 $catName = $data['category'];

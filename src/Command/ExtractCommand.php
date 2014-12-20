@@ -1,23 +1,10 @@
 <?php
 namespace modmore\Gitify\Command;
 
-use Exception;
-use modContext;
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
-
-use modStaticResource;
-use RecursiveIteratorIterator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use xPDOObject;
-use modResource;
-use modCategory;
-use modElement;
-
-use RecursiveDirectoryIterator;
-use SplFileInfo;
 
 /**
  * Class BuildCommand
@@ -92,13 +79,13 @@ class ExtractCommand extends BaseCommand
         // Grab the contexts
         $contexts = $this->modx->getIterator('modContext');
         foreach ($contexts as $context) {
-            /** @var modContext $context */
+            /** @var \modContext $context */
             $contextKey = $context->get('key');
 
             // Grab the resources in the context
             $resources = $this->modx->getIterator('modResource', array('context_key' => $contextKey));
             foreach ($resources as $resource) {
-                /** @var modResource $resource */
+                /** @var \modResource $resource */
                 $file = $this->generate($resource, $options);
 
                 // Somewhat normalize uris into something we can use as file path that makes (human) sense
@@ -148,7 +135,7 @@ class ExtractCommand extends BaseCommand
         // Loop over stuff to generate
         $pk = isset($options['primary']) ? $options['primary'] : '';
         foreach ($collection as $object) {
-            /** @var xPDOObject $object */
+            /** @var \xPDOObject $object */
             $file = $this->generate($object, $options);
 
             // Grab the primary key on the object, including support for composite primary keys
@@ -166,7 +153,7 @@ class ExtractCommand extends BaseCommand
                 $path = $object->get($pk);
             }
 
-            $path = modResource::filterPathSegment($this->modx, $path, array(
+            $path = \modResource::filterPathSegment($this->modx, $path, array(
                     'friendly_alias_lowercase_only' => false,
                 )
             );
@@ -189,7 +176,7 @@ class ExtractCommand extends BaseCommand
     }
 
     /**
-     * @param xPDOObject|modElement $object
+     * @param \xPDOObject|\modElement $object
      * @param array $options
      * @return string
      */
@@ -202,7 +189,7 @@ class ExtractCommand extends BaseCommand
         // unless the object is a modStaticResource, calling getContent on a static resource can break the
         // extracting because it tries to return the (possibly binary) file.
         $content = '';
-        if (method_exists($object, 'getContent') && !($object instanceof modStaticResource)) {
+        if (method_exists($object, 'getContent') && !($object instanceof \modStaticResource)) {
             $content = $object->getContent();
 
             if (!empty($content)) {
@@ -225,7 +212,7 @@ class ExtractCommand extends BaseCommand
         }
 
         // Handle string-based categories automagically on elements
-        if ($object instanceof modElement && !($object instanceof modCategory)) {
+        if ($object instanceof \modElement && !($object instanceof \modCategory)) {
             if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
                 $catId = $data['category'];
                 $data['category'] = $this->getCategoryName($catId);
@@ -269,15 +256,15 @@ class ExtractCommand extends BaseCommand
     {
         $files = array();
         try {
-            $di = new RecursiveDirectoryIterator($folder, RecursiveDirectoryIterator::SKIP_DOTS);
-            $it = new RecursiveIteratorIterator($di);
-        } catch (Exception $e) {
+            $di = new \RecursiveDirectoryIterator($folder, \RecursiveDirectoryIterator::SKIP_DOTS);
+            $it = new \RecursiveIteratorIterator($di);
+        } catch (\Exception $e) {
             return array();
         }
 
         foreach($it as $file)
         {
-            /** @var SplFileInfo $file */
+            /** @var \SplFileInfo $file */
             $files[] = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
         }
         return $files;
@@ -325,10 +312,10 @@ class ExtractCommand extends BaseCommand
     /**
      * Turns the object into an array, and do some more processing depending on the object.
      *
-     * @param xPDOObject $object
+     * @param \xPDOObject $object
      * @return array
      */
-    protected function objectToArray(xPDOObject $object)
+    protected function objectToArray(\xPDOObject $object)
     {
         $data = $object->toArray('', true, true);
         switch (true) {
