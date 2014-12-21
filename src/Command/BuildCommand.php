@@ -243,15 +243,14 @@ class BuildCommand extends BaseCommand
      */
     public function buildObjects($folder, $type)
     {
-        $folder = GITIFY_WORKING_DIR . $folder;
 
-        if (!file_exists($folder)) {
-            $this->echoInfo('Skipping : no content folder found');
+        if (!file_exists(GITIFY_WORKING_DIR . $folder)) {
+            $this->output->writeln('Skipping ' . $folder . ', folder does not exist yet.');
 
             return;
         }
 
-        $directory = new \DirectoryIterator($folder);
+        $directory = new \DirectoryIterator(GITIFY_WORKING_DIR . $folder);
 
         foreach ($directory as $file) {
             /** @var \SplFileInfo $file */
