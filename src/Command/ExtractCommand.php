@@ -17,6 +17,9 @@ class ExtractCommand extends BaseCommand
 {
     public $categories = array();
 
+    protected $_useResource = null;
+    protected $_resource = false;
+
     protected function configure()
     {
         $this
@@ -41,6 +44,8 @@ class ExtractCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // load modResource dependency
+        $this->modx->loadClass('modResource');
         foreach ($this->config['data'] as $folder => $type) {
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
@@ -153,10 +158,7 @@ class ExtractCommand extends BaseCommand
                 $path = $object->get($pk);
             }
 
-            $path = \modResource::filterPathSegment($this->modx, $path, array(
-                    'friendly_alias_lowercase_only' => false,
-                )
-            );
+            $path = $this->filterPathSegment($path);
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
@@ -332,5 +334,37 @@ class ExtractCommand extends BaseCommand
         }
 
         return $data;
+    }
+
+    /**
+     * Uses the modResource::filterPathSegment method if available for cleaning a file path.
+     * When it is not available (pre MODX 2.3) it uses a fake resource to call its cleanAlias method
+     *
+     * @param $path
+     * @return string
+     */
+    protected function filterPathSegment($path)
+    {
+        if ($this->_useResource === null) {
+            $resource = $this->modx->newObject('modResource');
+            if (method_exists($resource, 'filterPathSegment')) {
+                echo 'Method exists';
+                $this->_useResource = false;
+            }
+            else {
+                echo 'Method doesn\'t exist';
+                $this->_useResource = true;
+                $this->_resource = $resource;
+            }
+        }
+
+        $options = array(
+            'friendly_alias_lowercase_only' => false,
+        );
+
+        if ($this->_useResource) {
+            return $this->_resource->cleanAlias($path, $options);
+        }
+        return \modResource::filterPathSegment($this->modx, $path, $options);
     }
 }
