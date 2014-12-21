@@ -6,6 +6,7 @@ use modmore\Gitify\Gitify;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * Class BuildCommand
@@ -147,11 +148,12 @@ class BuildCommand extends BaseCommand
         $resources = array();
         $parents = array();
         foreach ($iterator as $fileInfo) {
+            if (substr($fileInfo->getBasename(), 0, 1) == '.') {
+                continue;
+            }
             /** @var \SplFileInfo $fileInfo */
             if ($fileInfo->isDir()) {
-                if (substr($fileInfo->getBasename(), 0, 1) != '.') {
-                    $parents[] = $fileInfo;
-                }
+                $parents[] = $fileInfo;
             }
             elseif ($fileInfo->isFile()) {
                 $resources[] = $fileInfo;
@@ -165,7 +167,12 @@ class BuildCommand extends BaseCommand
 
             list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
-            $data = Gitify::fromYAML($rawData);
+            try {
+                $data = Gitify::fromYAML($rawData);
+            } catch (ParseException $Exception) {
+                $this->output->writeln('<error>Could not parse ' . $resource->getBasename() . ': ' . $Exception->getMessage() .'</error>');
+                continue;
+            }
             if (!empty($content)) {
                 $data['content'] = $content;
             }

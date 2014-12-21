@@ -4,6 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+- Catch YAML parse exceptions so it doesn't kill the entire process on an invalid file
+- Prevent Gitify from trying to build dotfiles
 - Ensure file path transliteration/filters also works pre MODX 2.3
 - Simplify the number of options that are added by default to all commands.
 - Add ability to specify the MODX version to download/install in `Gitify install:modx [modx_version]`
