@@ -348,11 +348,9 @@ class ExtractCommand extends BaseCommand
         if ($this->_useResource === null) {
             $resource = $this->modx->newObject('modResource');
             if (method_exists($resource, 'filterPathSegment')) {
-                echo 'Method exists';
                 $this->_useResource = false;
             }
             else {
-                echo 'Method doesn\'t exist';
                 $this->_useResource = true;
                 $this->_resource = $resource;
             }
