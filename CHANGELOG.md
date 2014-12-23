@@ -4,7 +4,9 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
-- Fix undefined method issue in build command
+- `[BC]` Fix `build` issue with ContentBlocks (and probably other extras) caused by automatically expanding JSON
+- Improve information provided during `build` and `extract`, including more verbose logging with `-v` or `--verbose` flag
+- Fix undefined method issue in `build` command
 - Catch YAML parse exceptions so it doesn't kill the entire process on an invalid file
 - Prevent Gitify from trying to build dotfiles
 - Ensure file path transliteration/filters also works pre MODX 2.3

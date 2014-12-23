@@ -54,13 +54,13 @@ class BuildCommand extends BaseCommand
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
-                    $output->writeln("- Building content from $folder/...");
+                    $output->writeln("Building content from $folder/...");
                     $this->buildContent($this->config['data_directory'] . $folder, $type);
 
                     break;
 
                 case (!empty($type['class'])):
-                    $output->writeln(" - Building {$type['class']} from {$folder}/...");
+                    $output->writeln("Building {$type['class']} from {$folder}/...");
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
                     }
@@ -109,11 +109,11 @@ class BuildCommand extends BaseCommand
 
             $context = $this->modx->getObject('modContext', array('key' => $name));
             if (!$context) {
-                $this->output->writeln('Context ' . $name . ' does not exist. Perhaps you\'re missing contexts data?');
+                $this->output->writeln('- Context ' . $name . ' does not exist. Perhaps you\'re missing contexts data?');
                 continue;
             }
 
-            $this->output->writeln('Building context ' . $name . '...');
+            $this->output->writeln('- Building ' . $name . ' context...');
 
             $path = $info->getRealPath();
             $this->buildResources($name, new \RecursiveDirectoryIterator($path));
@@ -230,7 +230,7 @@ class BuildCommand extends BaseCommand
         if ($object->save()) {
             if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $this->output->writeln("{$new} resource from {$method}: {$data[$method]}");
+                $this->output->writeln("- {$new} resource from {$method}: {$data[$method]}");
             }
         }
     }
@@ -245,7 +245,7 @@ class BuildCommand extends BaseCommand
     {
 
         if (!file_exists(GITIFY_WORKING_DIR . $folder)) {
-            $this->output->writeln('Skipping ' . $folder . ', folder does not exist yet.');
+            $this->output->writeln('- Skipping ' . $folder . ', folder does not exist yet.');
 
             return;
         }
@@ -260,7 +260,7 @@ class BuildCommand extends BaseCommand
             if (substr($name, 0, 1) == '.') continue;
 
             if (!$file->isFile()) {
-                $this->output->writeln('Skipping ' . $file->getType() . ': ' . $name);
+                $this->output->writeln('- Skipping ' . $file->getType() . ': ' . $name);
                 continue;
             }
 
@@ -320,7 +320,7 @@ class BuildCommand extends BaseCommand
         if ($object->save()) {
             if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $this->output->writeln("{$new} {$class}: {$data[$primaryKey]}");
+                $this->output->writeln("- {$new} {$class}: {$data[$primaryKey]}");
             }
         }
     }

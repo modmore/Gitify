@@ -46,21 +46,20 @@ class ExtractCommand extends BaseCommand
     {
         // load modResource dependency
         $this->modx->loadClass('modResource');
-        foreach ($this->config['data'] as $folder => $type) {
+        foreach ($this->config['data'] as $folder => $options) {
+            $options['folder'] = $folder;
             switch (true) {
-                case (!empty($type['type']) && $type['type'] == 'content'):
+                case (!empty($options['type']) && $options['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
-                    $output->writeln("- Extracting content into {$folder}...");
-                    $this->extractContent(GITIFY_WORKING_DIR . $this->config['data_directory'] . $folder, $type);
+                    $this->extractContent(GITIFY_WORKING_DIR . $this->config['data_directory'] . $folder, $options);
 
                     break;
 
-                case (!empty($type['class'])):
-                    $output->writeln("- Extracting {$type['class']} into {$folder}...");
-                    if (isset($type['package'])) {
-                        $this->getPackage($type['package'], $type);
+                case (!empty($options['class'])):
+                    if (isset($options['package'])) {
+                        $this->getPackage($options['package'], $options);
                     }
-                    $this->extractObjects(GITIFY_WORKING_DIR . $this->config['data_directory'] . $folder, $type);
+                    $this->extractObjects(GITIFY_WORKING_DIR . $this->config['data_directory'] . $folder, $options);
 
                     break;
             }
@@ -76,10 +75,15 @@ class ExtractCommand extends BaseCommand
      */
     public function extractContent($folder, $options)
     {
+        // Read the current files
+        $before = $this->getAllFiles($folder);
+        $after = array();
         $extension = (isset($options['extension'])) ? $options['extension'] : '.html';
 
-        // Empty the current data
-        $this->modx->getCacheManager()->deleteTree($folder, array('extensions' => ''));
+        // Display what we're about to do here
+        $resourceCount = $this->modx->getCount('modResource');
+        $contextCount = $this->modx->getCount('modContext', array('key:!=' => 'mgr'));
+        $this->output->writeln("Extracting content into {$options['folder']} ({$resourceCount} resources across {$contextCount} contexts)...");
 
         // Grab the contexts
         $contexts = $this->modx->getIterator('modContext');
@@ -87,8 +91,18 @@ class ExtractCommand extends BaseCommand
             /** @var \modContext $context */
             $contextKey = $context->get('key');
 
+            $count = $this->modx->getCount('modResource', array('context_key' => $contextKey));
+            $this->output->writeln("- Extracting resources from {$contextKey} context ({$count} resources)...");
+
             // Grab the resources in the context
-            $resources = $this->modx->getIterator('modResource', array('context_key' => $contextKey));
+            $c = $this->modx->newQuery('modResource');
+            $c->where(
+                array(
+                    'context_key' => $contextKey,
+                )
+            );
+            $c->sortby('uri', 'ASC');
+            $resources = $this->modx->getIterator('modResource', $c);
             foreach ($resources as $resource) {
                 /** @var \modResource $resource */
                 $file = $this->generate($resource, $options);
@@ -113,7 +127,31 @@ class ExtractCommand extends BaseCommand
 
                 // Write the file
                 $fn = $folder . DIRECTORY_SEPARATOR . $contextKey . DIRECTORY_SEPARATOR . $uri . $extension;
-                $this->modx->cacheManager->writeFile($fn, $file);
+                $after[] = $fn;
+
+                // Only write stuff if it doesn't exist already, or is not the same
+                $written = false;
+                if (!file_exists($fn) || file_get_contents($fn) != $file) {
+                    $this->modx->cacheManager->writeFile($fn, $file);
+                    $written = true;
+                }
+
+                // If we're in verbose mode (-v/--verbose), output a message with what we did
+                if ($this->output->isVerbose()) {
+                    $this->output->writeln($written ? "- Generated {$uri}{$extension}" : "- Skipped {$uri}{$extension}, no change");
+                }
+            }
+        }
+
+        // Clean up removed object files
+        $old = array_diff($before, $after);
+        foreach ($old as $oldFile)
+        {
+            unlink($oldFile);
+            // If in verbose mode, let it be known to the world
+            if ($this->output->isVerbose()) {
+                $oldFileName = substr($oldFile, strlen($folder));
+                $this->output->writeln("- Removed {$oldFileName}, no longer exists");
             }
         }
     }
@@ -126,8 +164,12 @@ class ExtractCommand extends BaseCommand
      */
     public function extractObjects($folder, array $options = array())
     {
+        $criteria = (isset($options['where'])) ? $options['where'] : array();
+        $count = $this->modx->getCount($options['class'], $criteria);
+        $this->output->writeln("Extracting {$options['class']} into {$options['folder']} ({$count} records)...");
+
         // Read the current files
-        $before = $this->getAllFiles($options['path'] . $folder);
+        $before = $this->getAllFiles($folder);
         $after = array();
 
         // Grab the stuff
@@ -164,8 +206,13 @@ class ExtractCommand extends BaseCommand
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
             $after[] = $fn;
 
+            $written = false;
             if (!file_exists($fn) || file_get_contents($fn) != $file) {
                 $this->modx->cacheManager->writeFile($fn, $file);
+                $written = true;
+            }
+            if ($this->output->isVerbose()) {
+                $this->output->writeln($written ? "- Generated {$path}{$ext}" : "- Skipped {$path}{$ext}, no change");
             }
         }
 
@@ -174,6 +221,11 @@ class ExtractCommand extends BaseCommand
         foreach ($old as $oldFile)
         {
             unlink($oldFile);
+            // If in verbose mode, let it be known to the world
+            if ($this->output->isVerbose()) {
+                $oldFileName = substr($oldFile, strlen($folder));
+                $this->output->writeln("- Removed {$oldFileName}, no longer exists");
+            }
         }
     }
 
@@ -212,8 +264,6 @@ class ExtractCommand extends BaseCommand
                 unset($data[$key]);
             }
         }
-
-        $data = $this->expandJSON($data);
 
         $out = Gitify::toYAML($data);
 
@@ -280,27 +330,6 @@ class ExtractCommand extends BaseCommand
             return $this->categories[$id];
         }
         return '';
-    }
-
-    /**
-     * Takes in an array of data, expanding JSON formatted data into an array to be nicely
-     * transformed into YAML later.
-     *
-     * @param $data
-     * @return mixed
-     */
-    public function expandJSON($data)
-    {
-        foreach ($data as $key => $value) {
-            if (!empty($value) && is_string($value) && (strpos($value, '{') !== -1)) {
-                $json = $this->modx->fromJSON($value);
-                if (is_array($json)) $data[$key] = $this->expandJSON($json);
-            }
-            elseif (is_array($value)) {
-                $data[$key] = $this->expandJSON($value);
-            }
-        }
-        return $data;
     }
 
     /**
