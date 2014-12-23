@@ -19,7 +19,7 @@ use modmore\Gitify\Command\BuildCommand;
 use modmore\Gitify\Command\ExtractCommand;
 use modmore\Gitify\Command\InstallModxCommand;
 
-$application = new Gitify('Gitify', '0.2.0');
+$application = new Gitify('Gitify', '0.3.0');
 $application->add(new InitCommand);
 $application->add(new BuildCommand);
 $application->add(new ExtractCommand);

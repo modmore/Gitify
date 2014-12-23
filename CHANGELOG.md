@@ -4,6 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+## 0.3 - 2014-12-23
+
 - `[BC]` Fix `build` issue with ContentBlocks (and probably other extras) caused by automatically expanding JSON
 - Improve information provided during `build` and `extract`, including more verbose logging with `-v` or `--verbose` flag
 - Fix undefined method issue in `build` command
