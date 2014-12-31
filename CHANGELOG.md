@@ -4,6 +4,7 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+- Fix issue where resources in different contexts don't get built because of conflicting URIs
 - Make sure cases where saving a resource/object fails get logged to the terminal
 
 ## 0.3 - 2014-12-23
