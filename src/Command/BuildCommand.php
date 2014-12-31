@@ -195,7 +195,7 @@ class BuildCommand extends BaseCommand
     public function buildSingleResource($data) {
         // Figure out the primary key - it's either uri or id in the case of a resource.
         if (!empty($data['uri'])) {
-            $primary = array('uri' => $data['uri']);
+            $primary = array('uri' => $data['uri'], 'context_key' => $data['context_key']);
             $method = 'uri';
         }
         else {
