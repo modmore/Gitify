@@ -4,7 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
-- Fix issue where resources in different contexts don't get built because of conflicting URIs
+- Fix PHP warning: Illegal offset type when using composite primary keys (#36)
+- Fix issue where resources in different contexts don't get built because of conflicting URIs (#35)
 - Make sure cases where saving a resource/object fails get logged to the terminal
 
 ## 0.3 - 2014-12-23

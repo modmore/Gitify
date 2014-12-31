@@ -299,9 +299,11 @@ class BuildCommand extends BaseCommand
             foreach ($primaryKey as $pkVal) {
                 $primary[$pkVal] = $data[$pkVal];
             }
+            $showPrimary = json_encode($primary);
         }
         else {
             $primary = array($primaryKey => $data[$primaryKey]);
+            $showPrimary = $data[$primaryKey];
         }
 
         $new = false;
@@ -324,12 +326,12 @@ class BuildCommand extends BaseCommand
         if ($object->save()) {
             if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
-                $this->output->writeln("- {$new} {$class}: {$data[$primaryKey]}");
+                $this->output->writeln("- {$new} {$class}: {$showPrimary}");
             }
         }
         else {
             $new = ($new) ? 'new' : 'updated';
-            $this->output->writeln("- <error>Could not save {$new} {$class}: {$data[$primaryKey]}</error>");
+            $this->output->writeln("- <error>Could not save {$new} {$class}: {$showPrimary}</error>");
         }
     }
 
