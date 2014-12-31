@@ -22,6 +22,8 @@ abstract class BaseCommand extends Command
     /** \Symfony\Component\Console\Output\OutputInterface $output */
     public $output;
 
+    public $startTime;
+
     public $loadConfig = true;
     public $loadMODX = true;
 
@@ -36,6 +38,7 @@ abstract class BaseCommand extends Command
      */
     public function initialize(InputInterface $input, OutputInterface $output)
     {
+        $this->startTime = microtime(true);
         $this->input = $input;
         $this->output = $output;
 
@@ -47,5 +50,28 @@ abstract class BaseCommand extends Command
         {
             $this->modx = Gitify::loadMODX();
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getRunStats()
+    {
+        $curTime = microtime(true);
+        $duration = $curTime - $this->startTime;
+
+        $output = 'Time: ' . number_format($duration * 1000, 0) . 'ms | ';
+        $output .= 'Memory Usage: ' . $this->convertBytes(memory_get_usage(false)) . ' | ';
+        $output .= 'Peak Memory Usage: ' . $this->convertBytes(memory_get_peak_usage(false));
+        return $output;
+    }
+
+    /**
+     * @param $bytes
+     * @return string
+     */
+    public function convertBytes($bytes) {
+        $unit=array('b','kb','mb','gb','tb','pb');
+        return @round($bytes/pow(1024,($i=floor(log($bytes,1024)))),2).' '.$unit[$i];
     }
 }

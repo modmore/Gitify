@@ -66,7 +66,7 @@ class InstallModxCommand extends BaseCommand
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
         }
 
-        $output->writeln("Done!");
+        $output->writeln('Done! ' . $this->getRunStats());
         return 0;
     }
 

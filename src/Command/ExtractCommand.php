@@ -64,6 +64,8 @@ class ExtractCommand extends BaseCommand
                     break;
             }
         }
+
+        $output->writeln('Done! ' . $this->getRunStats());
         return 0;
     }
 

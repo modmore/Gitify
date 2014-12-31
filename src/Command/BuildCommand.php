@@ -75,7 +75,7 @@ class BuildCommand extends BaseCommand
             $this->modx->getCacheManager()->refresh();
         }
 
-        $output->writeln('Done!');
+        $output->writeln('Done! ' . $this->getRunStats());
         return 0;
     }
 
