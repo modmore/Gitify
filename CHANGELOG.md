@@ -4,6 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+- Make sure cases where saving a resource/object fails get logged to the terminal
+
 ## 0.3 - 2014-12-23
 
 - `[BC]` Fix `build` issue with ContentBlocks (and probably other extras) caused by automatically expanding JSON

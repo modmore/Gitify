@@ -233,6 +233,10 @@ class BuildCommand extends BaseCommand
                 $this->output->writeln("- {$new} resource from {$method}: {$data[$method]}");
             }
         }
+        else {
+            $new = ($new) ? 'new' : 'updated';
+            $this->output->writeln("- <error>Could not save {$new} resource from {$method}: {$data[$method]}</error>");
+        }
     }
 
     /**
@@ -322,6 +326,10 @@ class BuildCommand extends BaseCommand
                 $new = ($new) ? 'Created new' : 'Updated';
                 $this->output->writeln("- {$new} {$class}: {$data[$primaryKey]}");
             }
+        }
+        else {
+            $new = ($new) ? 'new' : 'updated';
+            $this->output->writeln("- <error>Could not save {$new} {$class}: {$data[$primaryKey]}</error>");
         }
     }
 

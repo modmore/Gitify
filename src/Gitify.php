@@ -68,6 +68,7 @@ class Gitify extends Application
         $modx = new \modX();
         $modx->initialize('mgr');
         $modx->getService('error', 'error.modError', '', '');
+        $modx->setLogTarget('ECHO');
 
         self::$modx = $modx;
 
