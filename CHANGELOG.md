@@ -4,6 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+- Don't exclude `createdby`/`createdon` keys from resources by default; could result in lost data on `build --force`
+
 ## 0.4 - 2014-12-31
 
 - Add time and memory usage statistics (#34)

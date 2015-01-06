@@ -93,7 +93,7 @@ class InitCommand extends BaseCommand
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['content'] = array(
                 'type' => 'content',
-                'exclude_keys' => array('createdby', 'createdon', 'editedby', 'editedon'),
+                'exclude_keys' => array('editedby', 'editedon'),
             );
         }
 
