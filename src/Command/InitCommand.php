@@ -160,7 +160,7 @@ class InitCommand extends BaseCommand
 
                 $command = $this->getApplication()->find('install-modx');
                 $arguments = array(
-                    'command' => 'install-modx'
+                    'command' => 'install:modx'
                 );
                 $input = new ArrayInput($arguments);
                 return $command->run($input, $output);
