@@ -4,6 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+## 0.4.1 - 2015-01-27
+
 - Fix install:modx command being called in Gitify init (#42)
 - Don't exclude `createdby`/`createdon` keys from resources by default; could result in lost data on `build --force`
 
