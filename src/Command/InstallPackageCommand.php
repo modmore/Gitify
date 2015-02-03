@@ -28,6 +28,7 @@ class InstallPackageCommand extends BaseCommand
                 InputOption::VALUE_NONE,
                 'When specified, will be installed packages, defined in .gitify config.'
             );
+        // TODO: add option `--update` for update installed packages, by default skip installed
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -37,25 +38,45 @@ class InstallPackageCommand extends BaseCommand
             $packages = $this->config['data']['packages'];
             foreach ($packages as $provider_name => $provider_data) {
                 $provider = $this->modx->getObject('transport.modTransportProvider', array("name" => $provider_name));
-                // TODO [REF]: create provider function
+                if (!$provider) {
+                    $api_key = '';
+                    if (file_exists(GITIFY_WORKING_DIR . '/' . $provider_data['api_key'])) {
+                        $api_key = trim(file_get_contents(GITIFY_WORKING_DIR . '/' .$provider_data['api_key']));
+                    }
+                    $provider = $this->modx->newObject('transport.modTransportProvider');
+                    $provider->fromArray(array(
+                        'name' => $provider_name,
+                        'service_url' => $provider_data['service_url'],
+                        'description' => isset($provider_data['description']) ? $provider_data['description'] : '',
+                        'username' => isset($provider_data['username']) ? $provider_data['username'] : '',
+                        'api_key' => $api_key,
+                    ));
+                    $provider->save();
+                }
 
                 foreach ($provider_data['packages'] as $package) {
-                    $this->install($package, $provider->toArray(), true);
+                    $this->install($package, $provider, true);
                 }
             }
 
-            return true;
+            return 0;
         }
 
         // install defined package
-        $package_name = $this->input->getArgument('package_name');
-        $this->install($package_name);
+        $this->install($this->input->getArgument('package_name'));
 
-        return true;
+        return 0;
     }
 
     private function install($package, $provider = 1, $quiet = false)
     {
+        $this->modx->addPackage('modx.transport', GITIFY_WORKING_DIR . '/core/model/');
+
+        if ($this->modx->getCount('transport.modTransportPackage', array('package_name' => $package))) {
+            $this->output->writeln("Package $package installed already. Skipping...");
+            return true;
+        }
+
         $helper = $this->getHelper('question');
 
         if (!$quiet) {
@@ -71,12 +92,8 @@ class InstallPackageCommand extends BaseCommand
             }
         }
 
-        $this->modx->addPackage('modx.transport', GITIFY_WORKING_DIR . '/core/model/');
-
-        if (!is_array($provider)) {
+        if (!is_object($provider)) {
             $provider = $this->modx->getObject('transport.modTransportProvider', $provider);
-        } else {
-            $provider = $this->modx->getObject('transport.modTransportProvider', $provider['id']);
         }
 
         $completed = $this->download($package, $provider, array());
@@ -94,9 +111,10 @@ class InstallPackageCommand extends BaseCommand
         $this->modx->getVersionData();
         $product_version = $this->modx->version['code_name'] . '-' . $this->modx->version['full_version'];
 
-        if ($provider->verify() !== true) {
+        $response = $provider->verify();
+        if ($response !== true) {
             $this->output->writeln("<error>Cannot continue adding package $package! Reason: provider cannot be verified...</error>");
-            $error = $provider->verify();
+            $error = $response;
             if (!empty($error) && is_string($error)) {
                 $this->output->writeln("PROVIDER SAYS: $error");
             }
@@ -105,7 +123,7 @@ class InstallPackageCommand extends BaseCommand
         }
         $provider->getClient();
 
-        $this->output->writeln("<comment>Heading to install $package...</comment>");
+        $this->output->writeln("<comment>Installing $package...</comment>");
 
         $response = $provider->request('package', 'GET', array(
             'supports' => $product_version,
