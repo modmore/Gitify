@@ -98,10 +98,12 @@ class InstallPackageCommand extends BaseCommand
 
         $completed = $this->download($package, $provider, array());
         if (!$completed) {
-            $this->output->writeln("<error>Error: Cannot install package $package.</error>");
+            $this->output->writeln("<error>Cannot install package $package.</error>");
 
             return false;
         }
+
+        $this->output->writeln("<info>Package $package installed</info>");
 
         return true;
     }
@@ -121,8 +123,8 @@ class InstallPackageCommand extends BaseCommand
 
             return false;
         }
-        $provider->getClient();
 
+        $provider->getClient();
         $this->output->writeln("<comment>Installing $package...</comment>");
 
         $response = $provider->request('package', 'GET', array(
@@ -135,48 +137,22 @@ class InstallPackageCommand extends BaseCommand
 
             foreach ($founded as $item) {
                 if ($item->name == $package) {
-                    $sig = explode('-', $item->signature);
-                    $version = explode('.', $sig[1]);
-                    file_put_contents(
-                        $this->modx->getOption('core_path') . 'packages/' . $item->signature . '.transport.zip',
-                        file_get_contents($item->location)
-                    );
-
-                    $p = $this->modx->newObject('transport.modTransportPackage');
-                    $p->set('signature', $item->signature);
-                    $p->fromArray(array(
-                        'created' => date('Y-m-d h:i:s'),
-                        'updated' => null,
-                        'state' => 1,
-                        'workspace' => 1,
+                    $response = $this->modx->runProcessor('workspace/packages/rest/download', array(
                         'provider' => $provider->id,
-                        'source' => $item->signature . '.transport.zip',
-                        'package_name' => $package,
-                        'version_major' => $version[0],
-                        'version_minor' => !empty($version[1]) ? $version[1] : 0,
-                        'version_patch' => !empty($version[2]) ? $version[2] : 0,
+                        'info' => join('::', array($item->location, $item->signature))
                     ));
-                    if (!empty($sig[2])) {
-                        $r = preg_split('/([0-9]+)/', $sig[2], -1, PREG_SPLIT_DELIM_CAPTURE);
-                        if (is_array($r) && !empty($r)) {
-                            $p->set('release', $r[0]);
-                            $p->set('release_index', (isset($r[1]) ? $r[1] : '0'));
-                        } else {
-                            $p->set('release', $sig[2]);
-                        }
-                    }
-                    $success = $p->save();
-                    if ($success) {
-                        $p->install();
-                    } else {
-                        $this->output->writeln("Could not save package $item->name");
+
+                    if ($response->isError()) {
+                        $this->output->writeln("<error>Could not download package $item->name. Reason: {$response->getMessage()}</error>");
+                        return false;
                     }
 
-                    break;
+                    $obj = $response->getObject();
+                    if ($pkg = $this->modx->getObject('transport.modTransportPackage', array('signature' => $obj['signature']))) {
+                        return $pkg->install();
+                    }
                 }
             }
-
-            return true;
         }
 
         return false;
