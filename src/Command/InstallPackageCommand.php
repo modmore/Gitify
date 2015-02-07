@@ -19,7 +19,7 @@ class InstallPackageCommand extends BaseCommand
     public $loadConfig = true;
     public $loadMODX = true;
 
-    public $quiet = false;
+    public $interactive = true;
 
     protected function configure()
     {
@@ -81,8 +81,8 @@ class InstallPackageCommand extends BaseCommand
                 }
 
                 foreach ($provider_data['packages'] as $package) {
-                    $this->setQuiet(true);
-                    $this->install($package, $provider, true);
+                    $this->setInteractive(false);
+                    $this->install($package, $provider);
                 }
             }
 
@@ -98,16 +98,15 @@ class InstallPackageCommand extends BaseCommand
     /**
      * @param $package
      * @param int|\modTransportProvider $provider
-     * @param bool $quiet
      * @param array $installOptions
      * @return bool
      */
-    private function install($package, $provider = 0, $quiet = false, array $installOptions = array())
+    private function install($package, $provider = 0, array $installOptions = array())
     {
         $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
 
         if ($this->modx->getCount('transport.modTransportPackage', array('package_name' => $package))) {
-            $this->output->writeln("Package $package already installed. Skipping...");
+            $this->output->writeln("<info>Package $package is already installed. Skipping...</info>");
             return true;
         }
 
@@ -179,7 +178,7 @@ class InstallPackageCommand extends BaseCommand
             $helper = $this->getHelper('question');
 
             foreach ($found as $item) {
-                if (!$this->quiet)
+                if ($this->interactive)
                 {
                     if (!$helper->ask(
                         $this->input,
@@ -222,12 +221,12 @@ class InstallPackageCommand extends BaseCommand
     }
 
     /**
-     * Sets the internal quiet flag
+     * Sets the internal interactive flag
      *
      * @param $value
      */
-    public function setQuiet($value)
+    public function setInteractive($value)
     {
-        $this->quiet = $value;
+        $this->interactive = $value;
     }
 }
