@@ -54,7 +54,7 @@ class InstallPackageCommand extends BaseCommand
 
         if ($input->getOption('all')) {
             // check list and run install for each
-            $packages = isset($this->config['data']['packages']) ? $this->config['data']['packages'] : array();
+            $packages = isset($this->config['packages']) ? $this->config['packages'] : array();
             foreach ($packages as $provider_name => $provider_data) {
                 // Try to load the provider from the database
                 $provider = $this->modx->getObject('transport.modTransportProvider', array("name" => $provider_name));
