@@ -19,6 +19,8 @@ class InstallPackageCommand extends BaseCommand
     public $loadConfig = true;
     public $loadMODX = true;
 
+    public $quiet = false;
+
     protected function configure()
     {
         $this
@@ -47,6 +49,9 @@ class InstallPackageCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->modx->setLogTarget('ECHO');
+        $this->modx->setLogLevel(\modX::LOG_LEVEL_INFO);
+
         if ($input->getOption('all')) {
             // check list and run install for each
             $packages = isset($this->config['data']['packages']) ? $this->config['data']['packages'] : array();
@@ -76,6 +81,7 @@ class InstallPackageCommand extends BaseCommand
                 }
 
                 foreach ($provider_data['packages'] as $package) {
+                    $this->setQuiet(true);
                     $this->install($package, $provider, true);
                 }
             }
@@ -96,7 +102,7 @@ class InstallPackageCommand extends BaseCommand
      * @param array $installOptions
      * @return bool
      */
-    private function install($package, $provider = 1, $quiet = false, array $installOptions = array())
+    private function install($package, $provider = 0, $quiet = false, array $installOptions = array())
     {
         $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
 
@@ -105,23 +111,20 @@ class InstallPackageCommand extends BaseCommand
             return true;
         }
 
-        $helper = $this->getHelper('question');
-
-        if (!$quiet) {
-            if (!$helper->ask(
-                $this->input,
-                $this->output,
-                new ConfirmationQuestion(
-                    "Do you want to install <info>$package</info>? <comment>[Y/n]</comment>: ",
-                    true
-                )
-            )) {
-                return true;
-            }
-        }
-
-        if (!is_object($provider)) {
+        if (!($provider instanceof \modTransportProvider) && is_numeric($provider) && $provider > 0)
+        {
             $provider = $this->modx->getObject('transport.modTransportProvider', $provider);
+        }
+        if (!($provider instanceof \modTransportProvider))
+        {
+            $c = $this->modx->newQuery('transport.modTransportProvider');
+            $c->sortby('id', 'ASC');
+            $provider = $this->modx->getObject('transport.modTransportProvider', $c);
+        }
+        if (!($provider instanceof \modTransportProvider))
+        {
+            $this->output->writeln("<error>Cannot load Provider to install $package</error>");
+            return false;
         }
 
         // Download and install the package from the chosen provider
@@ -162,7 +165,7 @@ class InstallPackageCommand extends BaseCommand
         }
 
         $provider->getClient();
-        $this->output->writeln("<comment>Downloading $package...</comment>");
+        $this->output->writeln("<comment>Searching Provider for $package...</comment>");
 
         // Request package information from the chosen provider
         $response = $provider->request('package', 'GET', array(
@@ -173,33 +176,58 @@ class InstallPackageCommand extends BaseCommand
         // Check for a proper response
         if (!empty($response)) {
             $found = simplexml_load_string($response->response);
+            $helper = $this->getHelper('question');
 
             foreach ($found as $item) {
-                if ($item->name == $package) {
-                    // Run the core processor to download the package from the provider
-                    $response = $this->modx->runProcessor('workspace/packages/rest/download', array(
-                        'provider' => $provider->get('id'),
-                        'info' => join('::', array($item->location, $item->signature))
-                    ));
-
-                    $this->output->writeln("<comment>Installing $package...</comment>");
-
-                    // If we have an error, show it and cancel.
-                    if ($response->isError()) {
-                        $this->output->writeln("<error>Could not download package $item->name. Reason: {$response->getMessage()}</error>");
-                        return false;
+                if (!$this->quiet)
+                {
+                    if (!$helper->ask(
+                        $this->input,
+                        $this->output,
+                        new ConfirmationQuestion(
+                            "Do you want to install <info>$item->name ($item->version)</info>? <comment>[Y/n]</comment>: ",
+                            true
+                        )
+                    )) {
+                        continue;
                     }
+                }
 
-                    // Grab the package object
-                    $obj = $response->getObject();
-                    if ($pkg = $this->modx->getObject('transport.modTransportPackage', array('signature' => $obj['signature']))) {
-                        // Install the package
-                        return $pkg->install($options);
-                    }
+
+                // Run the core processor to download the package from the provider
+                $this->output->writeln("<comment>Downloading $item->name ($item->version)...</comment>");
+                $response = $this->modx->runProcessor('workspace/packages/rest/download', array(
+                    'provider' => $provider->get('id'),
+                    'info' => join('::', array($item->location, $item->signature))
+                ));
+
+                $this->output->writeln("<comment>Installing $package...</comment>");
+
+                // If we have an error, show it and cancel.
+                if ($response->isError()) {
+                    $this->output->writeln("<error>Could not download package $item->name. Reason: {$response->getMessage()}</error>");
+                    return false;
+                }
+
+                // Grab the package object
+                $obj = $response->getObject();
+                if ($pkg = $this->modx->getObject('transport.modTransportPackage', array('signature' => $obj['signature']))) {
+                    // Install the package
+                    return $pkg->install($options);
                 }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Sets the internal quiet flag
+     *
+     * @param $value
+     */
+    public function setQuiet($value)
+    {
+        $this->quiet = $value;
     }
 }
