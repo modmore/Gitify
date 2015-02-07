@@ -23,7 +23,7 @@ class InstallPackageCommand extends BaseCommand
     {
         $this
             ->setName('install:package')
-            ->setDescription('Downloads and installs a MODX packages.')
+            ->setDescription('Downloads and installs MODX packages.')
             ->addArgument(
                 'package_name',
                 InputArgument::OPTIONAL,
