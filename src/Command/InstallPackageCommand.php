@@ -98,7 +98,7 @@ class InstallPackageCommand extends BaseCommand
      */
     private function install($package, $provider = 1, $quiet = false, array $installOptions = array())
     {
-        $this->modx->addPackage('modx.transport', GITIFY_WORKING_DIR . '/core/model/');
+        $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
 
         if ($this->modx->getCount('transport.modTransportPackage', array('package_name' => $package))) {
             $this->output->writeln("Package $package already installed. Skipping...");
