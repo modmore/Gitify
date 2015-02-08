@@ -4,6 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+## 0.5.0 - 2015-02-08
+
 - Add package support with `install:package [packagename]` and `install:package --all` based off the .gitify file (#3)
 - Apply the --force flag to all content types (#47)
 
