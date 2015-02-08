@@ -4,6 +4,9 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+- Add package support with `install:package [packagename]` and `install:package --all` based off the .gitify file (#3)
+- Apply the --force flag to all content types (#47)
+
 ## 0.4.1 - 2015-01-27
 
 - Fix install:modx command being called in Gitify init (#42)

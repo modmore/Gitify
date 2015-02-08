@@ -254,6 +254,10 @@ class BuildCommand extends BaseCommand
             return;
         }
 
+        if ($this->input->getOption('force')) {
+            $this->modx->removeCollection($type['class'], array());
+        }
+
         $directory = new \DirectoryIterator(GITIFY_WORKING_DIR . $folder);
 
         foreach ($directory as $file) {
