@@ -166,9 +166,29 @@ class ExtractCommand extends BaseCommand
      */
     public function extractObjects($folder, array $options = array())
     {
-        $criteria = (isset($options['where'])) ? $options['where'] : array();
-        $count = $this->modx->getCount($options['class'], $criteria);
-        $this->output->writeln("Extracting {$options['class']} into {$options['folder']} ({$count} records)...");
+        $options['where'] = $options['where'] ?: array();
+
+        // not match elements of package
+        $packages = array();
+        foreach ($this->config['packages'] as $provider => $config) {
+            if (is_array($config['packages'])) {
+                $packages = array_merge($packages, $config['packages']);
+            }
+        }
+
+        if ($options['class'] == 'modCategory') {
+            $options['where'] = array_merge($options['where'], array($options['primary'] . ':NOT IN' => $packages));
+        }
+
+        $dependent = array('modTemplate','modChunk','modSnippet','modPlugin','modTemplateVariable');
+        if (in_array($options['class'], $dependent)) {
+            $list = [];
+            $categories = $this->modx->getIterator('modCategory', array('category:IN' => $packages));
+            foreach ($categories as $category) {
+                $list[] = $category->id;
+            }
+            $options['where'] = array_merge($options['where'], array('category:NOT IN' => $list));
+        }
 
         // Read the current files
         $before = $this->getAllFiles($folder);
@@ -177,7 +197,11 @@ class ExtractCommand extends BaseCommand
         // Grab the stuff
         $c = $this->modx->newQuery($options['class']);
         if (isset($options['where'])) $c->where(array($options['where']));
-        $collection = $this->modx->getCollection($options['class'], $c);
+
+        $count = $this->modx->getCount($options['class'], $c);
+        $this->output->writeln("Extracting {$options['class']} into {$options['folder']} ({$count} records)...");
+
+        $collection = $this->modx->getIterator($options['class'], $c);
 
         $this->modx->getCacheManager();
 
