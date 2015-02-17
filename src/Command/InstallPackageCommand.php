@@ -200,13 +200,13 @@ class InstallPackageCommand extends BaseCommand
                     'info' => join('::', array($item->location, $item->signature))
                 ));
 
-                $this->output->writeln("<comment>Installing $package...</comment>");
-
                 // If we have an error, show it and cancel.
                 if ($response->isError()) {
                     $this->output->writeln("<error>Could not download package $item->name. Reason: {$response->getMessage()}</error>");
                     return false;
                 }
+
+                $this->output->writeln("<comment>Installing $item->name...</comment>");
 
                 // Grab the package object
                 $obj = $response->getObject();
