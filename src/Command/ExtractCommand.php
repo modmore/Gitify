@@ -254,7 +254,7 @@ class ExtractCommand extends BaseCommand
 
             if (!empty($content)) {
                 foreach ($data as $key => $value) {
-                    if ($value == $content) unset($data[$key]);
+                    if ($value === $content) unset($data[$key]);
                 }
             }
         }
