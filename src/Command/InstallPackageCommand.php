@@ -36,7 +36,13 @@ class InstallPackageCommand extends BaseCommand
                 null,
                 InputOption::VALUE_NONE,
                 'When specified, all packages defined in the .gitify config will be installed.'
-            );
+            )
+            ->addOption(
+                'interactive',
+                null,
+                InputOption::VALUE_NONE,
+                'When --all and --interactive are specified, all packages defined in the .gitify config will be installed interactively.'
+            );;
         // TODO: add option `--update` for update installed packages, by default skip installed
     }
 
@@ -81,7 +87,9 @@ class InstallPackageCommand extends BaseCommand
                 }
 
                 foreach ($provider_data['packages'] as $package) {
-                    $this->setInteractive(false);
+                    if (!$input->getOption('interactive')) {
+                        $this->setInteractive(false);
+                    }
                     $this->install($package, $provider);
                 }
             }
