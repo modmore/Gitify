@@ -39,10 +39,10 @@ class InstallPackageCommand extends BaseCommand
             )
             ->addOption(
                 'interactive',
-                null,
+                'i',
                 InputOption::VALUE_NONE,
                 'When --all and --interactive are specified, all packages defined in the .gitify config will be installed interactively.'
-            );;
+            );
         // TODO: add option `--update` for update installed packages, by default skip installed
     }
 
