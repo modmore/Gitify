@@ -121,7 +121,10 @@ class ExtractCommand extends BaseCommand
                     // Get rid of the extension by popping off the last part, and adding just the alias back.
                     $uri = explode('/', $uri);
                     array_pop($uri);
-                    $uri[] = $resource->alias;
+
+                    // The alias might contain slashes too, so cover that
+                    $alias = explode('/', trim($resource->alias, '/'));
+                    $uri[] = end($alias);
                     $uri = implode('/', $uri);
                 }
 

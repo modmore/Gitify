@@ -4,6 +4,10 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 
+## 0.5.1 - 2015-02-26
+- Fix duplicate paths in file name if alias contains a folder structure
+- Fix issue where in some cases, if the content was empty any field that can be compared to empty is removed from the file
+
 ## 0.5.0 - 2015-02-08
 
 - Add package support with `install:package [packagename]` and `install:package --all` based off the .gitify file (#3)
