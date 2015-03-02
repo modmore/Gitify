@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Make sure TVs are inserted into the resource file alphabetically (#54)
 
 ## 0.5.1 - 2015-02-26
 - Fix duplicate paths in file name if alias contains a folder structure

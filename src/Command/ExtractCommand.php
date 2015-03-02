@@ -360,6 +360,7 @@ class ExtractCommand extends BaseCommand
                     /** @var \modTemplateVar $tv */
                     $tvs[$tv->get('name')] = $tv->get('value');
                 }
+                ksort($tvs);
                 $data['tvs'] = $tvs;
                 break;
 
