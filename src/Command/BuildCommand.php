@@ -18,6 +18,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class BuildCommand extends BaseCommand
 {
     public $categories = array();
+    protected $_metaCache = array();
 
     protected function configure()
     {
@@ -313,7 +314,7 @@ class BuildCommand extends BaseCommand
         if (is_array($primaryKey)) {
             $primary = array();
             foreach ($primaryKey as $pkVal) {
-                $primary[$pkVal] = $data[$pkVal];
+                $primary[$pkVal] = isset($data[$pkVal]) ? $data[$pkVal] : $this->_getDefaultForField($class, $pkVal);
             }
             $showPrimary = json_encode($primary);
         }
@@ -379,5 +380,24 @@ class BuildCommand extends BaseCommand
             return $this->categories[md5($name)];
         }
         return 0;
+    }
+
+    /**
+     * Looks at the field meta to find the default value.
+     *
+     * @param string $class The xPDOObject to grab adefault value for
+     * @param string $field The field in the xPDOObject to grab a default value for
+     * @return null
+     */
+    protected function _getDefaultForField($class, $field)
+    {
+        if (!isset($this->_metaCache[$class])) {
+            $this->_metaCache[$class] = $this->modx->getFieldMeta($class);
+        }
+
+        if (isset($this->_metaCache[$class][$field]) && isset($this->_metaCache[$class][$field]['default'])) {
+            return $this->_metaCache[$class][$field]['default'];
+        }
+        return null;
     }
 }
