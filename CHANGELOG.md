@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Fix issue with modCategory objects and force building (#66)
 - Make sure TVs are inserted into the resource file alphabetically (#54)
 
 ## 0.5.1 - 2015-02-26

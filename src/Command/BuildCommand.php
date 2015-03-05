@@ -256,6 +256,18 @@ class BuildCommand extends BaseCommand
 
         if ($this->input->getOption('force')) {
             $this->modx->removeCollection($type['class'], array());
+
+            switch ($type['class']) {
+                // $modx->removeCollection does not automatically remove related objects, which in the case
+                // of modCategory results in orphaned modCategoryClosure objects. Normally, this is okay, because
+                // Gitify recreates the objects with the same ID. But Categories automatically add the closure on
+                // save, which then throws a bunch of errors about duplicate IDs. Worst of all, it _removes_ the
+                // category object if it can't save the closure, causing the IDs to go all over the place.
+                // So in this case, we make sure all category closures are wiped too.
+                case 'modCategory':
+                    $this->modx->removeCollection('modCategoryClosure', array());
+                    break;
+            }
         }
 
         $directory = new \DirectoryIterator(GITIFY_WORKING_DIR . $folder);
@@ -311,6 +323,7 @@ class BuildCommand extends BaseCommand
         }
 
         $new = false;
+        /** @var \xPDOObject $object */
         $object = $this->modx->getObject($class, $primary);
         if (!($object instanceof \xPDOObject)) {
             $object = $this->modx->newObject($class);
