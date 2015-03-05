@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Add new --interactive (-i) flag to `install:package --all` command to interactively install all packages defined in .gitify file
 - Fix issue where composite primary keys have the default value (e.g. sources.odMediaSourceElement) and it can't build those objects (#65)
 - Fix issue with modCategory objects and force building (#66)
 - Make sure TVs are inserted into the resource file alphabetically (#54)
