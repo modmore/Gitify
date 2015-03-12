@@ -1,5 +1,9 @@
 #!/usr/bin/env php
 <?php
+if (!file_exists('vendor/autoload.php')) {
+    echo "> Uh oh, it looks like you forgot to run `composer install`. Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation\n";
+    exit (1);
+}
 require 'vendor/autoload.php';
 
 if (version_compare(phpversion(),'5.3.0') >= 0) {

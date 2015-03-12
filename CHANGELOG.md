@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Show a helpful warning if the user forgot to run composer install (#67)
 - With install:package, prefer exact matches over provider order to ensure the right packages are installed (#58)
 
 ## 0.5.2 - 2015-03-05
