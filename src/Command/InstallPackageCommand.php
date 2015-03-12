@@ -151,18 +151,18 @@ class InstallPackageCommand extends BaseCommand
     /**
      * Download and install the package from the provider
      *
-     * @param string $package
+     * @param string $packageName
      * @param \modTransportProvider $provider
      * @param array $options
      * @return bool
      */
-    private function download($package, $provider, $options = array()) {
+    private function download($packageName, $provider, $options = array()) {
         $this->modx->getVersionData();
         $product_version = $this->modx->version['code_name'] . '-' . $this->modx->version['full_version'];
 
         $response = $provider->verify();
         if ($response !== true) {
-            $this->output->writeln("<error>Could not download $package because the provider cannot be verified.</error>");
+            $this->output->writeln("<error>Could not download $packageName because the provider cannot be verified.</error>");
             $error = $response;
             if (!empty($error) && is_string($error)) {
                 $this->output->writeln("Message from Provider: $error");
@@ -172,55 +172,70 @@ class InstallPackageCommand extends BaseCommand
         }
 
         $provider->getClient();
-        $this->output->writeln("<comment>Searching Provider for $package...</comment>");
+        $this->output->writeln("<comment>Searching Provider for $packageName...</comment>");
 
         // Request package information from the chosen provider
         $response = $provider->request('package', 'GET', array(
             'supports' => $product_version,
-            'query' => $package
+            'query' => $packageName
         ));
 
         // Check for a proper response
         if (!empty($response)) {
-            $found = simplexml_load_string($response->response);
+            $foundPackages = simplexml_load_string($response->response);
             $helper = $this->getHelper('question');
 
-            foreach ($found as $item) {
-                if ($this->interactive)
-                {
+            $packages = array();
+
+            foreach ($foundPackages as $foundPkg) {
+                $packages[strtolower((string)$foundPkg->name)] = array(
+                    'name' => (string)$foundPkg->name,
+                    'version' => (string)$foundPkg->version,
+                    'location' => (string)$foundPkg->location,
+                    'signature' => (string)$foundPkg->signature,
+                );
+            }
+
+            // Ensure the exact match is always first
+            if (isset($packages[strtolower($packageName)])) {
+                $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;
+            }
+
+            foreach ($packages as $package) {
+                if ($this->interactive) {
                     if (!$helper->ask(
                         $this->input,
                         $this->output,
                         new ConfirmationQuestion(
-                            "Do you want to install <info>$item->name ($item->version)</info>? <comment>[Y/n]</comment>: ",
+                            "Do you want to install <info>{$package['name']} ({$package['version']})</info>? <comment>[Y/n]</comment>: ",
                             true
                         )
-                    )) {
+                    )
+                    ) {
                         continue;
                     }
                 }
 
-
                 // Run the core processor to download the package from the provider
-                $this->output->writeln("<comment>Downloading $item->name ($item->version)...</comment>");
+                $this->output->writeln("<comment>Downloading {$package['name']} ({$package['version']})...</comment>");
                 $response = $this->modx->runProcessor('workspace/packages/rest/download', array(
                     'provider' => $provider->get('id'),
-                    'info' => join('::', array($item->location, $item->signature))
+                    'info' => join('::', array($package['location'], $package['signature']))
                 ));
 
                 // If we have an error, show it and cancel.
                 if ($response->isError()) {
-                    $this->output->writeln("<error>Could not download package $item->name. Reason: {$response->getMessage()}</error>");
+                    $this->output->writeln("<error>Could not download package {$package['name']}. Reason: {$response->getMessage()}</error>");
                     return false;
                 }
 
-                $this->output->writeln("<comment>Installing $item->name...</comment>");
+                $this->output->writeln("<comment>Installing {$package['name']}...</comment>");
 
                 // Grab the package object
                 $obj = $response->getObject();
-                if ($pkg = $this->modx->getObject('transport.modTransportPackage', array('signature' => $obj['signature']))) {
+                if ($package = $this->modx->getObject('transport.modTransportPackage', array('signature' => $obj['signature']))) {
                     // Install the package
-                    return $pkg->install($options);
+                    return $package->install($options);
                 }
             }
         }
