@@ -155,7 +155,7 @@ class InstallModxCommand extends BaseCommand
         $question = new Question('Manager User ['.$defaultMgrUser.']: ', $defaultMgrUser);
         $managerUser = $helper->ask($this->input, $this->output, $question);
 
-        $question = new Question('Database Password [generated]: ', 'generate');
+        $question = new Question('Manager User Password [generated]: ', 'generate');
         $question->setHidden(true);
         $question->setValidator(function ($value) {
             if (empty($value) || strlen($value) < 8) {
