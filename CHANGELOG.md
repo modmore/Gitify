@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Make sure installing packages works properly when the package name isn't the same as the signature (#74)
 
 ## 0.6.0 - 2015-03-30
 - Fix silly `<note>` in output from install:modx

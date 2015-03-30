@@ -113,11 +113,6 @@ class InstallPackageCommand extends BaseCommand
     {
         $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
 
-        if ($this->modx->getCount('transport.modTransportPackage', array('package_name' => $package))) {
-            $this->output->writeln("<info>Package $package is already installed. Skipping...</info>");
-            return true;
-        }
-
         if (!($provider instanceof \modTransportProvider) && is_numeric($provider) && $provider > 0)
         {
             $provider = $this->modx->getObject('transport.modTransportProvider', $provider);
@@ -142,7 +137,7 @@ class InstallPackageCommand extends BaseCommand
             return false;
         }
 
-        $this->output->writeln("<info>Package $package installed</info>");
+        $this->output->writeln("<info>Done!</info>");
 
         return true;
     }
@@ -202,6 +197,11 @@ class InstallPackageCommand extends BaseCommand
             }
 
             foreach ($packages as $package) {
+                if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $package['signature']))) {
+                    $this->output->writeln("<info>Package {$package['name']} {$package['version']} is already installed.</info>");
+                    continue;
+                }
+
                 if ($this->interactive) {
                     if (!$helper->ask(
                         $this->input,
