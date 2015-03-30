@@ -109,7 +109,7 @@ class InstallModxCommand extends BaseCommand
         exec("rm -r ./{$insideFolder}");
 
         if (!unlink('modx.zip')) {
-            $this->output->writeln("<note>Note: unable to clean up modx.zip file.</note>");
+            $this->output->writeln("<info>Note: unable to clean up modx.zip file.</info>");
         }
         return true;
     }
@@ -169,7 +169,7 @@ class InstallModxCommand extends BaseCommand
 
         if ($managerPass == 'generate') {
             $managerPass = substr(str_shuffle(md5(microtime(true))), 0, rand(8, 15));
-            $this->output->writeln("<note>Generated Manager Password: {$managerPass}</note>");
+            $this->output->writeln("<info>Generated Manager Password: {$managerPass}</info>");
         }
 
         $question = new Question('Manager Email: ');
