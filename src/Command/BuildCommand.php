@@ -61,7 +61,8 @@ class BuildCommand extends BaseCommand
                     break;
 
                 case (!empty($type['class'])):
-                    $output->writeln("Building {$type['class']} from {$folder}/...");
+                    $doing = $this->input->getOption('force') ? 'Force building' : 'Building';
+                    $output->writeln("{$doing} {$type['class']} from {$folder}/...");
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
                     }
@@ -94,6 +95,13 @@ class BuildCommand extends BaseCommand
         if ($this->input->getOption('force')) {
             $this->output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
+
+            if (isset($options['truncate_on_force'])) {
+                foreach ($options['truncate_on_force'] as $class) {
+                    $this->output->writeln('> Truncating ' . $class . ' before force building Resources...');
+                    $this->modx->removeCollection($class, array());
+                }
+            }
         }
 
         foreach ($directory as $path => $info) {
@@ -250,14 +258,25 @@ class BuildCommand extends BaseCommand
     {
 
         if (!file_exists(GITIFY_WORKING_DIR . $folder)) {
-            $this->output->writeln('- Skipping ' . $folder . ', folder does not exist yet.');
-
+            $this->output->writeln('> Skipping ' . $type['class'] . ', ' . $folder. ' does not exist.');
             return;
         }
 
         if ($this->input->getOption('force')) {
             $this->modx->removeCollection($type['class'], array());
 
+            if (isset($type['truncate_on_force'])) {
+                foreach ($type['truncate_on_force'] as $class) {
+                    $this->output->writeln('> Truncating ' . $class . ' before force building ' . $type['class'] . '...');
+                    $this->modx->removeCollection($class, array());
+                }
+            }
+
+            /**
+             * @deprecated 2015-03-30
+             *
+             * Deprecated in favour of specifying truncate_on_force in the .gitify file.
+             */
             switch ($type['class']) {
                 // $modx->removeCollection does not automatically remove related objects, which in the case
                 // of modCategory results in orphaned modCategoryClosure objects. Normally, this is okay, because

@@ -106,6 +106,15 @@ class InitCommand extends BaseCommand
             );
         }
 
+        $question = new ConfirmationQuestion('Would you like to include <info>Categories</info>? <comment>(Y/N)</comment> ', true);
+        if ($helper->ask($input, $output, $question)) {
+            $dataTypes['categories'] = array(
+                'class' => 'modCategory',
+                'primary' => 'category',
+                'truncate_on_force' => array('modCategoryClosure'),
+            );
+        }
+
         $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/N)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['template_variables'] = array(

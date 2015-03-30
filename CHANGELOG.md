@@ -3,6 +3,10 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+
+## 0.6.0 - 2015-03-30
+- Fix silly `<note>` in output from install:modx
+- Add new `truncate_on_force` option that accepts an array of class names that need to be truncated before building (#73)
 - Show a helpful warning if the user forgot to run composer install (#67)
 - With install:package, prefer exact matches over provider order to ensure the right packages are installed (#58)
 
