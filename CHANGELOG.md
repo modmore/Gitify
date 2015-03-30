@@ -6,7 +6,7 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## 0.6.0 - 2015-03-30
 - Fix silly `<note>` in output from install:modx
-- Add new `truncate_on_force` option that accepts an array of class names that need to be truncated before building (#73)
+- Add new `truncate_on_force` option that accepts an array of class names that need to be truncated before building (#73) - [see the wiki](https://github.com/modmore/Gitify/wiki/3.-The-.gitify-File#dealing-with-closures)
 - Show a helpful warning if the user forgot to run composer install (#67)
 - With install:package, prefer exact matches over provider order to ensure the right packages are installed (#58)
 
