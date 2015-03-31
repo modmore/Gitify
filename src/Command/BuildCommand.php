@@ -3,6 +3,7 @@ namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -39,6 +40,13 @@ class BuildCommand extends BaseCommand
                 InputOption::VALUE_NONE,
                 'When specified, all existing content will be removed before rebuilding. Can be useful when having dealt with complex conflicts.'
             )
+
+            ->addOption(
+                'no-backup',
+                null,
+                InputOption::VALUE_NONE,
+                'When using the --force attribute, Gitify will automatically create a full database backup first. Specify --no-backup to skip creating the backup, at your own risk.'
+            )
         ;
     }
 
@@ -51,6 +59,18 @@ class BuildCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
+        if ($input->getOption('force') && !$input->getOption('no-backup')) {
+            $backup = $this->getApplication()->find('backup');
+            $arguments = array(
+                'command' => 'backup'
+            );
+            $backupInput = new ArrayInput($arguments);
+            if ($backup->run($backupInput, $output) !== 0) {
+                $output->writeln('<error>Could not write backup. Try building without --force, or specify the --no-backup flag to force build without writing a backup.');
+                return 1;
+            }
+        }
         foreach ($this->config['data'] as $folder => $type) {
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
@@ -89,9 +109,6 @@ class BuildCommand extends BaseCommand
      */
     public function buildContent($folder, $options)
     {
-        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
-        $directory = new \DirectoryIterator($folder);
-
         if ($this->input->getOption('force')) {
             $this->output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
@@ -104,6 +121,8 @@ class BuildCommand extends BaseCommand
             }
         }
 
+        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
+        $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
             /** @var \SplFileInfo $info */
             $name = $info->getBasename();

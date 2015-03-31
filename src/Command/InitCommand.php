@@ -75,6 +75,17 @@ class InitCommand extends BaseCommand
         if (empty($directory)) $directory = '_data/';
         $directory = trim($directory, '/') . '/';
         $data['data_directory'] = $directory;
+        mkdir($directory);
+
+        /**
+         * Ask the user for a backup directory to store database backups in
+         */
+        $question = new Question('Please enter the name of the backup directory (defaults to _db/): ', '_db');
+        $directory = $helper->ask($input, $output, $question);
+        if (empty($directory)) $directory = '_db/';
+        $directory = trim($directory, '/') . '/';
+        $data['backup_directory'] = $directory;
+        mkdir($directory);
 
         /**
          * Ask if we want to include some default data types
