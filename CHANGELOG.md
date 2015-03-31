@@ -3,6 +3,8 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+
+## 0.7.0 - 2015-03-31
 - Add new `Gitify backup` and `Gitify restore` commands (#39)
 - Fix issue with installing packages where it proceeds to install FormIt2db if FormIt is already installed (same with MIGX)
 - Make sure installing packages works properly when the package name isn't the same as the signature (#74)
