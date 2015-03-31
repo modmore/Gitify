@@ -109,9 +109,6 @@ class BuildCommand extends BaseCommand
      */
     public function buildContent($folder, $options)
     {
-        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
-        $directory = new \DirectoryIterator($folder);
-
         if ($this->input->getOption('force')) {
             $this->output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
@@ -124,6 +121,8 @@ class BuildCommand extends BaseCommand
             }
         }
 
+        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
+        $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
             /** @var \SplFileInfo $info */
             $name = $info->getBasename();

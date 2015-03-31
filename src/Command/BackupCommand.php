@@ -4,6 +4,7 @@ namespace modmore\Gitify\Command;
 use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,13 +27,12 @@ class BackupCommand extends BaseCommand
     {
         $this
             ->setName('backup')
-            ->setDescription('Generates the .gitify file to set up a new Gitify project. Optionally installs MODX as well.')
+            ->setDescription('Creates a quick backup of the entire MODX database. Runs automatically when using `Gitify build --force`, but can also be used manually.')
 
-            ->addOption(
+            ->addArgument(
                 'name',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Optionally the name of the backup file, useful for milestone backups.'
+                InputArgument::OPTIONAL,
+                'Optionally the name of the backup file, useful for milestone backups. If not specified the file name will be a full timestamp.'
             )
         ;
     }
@@ -75,7 +75,7 @@ class BackupCommand extends BaseCommand
         }
 
         // Compute the name
-        $file = $input->getOption('name');
+        $file = $input->getArgument('name');
         if (!empty($file)) {
             $file = $this->modx->filterPathSegment($file);
         }
