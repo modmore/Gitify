@@ -80,9 +80,9 @@ class InitCommand extends BaseCommand
         /**
          * Ask the user for a backup directory to store database backups in
          */
-        $question = new Question('Please enter the name of the backup directory (defaults to _db/): ', '_db');
+        $question = new Question('Please enter the name of the backup directory (defaults to _backup/): ', '_backup');
         $directory = $helper->ask($input, $output, $question);
-        if (empty($directory)) $directory = '_db/';
+        if (empty($directory)) $directory = '_backup/';
         $directory = trim($directory, '/') . '/';
         $data['backup_directory'] = $directory;
         mkdir($directory);

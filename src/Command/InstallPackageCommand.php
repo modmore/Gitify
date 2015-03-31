@@ -94,6 +94,7 @@ class InstallPackageCommand extends BaseCommand
                 }
             }
 
+            $this->output->writeln("<info>Done!</info>");
             return 0;
         }
 
@@ -137,8 +138,6 @@ class InstallPackageCommand extends BaseCommand
             return false;
         }
 
-        $this->output->writeln("<info>Done!</info>");
-
         return true;
     }
 
@@ -167,7 +166,7 @@ class InstallPackageCommand extends BaseCommand
         }
 
         $provider->getClient();
-        $this->output->writeln("<comment>Searching Provider for $packageName...</comment>");
+        $this->output->writeln("Searching <comment>{$provider->get('name')}</comment> for <comment>$packageName</comment>...");
 
         // Request package information from the chosen provider
         $response = $provider->request('package', 'GET', array(
@@ -199,7 +198,13 @@ class InstallPackageCommand extends BaseCommand
             foreach ($packages as $package) {
                 if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $package['signature']))) {
                     $this->output->writeln("<info>Package {$package['name']} {$package['version']} is already installed.</info>");
-                    continue;
+
+                    if ($this->interactive) {
+                        continue;
+                    }
+                    else {
+                        return true;
+                    }
                 }
 
                 if ($this->interactive) {
@@ -240,7 +245,7 @@ class InstallPackageCommand extends BaseCommand
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
