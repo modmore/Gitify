@@ -3,6 +3,7 @@ namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -26,12 +27,11 @@ class ExtractCommand extends BaseCommand
             ->setName('extract')
             ->setDescription('Extracts data from the MODX site, and stores it in human readable files for editing and committing to a VCS.')
 
-            /*->addOption(
-                'skip-clear-cache',
-                null,
-                InputOption::VALUE_NONE,
-                'When specified, it will skip clearing the cache after building.'
-            )*/
+            ->addArgument(
+                'partitions',
+                InputArgument::IS_ARRAY | InputArgument::OPTIONAL,
+                'Specify the data partition key (folder name), or keys separated by a space, that you want to extract. '
+            )
         ;
     }
 
@@ -46,8 +46,20 @@ class ExtractCommand extends BaseCommand
     {
         // load modResource dependency
         $this->modx->loadClass('modResource');
+
+        $partitions = $input->getArgument('partitions');
+        if (!$partitions || empty($partitions)) {
+            $partitions = array_keys($this->config['data']);
+        }
         foreach ($this->config['data'] as $folder => $options) {
+            if (!in_array($folder, $partitions, true)) {
+                if ($output->isVerbose()) {
+                    $output->writeln('Skipping ' . $folder);
+                }
+                continue;
+            }
             $options['folder'] = $folder;
+
             switch (true) {
                 case (!empty($options['type']) && $options['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
