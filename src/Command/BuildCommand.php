@@ -20,6 +20,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class BuildCommand extends BaseCommand
 {
     public $categories = array();
+    public $isForce = false;
     protected $_metaCache = array();
 
     protected function configure()
@@ -66,8 +67,8 @@ class BuildCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
-        if ($input->getOption('force') && !$input->getOption('no-backup')) {
+        $this->isForce = $input->getOption('force');
+        if ($this->isForce && !$input->getOption('no-backup')) {
             $backup = $this->getApplication()->find('backup');
             $arguments = array(
                 'command' => 'backup'
@@ -100,7 +101,7 @@ class BuildCommand extends BaseCommand
                     break;
 
                 case (!empty($type['class'])):
-                    $doing = $this->input->getOption('force') ? 'Force building' : 'Building';
+                    $doing = $this->isForce ? 'Force building' : 'Building';
                     $output->writeln("{$doing} {$type['class']} from {$folder}/...");
                     if (isset($type['package'])) {
                         $this->getPackage($type['package'], $type);
@@ -128,7 +129,7 @@ class BuildCommand extends BaseCommand
      */
     public function buildContent($folder, $options)
     {
-        if ($this->input->getOption('force')) {
+        if ($this->isForce) {
             $this->output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
 
@@ -252,7 +253,7 @@ class BuildCommand extends BaseCommand
 
         // Grab the resource, or create a new one.
         $new = false;
-        $object = $this->modx->getObject('modResource', $primary);
+        $object = ($this->isForce) ? false : $this->modx->getObject('modResource', $primary);
         if (!($object instanceof \modResource)) {
             $object = $this->modx->newObject('modResource');
             $new = true;
@@ -300,7 +301,7 @@ class BuildCommand extends BaseCommand
             return;
         }
 
-        if ($this->input->getOption('force')) {
+        if ($this->isForce) {
             $this->modx->removeCollection($type['class'], array());
 
             if (isset($type['truncate_on_force'])) {
@@ -381,8 +382,8 @@ class BuildCommand extends BaseCommand
         }
 
         $new = false;
-        /** @var \xPDOObject $object */
-        $object = $this->modx->getObject($class, $primary);
+        /** @var \xPDOObject|bool $object */
+        $object = ($this->isForce) ? false : $this->modx->getObject($class, $primary);
         if (!($object instanceof \xPDOObject)) {
             $object = $this->modx->newObject($class);
             $new = true;
