@@ -131,7 +131,8 @@ class RestoreCommand extends BaseCommand
 
         $output->writeln('Restoring from backup <info>' . $file . '</info>...');
 
-        exec("mysql -u {$database_user} -p{$database_password} {$dbase} < {$targetDirectory}{$file}");
+        $database_password = str_replace("'", '\'', $database_password);
+        exec("mysql -u {$database_user} -p'{$database_password}' {$dbase} < {$targetDirectory}{$file}");
         return 0;
     }
 }

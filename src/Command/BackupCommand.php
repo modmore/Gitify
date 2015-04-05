@@ -95,7 +95,8 @@ class BackupCommand extends BaseCommand
         }
 
         $output->writeln('Writing database backup to <info>' . $file . '</info>...');
-        exec("mysqldump -u {$database_user} -p{$database_password} {$dbase} > {$targetFile} ");
+        $database_password = str_replace("'", '\'', $database_password);
+        exec("mysqldump -u {$database_user} -p'{$database_password}' {$dbase} > {$targetFile} ");
         return 0;
     }
 }
