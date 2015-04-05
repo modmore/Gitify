@@ -4,6 +4,7 @@ namespace modmore\Gitify\Command;
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -47,6 +48,12 @@ class BuildCommand extends BaseCommand
                 InputOption::VALUE_NONE,
                 'When using the --force attribute, Gitify will automatically create a full database backup first. Specify --no-backup to skip creating the backup, at your own risk.'
             )
+
+            ->addArgument(
+                'partitions',
+                InputArgument::IS_ARRAY | InputArgument::OPTIONAL,
+                'Specify the data partition key (folder name), or keys separated by a space, that you want to build. '
+            )
         ;
     }
 
@@ -71,7 +78,19 @@ class BuildCommand extends BaseCommand
                 return 1;
             }
         }
+
+        $partitions = $input->getArgument('partitions');
+        if (!$partitions || empty($partitions)) {
+            $partitions = array_keys($this->config['data']);
+        }
         foreach ($this->config['data'] as $folder => $type) {
+            if (!in_array($folder, $partitions, true)) {
+                if ($output->isVerbose()) {
+                    $output->writeln('Skipping ' . $folder);
+                }
+                continue;
+            }
+
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources

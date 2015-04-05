@@ -3,7 +3,8 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
-- Escape password in backup/restore commands so they work with special characters
+- Passing arguments to `Gitify build` now restricts building to those specific data partition/folder
+- Escape password in backup/restore commands so they work with special characters in the password
 
 ## 0.7.0 - 2015-03-31
 - Add new `Gitify backup` and `Gitify restore` commands (#39)
