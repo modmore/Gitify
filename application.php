@@ -37,7 +37,7 @@ use modmore\Gitify\Command\InstallModxCommand;
 use modmore\Gitify\Command\InstallPackageCommand;
 use modmore\Gitify\Command\RestoreCommand;
 
-$application = new Gitify('Gitify', '0.7.0');
+$application = new Gitify('Gitify', '0.8.0');
 $application->add(new InitCommand);
 $application->add(new BuildCommand);
 $application->add(new ExtractCommand);
