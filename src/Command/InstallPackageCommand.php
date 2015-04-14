@@ -24,8 +24,9 @@ class InstallPackageCommand extends BaseCommand
     protected function configure()
     {
         $this
-            ->setName('install:package')
-            ->setDescription('Downloads and installs MODX packages.')
+            ->setName('package:install')
+            ->setAliases(array('install:package'))
+            ->setDescription('Downloads and installs MODX packages. [Note: <info>install:package</info> will be removed in 1.0, use <info>package:install</info> instead]')
             ->addArgument(
                 'package_name',
                 InputArgument::OPTIONAL,
@@ -43,7 +44,6 @@ class InstallPackageCommand extends BaseCommand
                 InputOption::VALUE_NONE,
                 'When --all and --interactive are specified, all packages defined in the .gitify config will be installed interactively.'
             );
-        // TODO: add option `--update` for update installed packages, by default skip installed
     }
 
     /**

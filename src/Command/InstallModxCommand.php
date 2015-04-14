@@ -23,8 +23,9 @@ class InstallModxCommand extends BaseCommand
     protected function configure()
     {
         $this
-            ->setName('install:modx')
-            ->setDescription('Downloads, configures and installs a fresh MODX installation.')
+            ->setName('modx:install')
+            ->setAliases(array('install:modx'))
+            ->setDescription('Downloads, configures and installs a fresh MODX installation. [Note: <info>install:modx</info> will be removed in 1.0, use <info>modx:install</info> instead]')
 
             ->addArgument(
                 'modx_version',

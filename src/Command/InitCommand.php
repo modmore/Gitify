@@ -178,9 +178,9 @@ class InitCommand extends BaseCommand
             $question = new ConfirmationQuestion('No MODX installation found in the current directory. Would you like to install the latest stable version? <comment>(Y/N)</comment> ', false);
             if ($helper->ask($input, $output, $question)) {
 
-                $command = $this->getApplication()->find('install-modx');
+                $command = $this->getApplication()->find('modx:install');
                 $arguments = array(
-                    'command' => 'install:modx'
+                    'command' => 'modx:install'
                 );
                 $input = new ArrayInput($arguments);
                 return $command->run($input, $output);

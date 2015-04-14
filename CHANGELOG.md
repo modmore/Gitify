@@ -3,6 +3,10 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Nothing yet!
+
+## 0.8.0 - 2015-04-14
+- [BC] Rename `Gitify install:package` to `Gitify package:install`, and `Gitify install:modx` to `Gitify modx:install`. Aliases are in place so they will continue to work for now, but those will be removed in v1. 
 - Extract instantiation logic out of Gitify file into application.php for easier integration with non-CLI PHP.
 - Small speed optimization (~ 10%) to `Gitify build --force` (#78)
 - Passing arguments to `Gitify build` and  `Gitify extract` now restricts building/extracting to those specific data partitions/folders (#51, #26)
