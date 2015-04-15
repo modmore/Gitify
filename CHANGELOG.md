@@ -3,7 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
-- Nothing yet!
+- Extend `Gitify init` with more recommended options to include in the data, and automatically listing installed packages (#41)
 
 ## 0.8.0 - 2015-04-14
 - [BC] Rename `Gitify install:package` to `Gitify package:install`, and `Gitify install:modx` to `Gitify modx:install`. Aliases are in place so they will continue to work for now, but those will be removed in v1. 
