@@ -13,6 +13,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Gitify extends Application
 {
+    protected $envopts = array();
     /**
      * Used to separate between meta data and content in object files.
      *
@@ -106,5 +107,66 @@ class Gitify extends Application
             new InputOption('--verbose',        '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.'),
             new InputOption('--version',        '-V', InputOption::VALUE_NONE, 'Display the Gitify version.'),
         ));
+    }
+
+
+    /**
+     * Run a shell command using proc_open to get around limitations with exec()
+     *
+     * "Inspired" by https://github.com/kbjr/Git.php/blob/master/Git.php#L283
+     *
+     * @param string $command The command to execute
+     * @return string
+     * @throws \Exception
+     */
+    public function exec($command) {
+        $descriptorspec = array(
+            1 => array('pipe', 'w'),
+            2 => array('pipe', 'w'),
+        );
+        $pipes = array();
+        /* Depending on the value of variables_order, $_ENV may be empty.
+         * In that case, we have to explicitly set the new variables with
+         * putenv, and call proc_open with env=null to inherit the reset
+         * of the system.
+         *
+         * This is kind of crappy because we cannot easily restore just those
+         * variables afterwards.
+         *
+         * If $_ENV is not empty, then we can just copy it and be done with it.
+         */
+        if(count($_ENV) === 0) {
+            $env = NULL;
+            foreach($this->envopts as $k => $v) {
+                putenv(sprintf("%s=%s",$k,$v));
+            }
+        } else {
+            $env = array_merge($_ENV, $this->envopts);
+        }
+        $cwd = GITIFY_WORKING_DIR;
+        $resource = proc_open($command, $descriptorspec, $pipes, $cwd, $env);
+
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        foreach ($pipes as $pipe) {
+            fclose($pipe);
+        }
+
+        $status = trim(proc_close($resource));
+        if ($status) {
+            throw new \Exception($stderr);
+        }
+
+        return $stdout;
+    }
+
+    /**
+     * Sets custom environment options
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function setEnvOpt($key, $value) {
+        $this->envopts[$key] = $value;
     }
 }

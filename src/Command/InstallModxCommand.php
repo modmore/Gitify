@@ -59,7 +59,7 @@ class InstallModxCommand extends BaseCommand
         $output->writeln("Running MODX Setup...");
 
         // Actually run the CLI setup
-        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}");
+        $this->getApplication()->exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}");
 
         // Try to clean up the config file
         if (!unlink($config))
@@ -88,7 +88,7 @@ class InstallModxCommand extends BaseCommand
         }
 
         $this->output->writeln("Downloading MODX from {$url}...");
-        exec('curl -Lo modx.zip ' . $url . ' -#');
+        $this->getApplication()->exec('wget --output-document=modx.zip ' . $url);
 
         if (!file_exists('modx.zip')) {
             $this->output->writeln('<error>Error: Could not download the MODX zip</error>');
@@ -96,9 +96,9 @@ class InstallModxCommand extends BaseCommand
         }
 
         $this->output->writeln("Extracting zip...");
-        exec('unzip modx.zip');
+        $this->getApplication()->exec('unzip modx.zip');
 
-        $insideFolder = exec('ls -F | grep "modx-" | head -1');
+        $insideFolder = $this->getApplication()->exec('ls -F | grep "modx-" | head -1');
         if(empty($insideFolder) || $insideFolder == '/') {
             $this->output->writeln("<error>Error: Could not locate unzipped MODX folder; perhaps the download failed or unzip is not available on your system.</error>");
             return false;
@@ -106,8 +106,8 @@ class InstallModxCommand extends BaseCommand
 
         $this->output->writeln("Moving unzipped files out of temporary directory...");
 
-        exec("mv ./{$insideFolder}* .;");
-        exec("rm -r ./{$insideFolder}");
+        $this->getApplication()->exec("mv {$insideFolder}/* .;");
+        $this->getApplication()->exec("rm -r ./{$insideFolder}");
 
         if (!unlink('modx.zip')) {
             $this->output->writeln("<info>Note: unable to clean up modx.zip file.</info>");
