@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- `Gitify backup` and `Gitify restore` now also pass the host to the command, so should now work with non-localhost databases (#80, #82)
 - Extend `Gitify init` with more recommended options to include in the data, and automatically listing installed packages (#41)
 
 ## 0.8.0 - 2015-04-14
