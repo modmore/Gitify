@@ -370,6 +370,7 @@ class ExtractCommand extends BaseCommand
                 $templateVars = $object->getTemplateVars();
                 foreach ($templateVars as $tv) {
                     /** @var \modTemplateVar $tv */
+                    if (empty($tv->get('value'))) continue;
                     $tvs[$tv->get('name')] = $tv->get('value');
                 }
                 ksort($tvs);
