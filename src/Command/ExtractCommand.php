@@ -20,6 +20,7 @@ class ExtractCommand extends BaseCommand
 
     protected $_useResource = null;
     protected $_resource = false;
+    protected $_defaultTVValues = array();
 
     protected function configure()
     {
@@ -370,11 +371,16 @@ class ExtractCommand extends BaseCommand
                 $templateVars = $object->getTemplateVars();
                 foreach ($templateVars as $tv) {
                     /** @var \modTemplateVar $tv */
-                    if (empty($tv->get('value'))) continue;
+                    if(!isset($this->_defaultTVValues[$tv->get('id')])) {
+                        // get default TV value
+                        $tvObject = $this->modx->getObject('modTemplateVar', $tv->get('id'));
+                        $this->_defaultTVValues[$tv->get('id')] = $tvObject->get('default_text');
+                    }
+                    if ($tv->get('value') === $this->_defaultTVValues[$tv->get('id')]) continue;
                     $tvs[$tv->get('name')] = $tv->get('value');
                 }
                 ksort($tvs);
-                $data['tvs'] = $tvs;
+                if(!empty($tvs)) $data['tvs'] = $tvs;;
                 break;
 
             // Handle string-based categories automagically on elements
