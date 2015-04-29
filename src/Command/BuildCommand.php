@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -21,6 +22,9 @@ class BuildCommand extends BaseCommand
 {
     public $categories = array();
     public $isForce = false;
+    public $existingObjects = array();
+    public $conflictingObjects = array();
+    public $updatedObjects;
     protected $_metaCache = array();
 
     protected function configure()
@@ -331,6 +335,10 @@ class BuildCommand extends BaseCommand
 
         $directory = new \DirectoryIterator(GITIFY_WORKING_DIR . $folder);
 
+        $this->existingObjects = ($this->isForce) ? array() : $this->getExistingObjects($type['class']);
+        $this->updatedObjects = array();
+        $this->conflictingObjects = array();
+
         foreach ($directory as $file) {
             /** @var \SplFileInfo $file */
             $name = $file->getBasename();
@@ -357,6 +365,79 @@ class BuildCommand extends BaseCommand
 
             $this->buildSingleObject($data, $type);
         }
+
+        if (!empty($this->conflictingObjects)) {
+            $runExtract = false;
+            foreach ($this->conflictingObjects as $conflict) {
+                $this->output->writeln('- Resolving ID Conflict for <comment>' . $this->modx->toJSON($conflict['existing_object']) . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
+
+                $original = $this->modx->getObject($type['class'], $conflict['existing_object']);
+                if ($original instanceof \xPDOObject) {
+                    $primary = $type['primary'];
+                    $actualPrimary = $original->getPK();
+
+                    // First resolution attempt
+                    // If the primary in the gitify file isn't the same as the actual primary key(s),
+                    // we can resolve the conflict by unsetting the actual primary key
+                    if ($primary !== $actualPrimary) {
+                        $originalActualPrimary = $original->get($actualPrimary);
+
+                        foreach ($conflict['conflicts'] as $dupe) {
+                            $resolved = false;
+                            $dupeData = $dupe['data'];
+                            if (is_array($actualPrimary)) {
+                                $dupePrimary = array();
+                                $fieldMeta = $this->modx->getFieldMeta($type['class']);
+                                foreach ($actualPrimary as $key) {
+                                    $default = isset($fieldMeta[$key]['default']) ? $fieldMeta[$key]['default'] : null;
+                                    $dupePrimary[$key] = (isset($dupeData[$key])) ? $dupeData[$key] : $default;
+                                }
+                            }
+                            else {
+                                $dupePrimary = $dupeData[$actualPrimary];
+                            }
+                            if (!empty($dupePrimary) && $dupePrimary == $originalActualPrimary) {
+                                if (is_array($actualPrimary)) {
+                                    foreach ($actualPrimary as $key) {
+                                        unset($dupeData[$key]);
+                                    }
+                                }
+                                else {
+                                    unset($dupeData[$actualPrimary]);
+                                }
+
+                                $this->output->writeln("  \ - <comment>Duplicate #{$dupe['idx']}</comment>: resolving <comment>primary key conflict</comment> by building object with new auto incremented primary key ");
+                                $this->buildSingleObject($dupeData, $type, false);
+                                $resolved = $runExtract = true;
+                            }
+
+                            if (!$resolved) {
+                                $this->output->writeln("  \ - <error>Unable to resolve ID conflict; situation does not match any expected conflict scenario.</error> The ID conflict will need to be solved manually. ");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($runExtract) {
+                $this->output->writeln('- Running extract for ' . basename($folder) . '; you will need to commit the changes manually.');
+                $command = $this->getApplication()->find('extract');
+                $inputArray = array(
+                    'command' => 'extract',
+                    'partitions' => array(basename($folder)),
+                );
+                $input = new ArrayInput($inputArray);
+                $output = new BufferedOutput();
+                $command->run($input, $output);
+
+                $cmdOutput = $output->fetch();
+                $cmdOutput = explode("\n", $cmdOutput);
+                $cmdOutput = array_map(function($n) { return '  \ ' . $n; }, $cmdOutput);
+                $cmdOutput = implode("\n", $cmdOutput);
+
+                $this->output->write($cmdOutput);
+            }
+        }
     }
 
     /**
@@ -364,8 +445,9 @@ class BuildCommand extends BaseCommand
      *
      * @param $data
      * @param $type
+     * @param bool $checkDuplicates
      */
-    public function buildSingleObject($data, $type) {
+    public function buildSingleObject($data, $type, $checkDuplicates = true) {
         $primaryKey = !empty($type['primary']) ? $type['primary'] : 'id';
         $class = $type['class'];
 
@@ -379,6 +461,40 @@ class BuildCommand extends BaseCommand
         else {
             $primary = array($primaryKey => $data[$primaryKey]);
             $showPrimary = $data[$primaryKey];
+        }
+
+        if ($checkDuplicates) {
+            // Get the primary to match for ID conflict resolution
+            $classPrimary = $this->modx->getPK($class);
+            if (is_array($classPrimary)) {
+                $internalPrimary = array();
+                foreach ($classPrimary as $classPrimaryField) {
+                    $fieldMeta = $this->modx->getFieldMeta($class);
+                    $default = isset($fieldMeta[$classPrimaryField]['default']) ? $fieldMeta[$classPrimaryField]['default'] : null;
+                    $internalPrimary[$classPrimaryField] = (isset($data[$classPrimaryField])) ? $data[$classPrimaryField] : $default;
+                }
+                $internalPrimary = implode('--', $internalPrimary);
+            } else {
+                $internalPrimary = $data[$classPrimary];
+            }
+
+            if (isset($this->updatedObjects[$internalPrimary])) {
+                if (!isset($this->conflictingObjects[$internalPrimary])) {
+                    $this->conflictingObjects[$internalPrimary] = array(
+                        'existing_object' => $this->updatedObjects[$internalPrimary],
+                        'conflicts' => array(),
+                    );
+                }
+                $this->conflictingObjects[$internalPrimary]['conflicts'][] = array(
+                    'idx' => count($this->conflictingObjects[$internalPrimary]['conflicts']) + 1,
+                    'data' => $data,
+                );
+
+                $this->output->writeln("<comment>- Potential ID Conflict found affecting {$class} {$showPrimary}</comment>; will attempt to resolve after completing build process.");
+
+                return;
+            }
+            $this->updatedObjects[$internalPrimary] = $primary;
         }
 
         $new = false;
@@ -457,5 +573,29 @@ class BuildCommand extends BaseCommand
             return $this->_metaCache[$class][$field]['default'];
         }
         return null;
+    }
+
+    /**
+     * Returns an array of all current objects in the database, per key => array
+     *
+     * @param $class
+     * @return array
+     */
+    public function getExistingObjects($class)
+    {
+        $objects = array();
+
+        $iterator = $this->modx->getIterator($class);
+        foreach ($iterator as $object) {
+            /** @var \xPDOObject $object */
+            $key = $object->getPrimaryKey();
+            if (is_array($key)) {
+                $key = implode('--', $key);
+            }
+
+            $objects[$key] = $object->toArray();
+        }
+
+        return $objects;
     }
 }
