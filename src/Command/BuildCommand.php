@@ -213,14 +213,12 @@ class BuildCommand extends BaseCommand
         foreach ($resources as $resource) {
             $file = file_get_contents($resource->getRealPath());
 
-			$file = preg_replace('~\R~u', "\n",  $file);
+            $file = preg_replace('~\R~u', "\n",  $file);
             list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
-
 			
             try {
                 $data = Gitify::fromYAML($rawData);
             } catch (ParseException $Exception) {
-				var_dump ($rawData);
                 $this->output->writeln('<error>Could not parse ' . $resource->getBasename() . ': ' . $Exception->getMessage() .'</error>');
                 continue;
             }
@@ -348,7 +346,7 @@ class BuildCommand extends BaseCommand
 
             // Load the file contents
             $fileContents = file_get_contents($file->getRealPath());
-			$fileContents = preg_replace('~\R~u', "\n",  $fileContents);
+            $fileContents = preg_replace('~\R~u', "\n",  $fileContents);
 
             // Get the raw data, and the content
             list($rawData, $content) = explode(Gitify::$contentSeparator, $fileContents);
