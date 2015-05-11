@@ -155,7 +155,7 @@ class ExtractCommand extends BaseCommand
 
                 // If we're in verbose mode (-v/--verbose), output a message with what we did
                 if ($this->output->isVerbose()) {
-                    $this->output->writeln($written ? "- Generated {$uri}{$extension}" : "- Skipped {$uri}{$extension}, no change");
+                    $this->output->writeln('  \ ' . ($written ? "Generated {$uri}{$extension}" : "Skipped {$uri}{$extension}, no change"));
                 }
             }
         }
@@ -168,7 +168,7 @@ class ExtractCommand extends BaseCommand
             // If in verbose mode, let it be known to the world
             if ($this->output->isVerbose()) {
                 $oldFileName = substr($oldFile, strlen($folder));
-                $this->output->writeln("- Removed {$oldFileName}, no longer exists");
+                $this->output->writeln("  \\ Removed {$oldFileName}, no longer exists");
             }
         }
     }
