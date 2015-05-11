@@ -4,8 +4,8 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 
 ## Current development (master)
 - Fix several issues using Gitify on Windows:
- \ - Due to inconsistent directory separators, certain files would be removed on extract.
- \ - Ensure line endings are normalized (LF \n) to prevent issues reading files/parsing yaml
+  \ - Due to inconsistent directory separators, certain files would be removed on extract.
+  \ - Ensure line endings are normalized (LF \n) to prevent issues reading files/parsing yaml
 - `Gitify backup` and `Gitify restore` now also pass the host to the command, so should now work with non-localhost databases (#80, #82)
 - Extend `Gitify init` with more recommended options to include in the data, and automatically listing installed packages (#41)
 
