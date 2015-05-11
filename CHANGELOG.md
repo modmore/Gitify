@@ -3,6 +3,8 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Fix several issues using Gitify on Windows:
+ \ - Due to inconsistent directory separators, certain files would be removed on extract.
 - `Gitify backup` and `Gitify restore` now also pass the host to the command, so should now work with non-localhost databases (#80, #82)
 - Extend `Gitify init` with more recommended options to include in the data, and automatically listing installed packages (#41)
 
