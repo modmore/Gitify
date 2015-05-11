@@ -373,78 +373,7 @@ class BuildCommand extends BaseCommand
             $this->buildSingleObject($data, $type);
         }
 
-        if (!empty($this->conflictingObjects)) {
-            $runExtract = false;
-            foreach ($this->conflictingObjects as $conflict) {
-                $this->output->writeln('- Resolving ID Conflict for <comment>' . $this->modx->toJSON($conflict['existing_object']) . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
-
-                $original = $this->modx->getObject($type['class'], $conflict['existing_object']);
-                if ($original instanceof \xPDOObject) {
-                    $primary = $type['primary'];
-                    $actualPrimary = $original->getPK();
-
-                    // First resolution attempt
-                    // If the primary in the gitify file isn't the same as the actual primary key(s),
-                    // we can resolve the conflict by unsetting the actual primary key
-                    if ($primary !== $actualPrimary) {
-                        $originalActualPrimary = $original->get($actualPrimary);
-
-                        foreach ($conflict['conflicts'] as $dupe) {
-                            $resolved = false;
-                            $dupeData = $dupe['data'];
-                            if (is_array($actualPrimary)) {
-                                $dupePrimary = array();
-                                $fieldMeta = $this->modx->getFieldMeta($type['class']);
-                                foreach ($actualPrimary as $key) {
-                                    $default = isset($fieldMeta[$key]['default']) ? $fieldMeta[$key]['default'] : null;
-                                    $dupePrimary[$key] = (isset($dupeData[$key])) ? $dupeData[$key] : $default;
-                                }
-                            }
-                            else {
-                                $dupePrimary = $dupeData[$actualPrimary];
-                            }
-                            if (!empty($dupePrimary) && $dupePrimary == $originalActualPrimary) {
-                                if (is_array($actualPrimary)) {
-                                    foreach ($actualPrimary as $key) {
-                                        unset($dupeData[$key]);
-                                    }
-                                }
-                                else {
-                                    unset($dupeData[$actualPrimary]);
-                                }
-
-                                $this->output->writeln("  \ - <comment>Duplicate #{$dupe['idx']}</comment>: resolving <comment>primary key conflict</comment> by building object with new auto incremented primary key ");
-                                $this->buildSingleObject($dupeData, $type, false);
-                                $resolved = $runExtract = true;
-                            }
-
-                            if (!$resolved) {
-                                $this->output->writeln("  \ - <error>Unable to resolve ID conflict; situation does not match any expected conflict scenario.</error> The ID conflict will need to be solved manually. ");
-                            }
-                        }
-                    }
-                }
-            }
-
-            if ($runExtract) {
-                $this->output->writeln('- Running extract for ' . basename($folder) . '; you will need to commit the changes manually.');
-                $command = $this->getApplication()->find('extract');
-                $inputArray = array(
-                    'command' => 'extract',
-                    'partitions' => array(basename($folder)),
-                );
-                $input = new ArrayInput($inputArray);
-                $output = new BufferedOutput();
-                $command->run($input, $output);
-
-                $cmdOutput = $output->fetch();
-                $cmdOutput = explode("\n", $cmdOutput);
-                $cmdOutput = array_map(function($n) { return '  \ ' . $n; }, $cmdOutput);
-                $cmdOutput = implode("\n", $cmdOutput);
-
-                $this->output->write($cmdOutput);
-            }
-        }
+        $this->resolveConflicts($folder, $type);
     }
 
     /**
@@ -604,5 +533,87 @@ class BuildCommand extends BaseCommand
         }
 
         return $objects;
+    }
+
+
+    /**
+     * @param $folder
+     * @param $type
+     * @throws \Exception
+     */
+    public function resolveConflicts($folder, $type)
+    {
+        if (!empty($this->conflictingObjects)) {
+            $runExtract = false;
+            foreach ($this->conflictingObjects as $conflict) {
+                $this->output->writeln('- Resolving ID Conflict for <comment>' . $this->modx->toJSON($conflict['existing_object']) . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
+
+                $original = $this->modx->getObject($type['class'], $conflict['existing_object']);
+                if ($original instanceof \xPDOObject) {
+                    $primary = $type['primary'];
+                    $actualPrimary = $original->getPK();
+
+                    // First resolution attempt
+                    // If the primary in the gitify file isn't the same as the actual primary key(s),
+                    // we can resolve the conflict by unsetting the actual primary key
+                    if ($primary !== $actualPrimary) {
+                        $originalActualPrimary = $original->get($actualPrimary);
+
+                        foreach ($conflict['conflicts'] as $dupe) {
+                            $resolved = false;
+                            $dupeData = $dupe['data'];
+                            if (is_array($actualPrimary)) {
+                                $dupePrimary = array();
+                                $fieldMeta = $this->modx->getFieldMeta($type['class']);
+                                foreach ($actualPrimary as $key) {
+                                    $default = isset($fieldMeta[$key]['default']) ? $fieldMeta[$key]['default'] : null;
+                                    $dupePrimary[$key] = (isset($dupeData[$key])) ? $dupeData[$key] : $default;
+                                }
+                            } else {
+                                $dupePrimary = $dupeData[$actualPrimary];
+                            }
+                            if (!empty($dupePrimary) && $dupePrimary == $originalActualPrimary) {
+                                if (is_array($actualPrimary)) {
+                                    foreach ($actualPrimary as $key) {
+                                        unset($dupeData[$key]);
+                                    }
+                                } else {
+                                    unset($dupeData[$actualPrimary]);
+                                }
+
+                                $this->output->writeln("  \ - <comment>Duplicate #{$dupe['idx']}</comment>: resolving <comment>primary key conflict</comment> by building object with new auto incremented primary key ");
+                                $this->buildSingleObject($dupeData, $type, false);
+                                $resolved = $runExtract = true;
+                            }
+
+                            if (!$resolved) {
+                                $this->output->writeln("  \ - <error>Unable to resolve ID conflict; situation does not match any expected conflict scenario.</error> The ID conflict will need to be solved manually. ");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($runExtract) {
+                $this->output->writeln('- Running extract for ' . basename($folder) . '; you will need to commit the changes manually.');
+                $command = $this->getApplication()->find('extract');
+                $inputArray = array(
+                    'command' => 'extract',
+                    'partitions' => array(basename($folder)),
+                );
+                $input = new ArrayInput($inputArray);
+                $output = new BufferedOutput();
+                $command->run($input, $output);
+
+                $cmdOutput = $output->fetch();
+                $cmdOutput = explode("\n", $cmdOutput);
+                $cmdOutput = array_map(function ($n) {
+                    return '  \ ' . $n;
+                }, $cmdOutput);
+                $cmdOutput = implode("\n", $cmdOutput);
+
+                $this->output->write($cmdOutput);
+            }
+        }
     }
 }
