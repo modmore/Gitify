@@ -217,6 +217,9 @@ class BuildCommand extends BaseCommand
         foreach ($resources as $resource) {
             $file = file_get_contents($resource->getRealPath());
 
+            // Normalize line-endings to \n to ensure consistency
+            $file = str_replace("\r\n", "\n", $file);
+            $file = str_replace("\r", "\n", $file);
             list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
             try {
@@ -352,10 +355,14 @@ class BuildCommand extends BaseCommand
             }
 
             // Load the file contents
-            $fileContents = file_get_contents($file->getRealPath());
+            $file = file_get_contents($file->getRealPath());
+
+            // Normalize line-endings to \n to ensure consistency
+            $file = str_replace("\r\n", "\n", $file);
+            $file = str_replace("\r", "\n", $file);
 
             // Get the raw data, and the content
-            list($rawData, $content) = explode(Gitify::$contentSeparator, $fileContents);
+            list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
             // Turn the raw YAML data into an array
             $data = Gitify::fromYAML($rawData);

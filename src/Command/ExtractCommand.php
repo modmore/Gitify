@@ -137,7 +137,7 @@ class ExtractCommand extends BaseCommand
                     // The alias might contain slashes too, so cover that
                     $alias = explode('/', trim($resource->alias, '/'));
                     $uri[] = end($alias);
-                    $uri = implode('/', $uri);
+                    $uri = implode(DIRECTORY_SEPARATOR, $uri);
                 }
 
                 if (empty($uri)) $uri = $resource->id;
