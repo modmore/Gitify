@@ -55,6 +55,13 @@ class BuildCommand extends BaseCommand
                 'When using the --force attribute, Gitify will automatically create a full database backup first. Specify --no-backup to skip creating the backup, at your own risk.'
             )
 
+            ->addOption(
+                'no-cleanup',
+                null,
+                InputOption::VALUE_NONE,
+                'With --no-cleanup specified the built-in orphan handling is disabled for this build. The orphan handling removes objects that no longer exist in files from the database. '
+            )
+
             ->addArgument(
                 'partitions',
                 InputArgument::IS_ARRAY | InputArgument::OPTIONAL,
@@ -723,6 +730,14 @@ class BuildCommand extends BaseCommand
      */
     public function removeOrphans($type, $primary = false)
     {
+        if ($this->input->getOption('no-cleanup')) {
+            $orphans = count($this->orphanedObjects);
+            if ($orphans > 0) {
+                $this->output->writeln("- Found <comment>{$orphans} orphaned {$type['class']}</comment> object(s), but the <comment>--no-cleanup</comment> flag was specified.");
+            }
+            return;
+        }
+
         if (!$primary) {
             $primary = $type['primary'];
         }
