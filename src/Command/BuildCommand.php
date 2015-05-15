@@ -129,16 +129,16 @@ class BuildCommand extends BaseCommand
      * Loads the Content, handling uris for naming etc.
      *
      * @param $folder
-     * @param $options
+     * @param $type
      */
-    public function buildContent($folder, $options)
+    public function buildContent($folder, $type)
     {
         if ($this->isForce) {
             $this->output->writeln('Forcing build, removing prior Resources...');
             $this->modx->removeCollection('modResource', array());
 
-            if (isset($options['truncate_on_force'])) {
-                foreach ($options['truncate_on_force'] as $class) {
+            if (isset($type['truncate_on_force'])) {
+                foreach ($type['truncate_on_force'] as $class) {
                     $this->output->writeln('> Truncating ' . $class . ' before force building Resources...');
                     $this->modx->removeCollection($class, array());
                 }
@@ -146,6 +146,10 @@ class BuildCommand extends BaseCommand
         }
 
         $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
+        // Conflict handling
+        $this->resetConflicts();
+        $this->existingObjects = ($this->isForce) ? array() : $this->getExistingObjects('modResource');
+
         $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
             /** @var \SplFileInfo $info */
@@ -170,6 +174,9 @@ class BuildCommand extends BaseCommand
             $path = $info->getRealPath();
             $this->buildResources($name, new \RecursiveDirectoryIterator($path));
         }
+
+        $type['class'] = 'modResource';
+        $this->resolveConflicts($folder, $type, true);
     }
 
     /**
@@ -246,16 +253,23 @@ class BuildCommand extends BaseCommand
      * Creates or updates a single Resource
      *
      * @param $data
+     * @param bool $isConflictResolution
      */
-    public function buildSingleResource($data) {
+    public function buildSingleResource($data, $isConflictResolution = false) {
         // Figure out the primary key - it's either uri or id in the case of a resource.
         if (!empty($data['uri'])) {
             $primary = array('uri' => $data['uri'], 'context_key' => $data['context_key']);
+            $primaryKey = array('uri', 'context_key');
             $method = 'uri';
         }
         else {
             $primary = $data['id'];
+            $primaryKey = 'id';
             $method = 'id';
+        }
+
+        if (!$isConflictResolution && $this->hasConflict('modResource', $primaryKey, $primary, $data)) {
+            return;
         }
 
         // Grab the resource, or create a new one.
@@ -390,39 +404,8 @@ class BuildCommand extends BaseCommand
         $primary = $this->_getPrimaryKey($class, $primaryKey, $data);
         $showPrimary = (is_array($primary)) ? json_encode($primary) : $primary;
 
-        if (!$isConflictResolution) {
-            // Get the primary to match for ID conflict resolution
-            $classPrimary = $this->modx->getPK($class);
-            if (is_array($classPrimary)) {
-                $internalPrimary = array();
-                foreach ($classPrimary as $classPrimaryField) {
-                    $fieldMeta = $this->modx->getFieldMeta($class);
-                    $default = isset($fieldMeta[$classPrimaryField]['default']) ? $fieldMeta[$classPrimaryField]['default'] : null;
-                    $internalPrimary[$classPrimaryField] = (isset($data[$classPrimaryField])) ? $data[$classPrimaryField] : $default;
-                }
-                $internalPrimary = implode('--', $internalPrimary);
-            } else {
-                $internalPrimary = $data[$classPrimary];
-            }
-
-            // First check - have we came across an object with this primary key before?
-            if (isset($this->updatedObjects[$internalPrimary])) {
-                $this->registerConflict($data, $internalPrimary, $primary);
-                $this->output->writeln("<comment>- Primary Key Duplicate found: duplicate {$class} with primary {$showPrimary}</comment>; will attempt to resolve after completing build process.");
-
-                return;
-            }
-            // Second check - see if the object already exists in the database with a different real primary key
-            elseif (isset($this->existingObjects[$internalPrimary])) {
-                $existingObjPrimary = $this->_getPrimaryKey($class, $primaryKey, $this->existingObjects[$internalPrimary]);
-                if ($primary !== $existingObjPrimary) {
-                    $this->registerConflict($data, $internalPrimary, $primary);
-                    $showExistingObjPrimary = (is_array($existingObjPrimary)) ? json_encode($existingObjPrimary) : $existingObjPrimary;
-                    $this->output->writeln("<comment>- Primary Key Conflict found: {$class} {$showPrimary} has the same primary key as {$showExistingObjPrimary}</comment>; will attempt to resolve after completing build process.");
-                }
-            }
-
-            $this->updatedObjects[$internalPrimary] = $primary;
+        if (!$isConflictResolution && $this->hasConflict($class, $primaryKey, $primary, $data)) {
+            return;
         }
 
         $new = false;
@@ -540,17 +523,16 @@ class BuildCommand extends BaseCommand
     /**
      * @param $folder
      * @param $type
+     * @param bool $isResource
      * @throws \Exception
      */
-    public function resolveConflicts($folder, $type)
+    public function resolveConflicts($folder, $type, $isResource = false)
     {
         if (!empty($this->conflictingObjects)) {
             $runExtract = false;
             foreach ($this->conflictingObjects as $conflict) {
                 $showOriginalPrimary = is_array($conflict['existing_object_primary']) ? json_encode($conflict['existing_object_primary']) : $conflict['existing_object_primary'];
-                $this->output->writeln('- Resolving ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
-
-                // Get the original/master copy of this conflict
+                $this->output->writeln('- Resolving ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');// Get the original/master copy of this conflict
                 $original = $this->modx->getObject($type['class'], $conflict['existing_object_primary']);
                 if ($original instanceof \xPDOObject) {
                     // Get the primary key definition of the class
@@ -562,8 +544,14 @@ class BuildCommand extends BaseCommand
                         if (is_string($objectPrimaryKey) && $objectPrimaryKey === 'id') {
                             unset($duplicateObject[$objectPrimaryKey]);
 
-                            $this->output->writeln("  \ <comment>Duplicate #{$dupe['idx']}</comment>: resolving <comment>primary key conflict</comment> by building object with new auto incremented primary key. ");
-                            $this->buildSingleObject($duplicateObject, $type, true);
+                            $this->output->writeln("  \\ <comment>Duplicate #{$dupe['idx']}</comment>: resolving <comment>primary key conflict</comment> by building object with new auto incremented primary key. ");
+
+                            if ($isResource) {
+                                $this->buildSingleResource($duplicateObject, true);
+                            }
+                            else {
+                                $this->buildSingleObject($duplicateObject, $type, true);
+                            }
                             $resolved = $runExtract = true;
                         }
 
@@ -571,6 +559,9 @@ class BuildCommand extends BaseCommand
                             $this->output->writeln("  \ <error>Unable to resolve ID conflict.</error> The ID conflict will need to be solved manually. ");
                         }
                     }
+                }
+                else {
+                    $this->output->writeln("  \ <error>Could not find original duplicated {$type['class']}</error>");
                 }
             }
 
@@ -633,5 +624,55 @@ class BuildCommand extends BaseCommand
             'idx' => count($this->conflictingObjects[$internalPrimary]['conflicts']) + 1,
             'data' => $data,
         );
+    }
+
+    /**
+     * Checks against conflicts in the source and database. Returns true if there was a conflict, false if all's good.
+     *
+     * @param $class
+     * @param $primaryKey
+     * @param $primary
+     * @param $data
+     * @return bool
+     */
+    public function hasConflict($class, $primaryKey, $primary, $data)
+    {
+        $showPrimary = (is_array($primary)) ? json_encode($primary) : $primary;
+
+        // Get the primary to match for ID conflict resolution
+        $classPrimary = $this->modx->getPK($class);
+        if (is_array($classPrimary)) {
+            $internalPrimary = array();
+            foreach ($classPrimary as $classPrimaryField) {
+                $fieldMeta = $this->modx->getFieldMeta($class);
+                $default = isset($fieldMeta[$classPrimaryField]['default']) ? $fieldMeta[$classPrimaryField]['default'] : null;
+                $internalPrimary[$classPrimaryField] = (isset($data[$classPrimaryField])) ? $data[$classPrimaryField] : $default;
+            }
+            $internalPrimary = implode('--', $internalPrimary);
+        } else {
+            $internalPrimary = $data[$classPrimary];
+        }
+
+        $prefix = ($class === 'modResource') ? '  \ ' : '- ';
+        // First check - have we came across an object with this primary key before?
+        if (isset($this->updatedObjects[$internalPrimary])) {
+            $this->registerConflict($data, $internalPrimary, $primary);
+            $this->output->writeln("$prefix<comment>Primary Key Duplicate found: duplicate {$class} with primary {$showPrimary}</comment>");
+
+            return true;
+        }
+        // Second check - see if the object already exists in the database with a different real primary keys
+        elseif (isset($this->existingObjects[$internalPrimary])) {
+            $existingObjPrimary = $this->_getPrimaryKey($class, $primaryKey, $this->existingObjects[$internalPrimary]);
+            if ($primary !== $existingObjPrimary) {
+                $this->registerConflict($data, $internalPrimary, $existingObjPrimary);
+                $showExistingObjPrimary = (is_array($existingObjPrimary)) ? json_encode($existingObjPrimary) : $existingObjPrimary;
+                $this->output->writeln("{$prefix}<comment>Primary Key Conflict found: {$class} {$showPrimary} has the same primary key as {$showExistingObjPrimary}</comment>");
+                return true;
+            }
+        }
+
+        $this->updatedObjects[$internalPrimary] = $primary;
+        return false;
     }
 }
