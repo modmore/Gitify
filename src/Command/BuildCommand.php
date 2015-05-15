@@ -558,7 +558,7 @@ class BuildCommand extends BaseCommand
             $runExtract = false;
             foreach ($this->conflictingObjects as $conflict) {
                 $showOriginalPrimary = is_array($conflict['existing_object_primary']) ? json_encode($conflict['existing_object_primary']) : $conflict['existing_object_primary'];
-                $this->output->writeln('- Resolving ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
+                $this->output->writeln('- Attempting to resolve ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
 
 
                 // Get the original/master copy of this conflict
