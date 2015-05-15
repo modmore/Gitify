@@ -25,6 +25,7 @@ class BuildCommand extends BaseCommand
     public $existingObjects = array();
     public $conflictingObjects = array();
     public $updatedObjects;
+    public $orphanedObjects;
     protected $_metaCache = array();
 
     protected function configure()
@@ -148,7 +149,7 @@ class BuildCommand extends BaseCommand
         $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
         // Conflict handling
         $this->resetConflicts();
-        $this->existingObjects = ($this->isForce) ? array() : $this->getExistingObjects('modResource');
+        $this->getExistingObjects('modResource');
 
         $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
@@ -176,6 +177,7 @@ class BuildCommand extends BaseCommand
         }
 
         $type['class'] = 'modResource';
+        $this->removeOrphans($type, 'uri');
         $this->resolveConflicts($folder, $type, true);
     }
 
@@ -301,6 +303,14 @@ class BuildCommand extends BaseCommand
                 $new = ($new) ? 'Created new' : 'Updated';
                 $this->output->writeln("- {$new} resource from {$method}: {$data[$method]}");
             }
+
+            $pk = $object->getPrimaryKey();
+            if (is_array($pk)) {
+                $pk = json_encode($pk);
+            }
+            if (isset($this->orphanedObjects[$pk])) {
+                unset($this->orphanedObjects[$pk]);
+            }
         }
         else {
             $new = ($new) ? 'new' : 'updated';
@@ -354,7 +364,7 @@ class BuildCommand extends BaseCommand
 
         // Reset the conflicts so we're good to go on new ones
         $this->resetConflicts();
-        $this->existingObjects = ($this->isForce) ? array() : $this->getExistingObjects($type['class']);
+        $this->getExistingObjects($type['class']);
 
         foreach ($directory as $file) {
             /** @var \SplFileInfo $file */
@@ -386,6 +396,8 @@ class BuildCommand extends BaseCommand
 
             $this->buildSingleObject($data, $type);
         }
+
+        $this->removeOrphans($type);
 
         $this->resolveConflicts($folder, $type);
     }
@@ -434,6 +446,14 @@ class BuildCommand extends BaseCommand
             if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
                 $this->output->writeln("{$prefix}{$new} {$class}: {$showPrimary}");
+            }
+
+            $pk = $object->getPrimaryKey();
+            if (is_array($pk)) {
+                $pk = json_encode($pk);
+            }
+            if (isset($this->orphanedObjects[$pk])) {
+                unset($this->orphanedObjects[$pk]);
             }
         }
         else {
@@ -498,20 +518,26 @@ class BuildCommand extends BaseCommand
      */
     public function getExistingObjects($class)
     {
-        $objects = array();
+        $this->existingObjects = array();
+        $this->orphanedObjects = array();
 
-        $iterator = $this->modx->getIterator($class);
-        foreach ($iterator as $object) {
-            /** @var \xPDOObject $object */
-            $key = $object->getPrimaryKey();
-            if (is_array($key)) {
-                $key = implode('--', $key);
+        if (!$this->isForce) {
+            $iterator = $this->modx->getIterator($class);
+            foreach ($iterator as $object) {
+                /** @var \xPDOObject $object */
+                $key = $object->getPrimaryKey();
+                if (is_array($key)) {
+                    $key = implode('--', $key);
+                }
+
+                $this->existingObjects[$key] = $object->toArray();
+                $pk = $object->getPrimaryKey();
+                if (is_array($pk)) {
+                    $pk = json_encode($pk);
+                }
+                $this->orphanedObjects[$pk] = 1;
             }
-
-            $objects[$key] = $object->toArray();
         }
-
-        return $objects;
     }
 
     public function resetConflicts()
@@ -532,8 +558,15 @@ class BuildCommand extends BaseCommand
             $runExtract = false;
             foreach ($this->conflictingObjects as $conflict) {
                 $showOriginalPrimary = is_array($conflict['existing_object_primary']) ? json_encode($conflict['existing_object_primary']) : $conflict['existing_object_primary'];
-                $this->output->writeln('- Resolving ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');// Get the original/master copy of this conflict
-                $original = $this->modx->getObject($type['class'], $conflict['existing_object_primary']);
+                $this->output->writeln('- Resolving ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
+
+
+                // Get the original/master copy of this conflict
+                $getPrimary = $conflict['existing_object_primary'];
+                if (!is_array($getPrimary)) {
+                    $getPrimary = array($type['primary'] => $getPrimary);
+                }
+                $original = $this->modx->getObject($type['class'], $getPrimary);
                 if ($original instanceof \xPDOObject) {
                     // Get the primary key definition of the class
                     $objectPrimaryKey = $original->getPK();
@@ -561,7 +594,15 @@ class BuildCommand extends BaseCommand
                     }
                 }
                 else {
-                    $this->output->writeln("  \ <error>Could not find original duplicated {$type['class']}</error>");
+                    $this->output->writeln("  \ <comment>Can't load original {$type['class']} with primary {$showOriginalPrimary}</comment> assuming conflict was due to an orphaned object.");
+                    $conflict = reset($conflict['conflicts']);
+                    $duplicateObject = $conflict['data'];
+                    if ($isResource) {
+                        $this->buildSingleResource($duplicateObject, true);
+                    }
+                    else {
+                        $this->buildSingleObject($duplicateObject, $type, true);
+                    }
                 }
             }
 
@@ -674,5 +715,28 @@ class BuildCommand extends BaseCommand
 
         $this->updatedObjects[$internalPrimary] = $primary;
         return false;
+    }
+
+    /**
+     * @param $type
+     * @param bool $primary
+     */
+    public function removeOrphans($type, $primary = false)
+    {
+        if (!$primary) {
+            $primary = $type['primary'];
+        }
+        foreach ($this->orphanedObjects as $pk => $val) {
+            $getPrimary = (json_decode($pk)) ? json_decode($pk) : $pk;
+            $obj = $this->modx->getObject($type['class'], $getPrimary);
+            if ($obj instanceof \xPDOObject) {
+                $showPrimary = $this->_getPrimaryKey($type['class'], $primary, $obj->toArray());
+                if ($obj->remove()) {
+                    $this->output->writeln("- <info>Removed orphaned {$type['class']} with primary {$showPrimary}</info>");
+                } else {
+                    $this->output->writeln("- <comment>Could not remove orphaned {$type['class']} with primary {$showPrimary}</comment>");
+                }
+            }
+        }
     }
 }
