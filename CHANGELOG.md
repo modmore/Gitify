@@ -3,11 +3,17 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+
+## 0.9.0 - 2015-05-15
+- Implement automatic ID Conflict resolution during build, which will fix duplicate ID errors automatically. (#86, related to #69, #53)
+- [BC] Implement orphan handling during build, which removes any object that no longer exists in file automatically.
+- Add `no-cleanup` flag to build to allow bypassing the orphan handling.
 - Fix several issues using Gitify on Windows:
   \ - Due to inconsistent directory separators, certain files would be removed on extract.
   \ - Ensure line endings are normalized (LF \n) to prevent issues reading files/parsing yaml
 - `Gitify backup` and `Gitify restore` now also pass the host to the command, so should now work with non-localhost databases (#80, #82)
 - Extend `Gitify init` with more recommended options to include in the data, and automatically listing installed packages (#41)
+- Improved formatting of command output somewhat in several commands
 
 ## 0.8.0 - 2015-04-14
 - [BC] Rename `Gitify install:package` to `Gitify package:install`, and `Gitify install:modx` to `Gitify modx:install`. Aliases are in place so they will continue to work for now, but those will be removed in v1. 
