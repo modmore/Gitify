@@ -104,6 +104,8 @@ class BuildCommand extends BaseCommand
                 continue;
             }
 
+            $type['folder'] = $folder;
+
             switch (true) {
                 case (!empty($type['type']) && $type['type'] == 'content'):
                     // "content" is a shorthand for contexts + resources
@@ -143,7 +145,11 @@ class BuildCommand extends BaseCommand
     {
         if ($this->isForce) {
             $this->output->writeln('Forcing build, removing prior Resources...');
-            $this->modx->removeCollection('modResource', array());
+            $forceCriteria = $this->getPartitionCriteria($type['folder']);
+            if (is_null($forceCriteria)) {
+                $forceCriteria = array();
+            }
+            $this->modx->removeCollection('modResource', $forceCriteria);
 
             if (isset($type['truncate_on_force'])) {
                 foreach ($type['truncate_on_force'] as $class) {
@@ -153,10 +159,11 @@ class BuildCommand extends BaseCommand
             }
         }
 
-        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
         // Conflict handling
         $this->resetConflicts();
-        $this->getExistingObjects('modResource');
+        $this->getExistingObjects('modResource', $this->getPartitionCriteria($type['folder']));
+
+        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
 
         $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
@@ -333,14 +340,18 @@ class BuildCommand extends BaseCommand
      */
     public function buildObjects($folder, $type)
     {
-
         if (!file_exists(GITIFY_WORKING_DIR . $folder)) {
             $this->output->writeln('> Skipping ' . $type['class'] . ', ' . $folder. ' does not exist.');
             return;
         }
 
+        $criteria = $this->getPartitionCriteria($type['folder']);
+        if (is_null($criteria)) {
+            $criteria = array();
+        }
+
         if ($this->isForce) {
-            $this->modx->removeCollection($type['class'], array());
+            $this->modx->removeCollection($type['class'], $criteria);
 
             if (isset($type['truncate_on_force'])) {
                 foreach ($type['truncate_on_force'] as $class) {
@@ -371,7 +382,7 @@ class BuildCommand extends BaseCommand
 
         // Reset the conflicts so we're good to go on new ones
         $this->resetConflicts();
-        $this->getExistingObjects($type['class']);
+        $this->getExistingObjects($type['class'], $criteria);
 
         foreach ($directory as $file) {
             /** @var \SplFileInfo $file */
@@ -521,15 +532,16 @@ class BuildCommand extends BaseCommand
      * Returns an array of all current objects in the database, per key => array
      *
      * @param $class
+     * @param array $criteria
      * @return array
      */
-    public function getExistingObjects($class)
+    public function getExistingObjects($class, $criteria = array())
     {
         $this->existingObjects = array();
         $this->orphanedObjects = array();
 
         if (!$this->isForce) {
-            $iterator = $this->modx->getIterator($class);
+            $iterator = $this->modx->getIterator($class, $criteria);
             foreach ($iterator as $object) {
                 /** @var \xPDOObject $object */
                 $key = $object->getPrimaryKey();

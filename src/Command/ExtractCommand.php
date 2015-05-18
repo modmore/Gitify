@@ -94,8 +94,10 @@ class ExtractCommand extends BaseCommand
         $after = array();
         $extension = (isset($options['extension'])) ? $options['extension'] : '.html';
 
+        $criteria = $this->getPartitionCriteria($options['folder']);
+
         // Display what we're about to do here
-        $resourceCount = $this->modx->getCount('modResource');
+        $resourceCount = $this->modx->getCount('modResource', $criteria);
         $contextCount = $this->modx->getCount('modContext', array('key:!=' => 'mgr'));
         $this->output->writeln("Extracting content into {$options['folder']} ({$resourceCount} resources across {$contextCount} contexts)...");
 
@@ -105,16 +107,17 @@ class ExtractCommand extends BaseCommand
             /** @var \modContext $context */
             $contextKey = $context->get('key');
 
-            $count = $this->modx->getCount('modResource', array('context_key' => $contextKey));
+            // Prepare the criteria for this context
+            $contextCriteria = ($criteria) ? $criteria : array();
+            $contextCriteria['context_key'] = $contextKey;
+
+            // Grab the count
+            $count = $this->modx->getCount('modResource', $contextCriteria);
             $this->output->writeln("- Extracting resources from {$contextKey} context ({$count} resources)...");
 
             // Grab the resources in the context
             $c = $this->modx->newQuery('modResource');
-            $c->where(
-                array(
-                    'context_key' => $contextKey,
-                )
-            );
+            $c->where($contextCriteria);
             $c->sortby('uri', 'ASC');
             $resources = $this->modx->getIterator('modResource', $c);
             foreach ($resources as $resource) {
@@ -181,7 +184,8 @@ class ExtractCommand extends BaseCommand
      */
     public function extractObjects($folder, array $options = array())
     {
-        $criteria = (isset($options['where'])) ? $options['where'] : array();
+        $criteria = $this->getPartitionCriteria($options['folder']);
+
         $count = $this->modx->getCount($options['class'], $criteria);
         $this->output->writeln("Extracting {$options['class']} into {$options['folder']} ({$count} records)...");
 
@@ -191,7 +195,9 @@ class ExtractCommand extends BaseCommand
 
         // Grab the stuff
         $c = $this->modx->newQuery($options['class']);
-        if (isset($options['where'])) $c->where(array($options['where']));
+        if (!empty($criteria)) {
+            $c->where(array($criteria));
+        }
         $collection = $this->modx->getCollection($options['class'], $c);
 
         $this->modx->getCacheManager();

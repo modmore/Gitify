@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Implement/improve support for `where` attributes on content and other objects
 
 ## 0.9.0 - 2015-05-15
 - Implement automatic ID Conflict resolution during build, which will fix duplicate ID errors automatically. (#86, related to #69, #53)

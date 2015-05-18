@@ -70,8 +70,27 @@ abstract class BaseCommand extends Command
      * @param $bytes
      * @return string
      */
-    public function convertBytes($bytes) {
-        $unit=array('b','kb','mb','gb','tb','pb');
+    public function convertBytes($bytes)
+    {
+        $unit = array('b','kb','mb','gb','tb','pb');
         return @round($bytes/pow(1024,($i=floor(log($bytes,1024)))),2).' '.$unit[$i];
+    }
+
+    /**
+     * @param string $partition
+     * @return array|null
+     */
+    public function getPartitionCriteria($partition)
+    {
+        if (!isset($this->config['data']) || !isset($this->config['data'][$partition])) {
+            return null;
+        }
+        $options = $this->config['data'][$partition];
+
+        if (isset($options['where']) && !empty($options['where'])) {
+            return $options['where'];
+        }
+
+        return null;
     }
 }
