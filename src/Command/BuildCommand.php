@@ -45,7 +45,7 @@ class BuildCommand extends BaseCommand
                 'force',
                 'f',
                 InputOption::VALUE_NONE,
-                'When specified, all existing content will be removed before rebuilding. Can be useful when having dealt with complex conflicts.'
+                'When specified, all existing content will be removed before rebuilding. Can be useful when having deal with complex conflicts.'
             )
 
             ->addOption(
