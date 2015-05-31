@@ -106,7 +106,7 @@ class InstallModxCommand extends BaseCommand
 
         $this->output->writeln("Moving unzipped files out of temporary directory...");
 
-        exec("mv ./{$insideFolder}* .;");
+        exec("mv ./{$insideFolder}* ./");
         exec("rm -r ./{$insideFolder}");
 
         if (!unlink('modx.zip')) {
