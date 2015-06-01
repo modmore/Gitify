@@ -147,6 +147,9 @@ class ExtractCommand extends BaseCommand
 
                 // Write the file
                 $fn = $folder . DIRECTORY_SEPARATOR . $contextKey . DIRECTORY_SEPARATOR . $uri . $extension;
+
+                $fn = $this->normalizePath($fn);
+
                 $after[] = $fn;
 
                 // Only write stuff if it doesn't exist already, or is not the same
@@ -227,6 +230,9 @@ class ExtractCommand extends BaseCommand
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
+
+            $fn = $this->normalizePath($fn);
+
             $after[] = $fn;
 
             $written = false;
@@ -336,7 +342,8 @@ class ExtractCommand extends BaseCommand
         foreach($it as $file)
         {
             /** @var \SplFileInfo $file */
-            $files[] = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
+            $file_path = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
+            $files[] = $this->normalizePath($file_path);
         }
         return $files;
     }
