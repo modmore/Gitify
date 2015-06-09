@@ -77,7 +77,7 @@ class BackupCommand extends BaseCommand
         if (!empty($file)) {
             $file = $this->modx->filterPathSegment($file);
         } else {
-            $file = date(DATE_ATOM);
+            $file = strftime('%Y-%m-%d-%H%M%S-%z');
         }
         if (substr($file, -4) != '.sql') {
             $file .= '.sql';
