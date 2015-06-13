@@ -168,28 +168,62 @@ class InstallPackageCommand extends BaseCommand
         $provider->getClient();
         $this->output->writeln("Searching <comment>{$provider->get('name')}</comment> for <comment>$packageName</comment>...");
 
-        // Request package information from the chosen provider
+        $packages = array();
+
+        // first try to find an exact match via signature from the chosen package provider
         $response = $provider->request('package', 'GET', array(
-            'supports' => $product_version,
-            'query' => $packageName
+        		'supports' => $product_version,
+        		'signature' => $packageName
         ));
+        
+        // when we got a match (non 404), extract package information
+		if (!$response->isError()) {
 
-        // Check for a proper response
-        if (!empty($response)) {
-            $foundPackages = simplexml_load_string($response->response);
-            $helper = $this->getHelper('question');
+			$foundPkg = simplexml_load_string ( $response->response );
+			
+			$packages [strtolower ( ( string ) $foundPkg->name )] = array (
+					'name' => ( string ) $foundPkg->name,
+					'version' => ( string ) $foundPkg->version,
+					'location' => ( string ) $foundPkg->location,
+					'signature' => ( string ) $foundPkg->signature 
+			);
+		}
 
-            $packages = array();
+        // if no exact match, try it with via query
+        if (empty($packages)) {
 
-            foreach ($foundPackages as $foundPkg) {
-                $packages[strtolower((string)$foundPkg->name)] = array(
-                    'name' => (string)$foundPkg->name,
-                    'version' => (string)$foundPkg->version,
-                    'location' => (string)$foundPkg->location,
-                    'signature' => (string)$foundPkg->signature,
-                );
-            }
+	        $response = $provider->request('package', 'GET', array(
+	            'supports' => $product_version,
+	            'query' => $packageName
+	        ));
+	        
+	        // Check for a proper response
+	        if (!empty($response)) {
+	        	 
+	        	$foundPackages = simplexml_load_string($response->response);
+	        	// no matches, simply return
+				if ($foundPackages['total'] == 0) {
+					return true;
+				}
+	        	
+	        	foreach ($foundPackages as $foundPkg) {
+	        		$packages[strtolower((string)$foundPkg->name)] = array(
+	        				'name' => (string)$foundPkg->name,
+	        				'version' => (string)$foundPkg->version,
+	        				'location' => (string)$foundPkg->location,
+	        				'signature' => (string)$foundPkg->signature,
+	        		);
+	        	}
+	        }
+        }
 
+        // process found packages
+        if (!empty($packages)) {
+
+        	$this->output->writeln('Found ' . count($packages) . ' package(s).');
+
+        	$helper = $this->getHelper('question');            
+            
             // Ensure the exact match is always first
             if (isset($packages[strtolower($packageName)])) {
                 $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;
