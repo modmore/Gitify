@@ -8,6 +8,8 @@ disqus_shortname: ''
 # if you use google analytics, add your tracking id here
 google_analytics_id: ''
 
+permalink: /:title/
+
 sections: [
     ['installation', 'Installation'],
     ['usage', 'Usage'],
