@@ -9,11 +9,9 @@ disqus_shortname: ''
 google_analytics_id: ''
 
 sections: [
-    ['doc', 'Documentation'],
-    ['tut', 'Tutorial'],
-    ['ref', 'Reference'],
-    ['dev', 'Developers'],
-    ['post', 'Posts']
+    ['docs', 'Documentation'],
+    ['tutorials', 'Tutorials'],
+    ['references', 'References']
 ]
 
 # Enable/show navigation. There are there options:
