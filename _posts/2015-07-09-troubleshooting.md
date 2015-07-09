@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Troubleshooting"
-category: trouble
+category: troubleshooting
 ---
 
 #Troubleshooting
