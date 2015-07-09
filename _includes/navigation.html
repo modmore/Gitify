@@ -1,0 +1,20 @@
+<div id="navigation">
+    <ul class="subnav">
+        <li><a href="{{ site.baseurl }}/">Getting started</a></li>
+        {% for section in site.sections %}
+            {% assign attr = section[0] %}
+            {% assign label = section[1] %}
+
+            {% for link in site.categories[attr] %}
+                {% if forloop.first %}
+                    <li class="nav-header"><h3><span>{{ label }}</span></h3></li>
+                {% endif %}
+                <li 
+                    {% if page.url == link.url %}class="active"{% endif %}
+                    data-order="{{ link.order }}">
+                    <a href="{{ site.baseurl }}{{ link.url }}">{{ link.title }}</a>
+                </li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
