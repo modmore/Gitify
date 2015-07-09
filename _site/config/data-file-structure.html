@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" class="noTouchDevice">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width">
+
+        <title>Data File Structure - Gitify</title>
+        <meta name="description" content="Command line toolkit to make managing a MODX site in git a lot easier.">
+
+        <link rel="stylesheet" href="/css/github.css">
+        <link rel="stylesheet" href="/css/mm.css">
+        <link rel="stylesheet" href="/css/theme.css">        
+    </head>
+    <body>
+        <div id="wrapper">
+            <header class="siteheader blueending">
+    <div class="row">
+        <h1 class="large-5 medium-12 columns">
+            <a href="/" class="logo">
+                <span>Gitify</span>
+                <small>Command line toolkit to make managing a MODX site in git a lot easier.</small>
+            </a>
+        </h1>
+        <nav class="large-7 medium-12 columns">
+            <ul>
+                <li class="last"><a href="/ru/" title="На русском">На русском</a></li>
+                <li class="first"><a href="https://github.com/modmore/Gitify" title="View on GitHub">View on GitHub</a></li>
+                <li class="last"><a href="https://modmore.com" title="modmore">modmore {+}</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+            <div id="content">
+                <div class="row">
+                    
+
+                    
+                        <div class="large-3 columns">
+                            <div id="navigation">
+    <ul class="subnav">
+        <li><a href="/">Getting started</a></li>
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Installation</span></h3></li>
+                
+                <li 
+                    
+                    data-order="4">
+                    <a href="/installation/updating.html">Updating</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="2">
+                    <a href="/installation/installation-on-windows.html">Installation on Windows</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="3">
+                    <a href="/installation/installation-on-mac-os.html">Installation on Mac OS X</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/installation/installation.html">Installation</a>
+                </li>
+            
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Usage</span></h3></li>
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/usage/installing-a-gitify-project.html">Installing a Gitify project</a>
+                </li>
+            
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Available Commands</span></h3></li>
+                
+                <li 
+                    
+                    data-order="4">
+                    <a href="/commands/restore.html">restore</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="6">
+                    <a href="/commands/packageinstall.html">package:install</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="5">
+                    <a href="/commands/modxinstall.html">modx:install</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="0">
+                    <a href="/commands/init.html">init</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="2">
+                    <a href="/commands/extract.html">extract</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/commands/build.html">build</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="3">
+                    <a href="/commands/backup.html">backup</a>
+                </li>
+            
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Configuration</span></h3></li>
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/config/the-gitify-file.html">The .gitify File</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="2">
+                    <a href="/config/example-gitify-files.html">Example .gitify files</a>
+                </li>
+            
+                
+                <li 
+                    class="active"
+                    data-order="3">
+                    <a href="/config/data-file-structure.html">Data File Structure</a>
+                </li>
+            
+        
+            
+            
+
+            
+        
+    </ul>
+</div>
+                        </div>
+                        <div class="large-9 columns">
+                            <div class="row">
+    <div class="small-12 columns">
+        <h1 id="data-file-structure">Data File Structure</h1>
+
+<p>Data files are formatted in a combination of YAML and a content area if the object has a getContent method defined.</p>
+
+<p>The top of the file contains the YAML meta data. This includes most of the objects&#39; fields. </p>
+
+<p>The separator is a blank line, followed by five dashes (<code>-----</code>) and another blank line. Anything before the separated is the YAML data, everything below it is the content.</p>
+
+<h2 id="yaml-formatting-notes">YAML Formatting Notes</h2>
+
+<p>When manually editing the data files, to build into MODX later, it&#39;s important to keep a few things in mind.</p>
+
+<ol>
+<li>Strings can be edited with or without quotes, however as soon as there&#39;s any non-alphanumeric characters inside the string (dots, slashes, brackets etc), there should be single or double quotes around the value. Otherwise, you might get a YAML parse error on build.</li>
+<li><em>No</em> commas at the end of a line; the line break is enough.</li>
+<li>Use the <a href="http://www.yamllint.com/">YAML Linter</a> if you get a YAML parse error but can&#39;t figure out what&#39;s causing it. Don&#39;t include the separator or content below it though.</li>
+</ol>
+
+<h2 id="example-data-files">Example data files</h2>
+
+<p>This example only has simple meta data (Redirector Redirect object):</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">id</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+<span class="l-Scalar-Plain">pattern</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">^redactor$</span>
+<span class="l-Scalar-Plain">target</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">extras/redactor/</span>
+<span class="l-Scalar-Plain">context_key</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">web</span>
+<span class="l-Scalar-Plain">triggered</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">257</span>
+<span class="l-Scalar-Plain">triggered_first</span><span class="p-Indicator">:</span> <span class="s">&#39;2014-08-02</span><span class="nv"> </span><span class="s">06:32:29&#39;</span>
+<span class="l-Scalar-Plain">triggered_last</span><span class="p-Indicator">:</span> <span class="s">&#39;2014-08-03</span><span class="nv"> </span><span class="s">13:18:51&#39;</span>
+</code></pre></div>
+<p>This example shows the YAML meta data, followed by the content (the ClientConfig plugin):</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">id</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">9</span>
+<span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ClientConfig</span>
+<span class="l-Scalar-Plain">description</span><span class="p-Indicator">:</span> <span class="s">&#39;Sets</span><span class="nv"> </span><span class="s">system</span><span class="nv"> </span><span class="s">settings</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">Client</span><span class="nv"> </span><span class="s">Config</span><span class="nv"> </span><span class="s">CMP.&#39;</span>
+<span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">null</span>
+
+<span class="l-Scalar-Plain">-----</span>
+
+<span class="l-Scalar-Plain">/**</span>
+ <span class="l-Scalar-Plain">* ClientConfig</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* Copyright 2011 by Mark Hamstra &lt;hello@markhamstra.com&gt;</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* ClientConfig is free software; you can redistribute it and/or modify it under the</span>
+ <span class="l-Scalar-Plain">* terms of the GNU General Public License as published by the Free Software</span>
+ <span class="l-Scalar-Plain">* Foundation; either version 2 of the License, or (at your option) any later</span>
+ <span class="l-Scalar-Plain">* version.</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* ClientConfig is distributed in the hope that it will be useful, but WITHOUT ANY</span>
+ <span class="l-Scalar-Plain">* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span>
+ <span class="l-Scalar-Plain">* A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* You should have received a copy of the GNU General Public License along with</span>
+ <span class="l-Scalar-Plain">* ClientConfig; if not, write to the Free Software Foundation, Inc., 59 Temple</span>
+ <span class="l-Scalar-Plain">* Place, Suite 330, Boston, MA 02111-1307 USA</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* @package clientconfig</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* @var modX $modx</span>
+ <span class="l-Scalar-Plain">* @var int $id</span>
+ <span class="l-Scalar-Plain">* @var string $mode</span>
+ <span class="l-Scalar-Plain">* @var modResource $resource</span>
+ <span class="l-Scalar-Plain">* @var modTemplate $template</span>
+ <span class="l-Scalar-Plain">* @var modTemplateVar $tv</span>
+ <span class="l-Scalar-Plain">* @var modChunk $chunk</span>
+ <span class="l-Scalar-Plain">* @var modSnippet $snippet</span>
+ <span class="l-Scalar-Plain">* @var modPlugin $plugin</span>
+<span class="err">*</span><span class="l-Scalar-Plain">/</span>
+
+<span class="l-Scalar-Plain">$eventName = $modx-&gt;event-&gt;name;</span>
+
+<span class="l-Scalar-Plain">switch($eventName) {</span>
+    <span class="l-Scalar-Plain">case &#39;OnHandleRequest&#39;</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">/* Grab the class */</span>
+        <span class="l-Scalar-Plain">$path = $modx-&gt;getOption(&#39;clientconfig.core_path&#39;, null, $modx-&gt;getOption(&#39;core_path&#39;) . &#39;components/clientconfig/&#39;);</span>
+        <span class="l-Scalar-Plain">$path .= &#39;model/clientconfig/&#39;;</span>
+        <span class="l-Scalar-Plain">$clientConfig = $modx-&gt;getService(&#39;clientconfig&#39;,&#39;ClientConfig&#39;, $path);</span>
+
+        <span class="l-Scalar-Plain">/* If we got the class (gotta be careful of failed migrations), grab settings and go! */</span>
+        <span class="l-Scalar-Plain">if ($clientConfig instanceof ClientConfig) {</span>
+            <span class="l-Scalar-Plain">$settings = $clientConfig-&gt;getSettings();</span>
+
+            <span class="l-Scalar-Plain">/* Make settings available as [[++tags]] */</span>
+            <span class="l-Scalar-Plain">$modx-&gt;setPlaceholders($settings, &#39;+&#39;);</span>
+
+            <span class="l-Scalar-Plain">/* Make settings available for $modx-&gt;getOption() */</span>
+            <span class="l-Scalar-Plain">foreach ($settings as $key =&gt; $value) {</span>
+                <span class="l-Scalar-Plain">$modx-&gt;setOption($key, $value);</span>
+            <span class="l-Scalar-Plain">}</span>
+        <span class="l-Scalar-Plain">}</span>
+        <span class="l-Scalar-Plain">break;</span>
+<span class="err">}</span>
+
+<span class="l-Scalar-Plain">return;</span>
+</code></pre></div>
+    </div>
+</div>
+                        </div>
+                    
+                </div>
+            </div>
+
+            <footer>
+    <div class="row">
+        <div class="large-8 medium-12 columns">
+            <p>
+                <strong>© 2013 - 2015 modmore</strong>, a brand by <a href="https://www.markhamstra.com/" title="Mark Hamstra Web Development">Mark Hamstra</a> 
+                • Designed by <a href="http://chsmedien.com/?pk_campaign=modmore&amp;pk_kwd=footerLink" title="chsmedien - Digital Marketing Agency &amp; MODX Professional Partner" target="_blank">chsmedien</a>
+            </p>
+            <p><small>Work on documentation – <a href="http://klimchuk.com" target="_blank">Ivan Klimchuk</a>.</small></p>
+        </div>
+    </div>
+</footer>
+
+        </div>
+
+        <script>
+    function orderNav() {
+        var list,
+            section,
+            header,
+            sections = [],
+            lists = {},
+            headers = {};
+        var navUl = document.querySelectorAll('#navigation ul')[0],
+            navLis = document.querySelectorAll('#navigation ul li');
+        if (!navUl) return;
+        for (var i = 0; i < navLis.length; i++) {
+            var order, li = navLis[i];
+            if (li.classList.contains('nav-header')) {
+                section = li.textContent || li.innerText;
+                sections.push(section);
+                headers[section] = li;
+                continue;
+            }
+            if (!lists[section]) {
+                lists[section] = [];
+            }
+            order = parseFloat(li.getAttribute('data-order'))
+            lists[section].push([order, li]);
+        }
+        for (var i = 0; i < sections.length; i++) {
+            section = sections[i];
+            list = lists[section].sort(function(a, b) {
+                return a[0] - b[0];
+            });
+            if (header = headers[section]) {
+                navUl.appendChild(header);
+            }
+            for (var j = 0; j < list.length; j++) {
+                navUl.appendChild(list[j][1]);
+            }
+        }
+    }
+    if (document.querySelectorAll) orderNav();
+</script>
+    </body>
+</html>

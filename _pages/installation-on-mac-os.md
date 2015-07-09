@@ -1,0 +1,1 @@
+../_posts/2015-07-09-installation-on-mac-os.md

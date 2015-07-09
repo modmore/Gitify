@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" class="noTouchDevice">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width">
+
+        <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
+        <meta name="description" content="{{ site.subtitle }}">
+
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/github.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/mm.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/theme.css">        
+    </head>
+    <body>
+        <div id="wrapper">
+            {% include header.html %}
+
+            <div id="content">
+                <div class="row">
+                    {% assign post_count = site.posts|size %}
+
+                    {% if site.navigation != 0 and site.navigation == 1 or post_count > 0 %}
+                        <div class="large-3 columns">
+                            {% include navigation.html %}
+                        </div>
+                        <div class="large-9 columns">
+                            {{ content }}
+                        </div>
+                    {% else %}
+                        <div class="large-12 columns">
+                            {{ content }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% include footer.html %}
+        </div>
+
+        {% include navorder.html %}
+    </body>
+</html>
