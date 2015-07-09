@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" class="noTouchDevice">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width">
+
+        <title>The .gitify File - Gitify</title>
+        <meta name="description" content="Command line toolkit to make managing a MODX site in git a lot easier.">
+
+        <link rel="stylesheet" href="/css/github.css">
+        <link rel="stylesheet" href="/css/mm.css">
+        <link rel="stylesheet" href="/css/theme.css">        
+    </head>
+    <body>
+        <div id="wrapper">
+            <header class="siteheader blueending">
+    <div class="row">
+        <h1 class="large-5 medium-12 columns">
+            <a href="/" class="logo">
+                <span>Gitify</span>
+                <small>Command line toolkit to make managing a MODX site in git a lot easier.</small>
+            </a>
+        </h1>
+        <nav class="large-7 medium-12 columns">
+            <ul>
+                <li class="last"><a href="/ru/" title="На русском">На русском</a></li>
+                <li class="first"><a href="https://github.com/modmore/Gitify" title="View on GitHub">View on GitHub</a></li>
+                <li class="last"><a href="https://modmore.com" title="modmore">modmore {+}</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+            <div id="content">
+                <div class="row">
+                    
+
+                    
+                        <div class="large-3 columns">
+                            <div id="navigation">
+    <ul class="subnav">
+        <li><a href="/">Getting started</a></li>
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Installation</span></h3></li>
+                
+                <li 
+                    
+                    data-order="4">
+                    <a href="/installation/updating.html">Updating</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="2">
+                    <a href="/installation/installation-on-windows.html">Installation on Windows</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="3">
+                    <a href="/installation/installation-on-mac-os.html">Installation on Mac OS X</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/installation/installation.html">Installation</a>
+                </li>
+            
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Usage</span></h3></li>
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/usage/installing-a-gitify-project.html">Installing a Gitify project</a>
+                </li>
+            
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Available Commands</span></h3></li>
+                
+                <li 
+                    
+                    data-order="4">
+                    <a href="/commands/restore.html">restore</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="6">
+                    <a href="/commands/packageinstall.html">package:install</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="5">
+                    <a href="/commands/modxinstall.html">modx:install</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="0">
+                    <a href="/commands/init.html">init</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="2">
+                    <a href="/commands/extract.html">extract</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="1">
+                    <a href="/commands/build.html">build</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="3">
+                    <a href="/commands/backup.html">backup</a>
+                </li>
+            
+        
+            
+            
+
+            
+                
+                    <li class="nav-header"><h3><span>Configuration</span></h3></li>
+                
+                <li 
+                    class="active"
+                    data-order="1">
+                    <a href="/config/the-gitify-file.html">The .gitify File</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="2">
+                    <a href="/config/example-gitify-files.html">Example .gitify files</a>
+                </li>
+            
+                
+                <li 
+                    
+                    data-order="3">
+                    <a href="/config/data-file-structure.html">Data File Structure</a>
+                </li>
+            
+        
+            
+            
+
+            
+        
+    </ul>
+</div>
+                        </div>
+                        <div class="large-9 columns">
+                            <div class="row">
+    <div class="small-12 columns">
+        <h1 id="the-gitify-file">The .gitify File</h1>
+
+<p>To define what to export, to where and how, we&#39;re using a <code>.gitify</code> file formatted in YAML.</p>
+
+<p>An example <code>.gitify</code> may look like this:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">data_directory</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">_data/</span>
+<span class="l-Scalar-Plain">data</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">contexts</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modContext</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">key</span>
+    <span class="l-Scalar-Plain">content</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">type</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">content</span>
+        <span class="l-Scalar-Plain">exclude_keys</span><span class="p-Indicator">:</span>
+            <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">editedby</span>
+            <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">editedon</span>
+    <span class="l-Scalar-Plain">templates</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modTemplate</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">templatename</span>
+        <span class="l-Scalar-Plain">extension</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.html</span>
+    <span class="l-Scalar-Plain">categories</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modCategory</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">category</span>
+        <span class="l-Scalar-Plain">truncate_on_force</span><span class="p-Indicator">:</span>
+            <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">modCategoryClosure</span>
+    <span class="l-Scalar-Plain">template_variables</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modTemplateVar</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name</span>
+    <span class="l-Scalar-Plain">chunks</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modChunk</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name</span>
+        <span class="l-Scalar-Plain">extension</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.html</span>
+    <span class="l-Scalar-Plain">snippets</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modSnippet</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name</span>
+        <span class="l-Scalar-Plain">extension</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.php</span>
+    <span class="l-Scalar-Plain">plugins</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modPlugin</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name</span>
+        <span class="l-Scalar-Plain">extension</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.php</span>
+</code></pre></div>
+<p>The <code>.gitify</code> file structure is real simple. There are root nodes for <code>data_directory</code> (the relative path where to store the files), <code>backup_directory</code>, <code>data</code> and <code>packages</code>. </p>
+
+<p><code>data</code> contains an array of what we call &quot;Partitions&quot;. These partitions are basically the name of the directory that holds all the files of that type, and can also be used in the <code>Gitify extract</code> and <code>Gitify build</code> commands. Each partition specifies either a <code>type</code> that has special processing going on (only <code>content</code> is available as type currently), or a <code>class</code> which specified the xPDOObject derivative that you want to use. The <code>primary</code> field determines the key to use in the name of the generated files. This defaults to <code>id</code>, but in many cases you may want to use the <code>name</code> as that is more human friendly. The primary is used for the file names and is also related to the automatic ID conflict resolution.</p>
+
+<p>By default files will be created with a <code>.yaml</code> extension, but if you want you can override that with a <code>extension</code> property. This can help with syntax highlighting in IDEs.</p>
+
+<p>Each partition can also specify a <code>where</code> property. This contains an array which can be turned into a valid xPDO criteria. </p>
+
+<p>When using GitifyWatch, there is also an <code>environments</code> root node in the gitify file, refer to the GitifyWatch documentation for more about that. </p>
+
+<h3 id="third-party-packages-models">Third party packages (models)</h3>
+
+<p>When a certain class is not part of the core models, you can define a <code>package</code> as well. This will run <code>$modx-&gt;addPackage</code> before attempting to load the data. The path is determined by looking at a <code>[package].core_path</code> setting suffixed with <code>model/</code>, <code>[[++core_path]]components/[package]/model/</code>or a hardcoded <code>package_path</code> property. For example, you could use the following in your <code>.gitify</code> file to load <a href="http://modmo.re/cb">ContentBlocks</a> Layouts &amp; Fields:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">data</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">cb_fields</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">cbField</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name</span>
+        <span class="l-Scalar-Plain">package</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">contentblocks</span>
+    <span class="l-Scalar-Plain">cb_layouts</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">cbLayout</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">name</span>
+</code></pre></div>
+<p>As it&#39;ll load the package into memory, it&#39;s only required to add the package once. For clarify, it can&#39;t hurt to add it to each <code>data</code> entry that uses it.</p>
+
+<h3 id="dealing-with-closures">Dealing with Closures</h3>
+
+<p>A Closure is a separate table in the database that a core or third party extra may use to keep information about a hierarchy in a convenient format. These are often automatically generated when creating a new object, which can result in a error messages and other issues when building, especially with the <code>--force</code> flag. </p>
+
+<p>To solve this, a <code>truncate_on_force</code> option was introduced in v0.6.0 that lets you define an array of class names that need their tables truncated on a force build. Truncating the closure table(s) before a forced build ensures that the model can properly create the rows in the closure table, without throwing errors.</p>
+
+<p>Here are two examples of using <code>truncate_on_force</code>:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">data</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">categories</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modCategory</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">category</span>
+        <span class="l-Scalar-Plain">truncate_on_force</span><span class="p-Indicator">:</span>
+            <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">modCategoryClosure</span>
+    <span class="l-Scalar-Plain">quip_comments</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">quipComment</span>
+        <span class="l-Scalar-Plain">package</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">quip</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">thread</span><span class="p-Indicator">,</span> <span class="nv">id</span><span class="p-Indicator">]</span>
+        <span class="l-Scalar-Plain">truncate_on_force</span><span class="p-Indicator">:</span> 
+            <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">quipCommentClosure</span>
+</code></pre></div>
+<h3 id="composite-primary-keys">Composite Primary Keys</h3>
+
+<p>When an object doesn&#39;t have a single primary key, or you want to get fancy with file names, it&#39;s possible to define a composite primary key, by setting the <code>primary</code> attribute to an array. For example, like this:</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">data</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">chunks</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">modChunk</span>
+        <span class="l-Scalar-Plain">primary</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="nv">category</span><span class="p-Indicator">,</span> <span class="nv">name</span><span class="p-Indicator">]</span>
+        <span class="l-Scalar-Plain">extension</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.html</span>
+</code></pre></div>
+<p>That would grab the category and the name as primary keys, and join them together with a dot in the file name. This is a pretty bad example, and you shouldn&#39;t really use it like this.</p>
+
+<h3 id="install-modx-packages">Install MODX Packages</h3>
+
+<p>You can also define packages to install. This uses the following format</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">packages</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">modx.com</span><span class="p-Indicator">:</span>
+            <span class="l-Scalar-Plain">service_url</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">http://rest.modx.com/extras/</span>
+            <span class="l-Scalar-Plain">packages</span><span class="p-Indicator">:</span>
+                <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">ace</span>
+                <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">wayfinder</span>
+        <span class="l-Scalar-Plain">modmore.com</span><span class="p-Indicator">:</span>
+            <span class="l-Scalar-Plain">service_url</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">https://rest.modmore.com/</span>
+            <span class="l-Scalar-Plain">username</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">username</span>
+            <span class="l-Scalar-Plain">api_key</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">.modmore.com.key</span>
+            <span class="l-Scalar-Plain">packages</span><span class="p-Indicator">:</span>
+                <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">clientconfig</span>
+</code></pre></div>
+<p>When specifying an api_key on a provider, like in the example above, the value provided is the name of a <strong>file</strong> that contains the actual API Key. So the value of <code>.modmore.com.key</code> in the example above loads the file <code>/path/to/your/base/directory/.modmore.com.key</code>. This file needs to be kept out of the git repository using a .gitignore file, and you will also want to protect direct read access to it with your .htaccess file or keeping it out of the webroot.</p>
+
+<p>To install the packages that you added to the <code>packages</code> entry in the .gitify file, simply run the command <code>Gitify package:install --all</code>. That will attempt to install all packages that were mentioned, skipping any that are already installed. </p>
+
+    </div>
+</div>
+                        </div>
+                    
+                </div>
+            </div>
+
+            <footer>
+    <div class="row">
+        <div class="large-8 medium-12 columns">
+            <p>
+                <strong>© 2013 - 2015 modmore</strong>, a brand by <a href="https://www.markhamstra.com/" title="Mark Hamstra Web Development">Mark Hamstra</a> 
+                • Designed by <a href="http://chsmedien.com/?pk_campaign=modmore&amp;pk_kwd=footerLink" title="chsmedien - Digital Marketing Agency &amp; MODX Professional Partner" target="_blank">chsmedien</a>
+            </p>
+            <p><small>Work on documentation – <a href="http://klimchuk.com" target="_blank">Ivan Klimchuk</a>.</small></p>
+        </div>
+    </div>
+</footer>
+
+        </div>
+
+        <script>
+    function orderNav() {
+        var list,
+            section,
+            header,
+            sections = [],
+            lists = {},
+            headers = {};
+        var navUl = document.querySelectorAll('#navigation ul')[0],
+            navLis = document.querySelectorAll('#navigation ul li');
+        if (!navUl) return;
+        for (var i = 0; i < navLis.length; i++) {
+            var order, li = navLis[i];
+            if (li.classList.contains('nav-header')) {
+                section = li.textContent || li.innerText;
+                sections.push(section);
+                headers[section] = li;
+                continue;
+            }
+            if (!lists[section]) {
+                lists[section] = [];
+            }
+            order = parseFloat(li.getAttribute('data-order'))
+            lists[section].push([order, li]);
+        }
+        for (var i = 0; i < sections.length; i++) {
+            section = sections[i];
+            list = lists[section].sort(function(a, b) {
+                return a[0] - b[0];
+            });
+            if (header = headers[section]) {
+                navUl.appendChild(header);
+            }
+            for (var j = 0; j < list.length; j++) {
+                navUl.appendChild(list[j][1]);
+            }
+        }
+    }
+    if (document.querySelectorAll) orderNav();
+</script>
+    </body>
+</html>

@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width">
 
-        <title>Gitify</title>
+        <title>Installation - Gitify</title>
         <meta name="description" content="Command line toolkit to make managing a MODX site in git a lot easier.">
 
         <link rel="stylesheet" href="/css/github.css">
@@ -71,7 +71,7 @@
             
                 
                 <li 
-                    
+                    class="active"
                     data-order="1">
                     <a href="/installation/installation.html">Installation</a>
                 </li>
@@ -184,20 +184,47 @@
 </div>
                         </div>
                         <div class="large-9 columns">
-                            <h1 id="gitify">Gitify</h1>
+                            <div class="row">
+    <div class="small-12 columns">
+        <h1 id="installation">Installation</h1>
 
-<p>The goal of Gitify is to provide a <strong>two-way sync</strong> of data typically stored in the MODX database, making it versionable with Git. To do this, it creates a representation of MODX objects in files. These files follow a certain <a href="https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7">human and machine friendly format</a>, built from a block of YAML, followed by a separator, and then the main content (if there&#39;s a specific content field) below that.</p>
+<p>New as of v0.2 is that dependencies are managed via <a href="https://getcomposer.org/">Composer</a>, most notably it has been rebuilt on top of Symfony&#39;s Console component to provide a more feature-packed base to build from. <a href="https://getcomposer.org/doc/00-intro.md">Follow these instructions if you haven&#39;t installed Composer before</a></p>
 
-<p>The project configuration, which determines what data is written to file and build to the database, is stored in a <code>.gitify</code> file in the project root.</p>
+<p>To get started with Gitify, it&#39;s easiest to set up a local clone of this repository. After that, run Composer to download the dependencies, and finally make the Gitify file executable to run it.</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git clone https://github.com/modmore/Gitify.git Gitify
+<span class="nv">$ </span><span class="nb">cd </span>Gitify
+<span class="nv">$ </span>composer install
+<span class="nv">$ </span>chmod +x Gitify
+</code></pre></div>
+<p>At this point you should be able to type <code>./Gitify</code> and get a response like the following:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Gitify version 1.0.0
 
-<h2 id="introductions-to-gitify">Introductions to Gitify</h2>
+Usage:
+  [options] command [arguments]
 
-<ul>
-<li><p><a href="https://video.modmore.com/modx-weekend-2014/sunday-backend/staging-workflow-with-git-and-gitify/">Video of Mark introduction Gitify</a> at the MODX Weekend 2014, 2015-09-21. <strong>Important:</strong> This presentation talks about a very early version of Gitify. It has learned a lot of new tricks since!</p></li>
-<li><p><a href="http://www.slideshare.net/hamstramark1/solving-the-workflow-building-modxtoday-with-gitify-20150521-alkmaar">Mark&#39;s slides of the MODX Meetup</a> in Alkmaar, The Netherlands, where he talked about how Gitify is used to build and manage Gitify. This is based on Gitify 0.9, 2015-05-21, so a lot more up to date on what you can do with it, and how you can manage a workflow with Gitify. Unfortunately, no video footage of this one. </p></li>
-<li><p><a href="https://modx.today/posts/2015/04/building-modx.today">&quot;Building MODX.today&quot;</a>, an article published on 2015-04-22 about how the MODX.today site was built. Includes a short section about using Gitify.</p></li>
-</ul>
+Options:
+  --help           -h Display this help message.
+  --verbose        -v|vv|vvv Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
+  --version        -V Display the Gitify version.
 
+Available commands:
+  build          Builds a MODX site from the files and configuration.
+  extract        Extracts data from the MODX site, and stores it in human readable files for editing and committing to a VCS.
+  help           Displays help for a command
+  init           Generates the .gitify file to set up a new Gitify project. Optionally installs MODX as well.
+  list           Lists commands
+install
+  install:modx   Downloads, configures and installs a fresh MODX installation.
+</code></pre></div>
+<p>If that&#39;s working as expected, the next step is to add the Gitify executable to your PATH so you can run Gitify in any directory. Edit your <code>~/.bash_profile</code> and add the following, with the right path to the Gitify directory (not file) of course:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/path/to/Gitify/:<span class="nv">$PATH</span>
+</code></pre></div>
+<p>Restart your terminal and you should be good to go.</p>
+
+<p>For successfull installing of MODX by <code>Gitify install:modx</code> command you should have installed <strong>unzip</strong> command in your system. For Debian/Ubuntu you can use <code>sudo apt-get install unzip</code>.</p>
+
+    </div>
+</div>
                         </div>
                     
                 </div>

@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width">
 
-        <title>Gitify</title>
+        <title>Data File Structure - Gitify</title>
         <meta name="description" content="Command line toolkit to make managing a MODX site in git a lot easier.">
 
         <link rel="stylesheet" href="/css/github.css">
@@ -169,7 +169,7 @@
             
                 
                 <li 
-                    
+                    class="active"
                     data-order="3">
                     <a href="/config/data-file-structure.html">Data File Structure</a>
                 </li>
@@ -184,20 +184,104 @@
 </div>
                         </div>
                         <div class="large-9 columns">
-                            <h1 id="gitify">Gitify</h1>
+                            <div class="row">
+    <div class="small-12 columns">
+        <h1 id="data-file-structure">Data File Structure</h1>
 
-<p>The goal of Gitify is to provide a <strong>two-way sync</strong> of data typically stored in the MODX database, making it versionable with Git. To do this, it creates a representation of MODX objects in files. These files follow a certain <a href="https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7">human and machine friendly format</a>, built from a block of YAML, followed by a separator, and then the main content (if there&#39;s a specific content field) below that.</p>
+<p>Data files are formatted in a combination of YAML and a content area if the object has a getContent method defined.</p>
 
-<p>The project configuration, which determines what data is written to file and build to the database, is stored in a <code>.gitify</code> file in the project root.</p>
+<p>The top of the file contains the YAML meta data. This includes most of the objects&#39; fields. </p>
 
-<h2 id="introductions-to-gitify">Introductions to Gitify</h2>
+<p>The separator is a blank line, followed by five dashes (<code>-----</code>) and another blank line. Anything before the separated is the YAML data, everything below it is the content.</p>
 
-<ul>
-<li><p><a href="https://video.modmore.com/modx-weekend-2014/sunday-backend/staging-workflow-with-git-and-gitify/">Video of Mark introduction Gitify</a> at the MODX Weekend 2014, 2015-09-21. <strong>Important:</strong> This presentation talks about a very early version of Gitify. It has learned a lot of new tricks since!</p></li>
-<li><p><a href="http://www.slideshare.net/hamstramark1/solving-the-workflow-building-modxtoday-with-gitify-20150521-alkmaar">Mark&#39;s slides of the MODX Meetup</a> in Alkmaar, The Netherlands, where he talked about how Gitify is used to build and manage Gitify. This is based on Gitify 0.9, 2015-05-21, so a lot more up to date on what you can do with it, and how you can manage a workflow with Gitify. Unfortunately, no video footage of this one. </p></li>
-<li><p><a href="https://modx.today/posts/2015/04/building-modx.today">&quot;Building MODX.today&quot;</a>, an article published on 2015-04-22 about how the MODX.today site was built. Includes a short section about using Gitify.</p></li>
-</ul>
+<h2 id="yaml-formatting-notes">YAML Formatting Notes</h2>
 
+<p>When manually editing the data files, to build into MODX later, it&#39;s important to keep a few things in mind.</p>
+
+<ol>
+<li>Strings can be edited with or without quotes, however as soon as there&#39;s any non-alphanumeric characters inside the string (dots, slashes, brackets etc), there should be single or double quotes around the value. Otherwise, you might get a YAML parse error on build.</li>
+<li><em>No</em> commas at the end of a line; the line break is enough.</li>
+<li>Use the <a href="http://www.yamllint.com/">YAML Linter</a> if you get a YAML parse error but can&#39;t figure out what&#39;s causing it. Don&#39;t include the separator or content below it though.</li>
+</ol>
+
+<h2 id="example-data-files">Example data files</h2>
+
+<p>This example only has simple meta data (Redirector Redirect object):</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">id</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">2</span>
+<span class="l-Scalar-Plain">pattern</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">^redactor$</span>
+<span class="l-Scalar-Plain">target</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">extras/redactor/</span>
+<span class="l-Scalar-Plain">context_key</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">web</span>
+<span class="l-Scalar-Plain">triggered</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">257</span>
+<span class="l-Scalar-Plain">triggered_first</span><span class="p-Indicator">:</span> <span class="s">&#39;2014-08-02</span><span class="nv"> </span><span class="s">06:32:29&#39;</span>
+<span class="l-Scalar-Plain">triggered_last</span><span class="p-Indicator">:</span> <span class="s">&#39;2014-08-03</span><span class="nv"> </span><span class="s">13:18:51&#39;</span>
+</code></pre></div>
+<p>This example shows the YAML meta data, followed by the content (the ClientConfig plugin):</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">id</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">9</span>
+<span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ClientConfig</span>
+<span class="l-Scalar-Plain">description</span><span class="p-Indicator">:</span> <span class="s">&#39;Sets</span><span class="nv"> </span><span class="s">system</span><span class="nv"> </span><span class="s">settings</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">Client</span><span class="nv"> </span><span class="s">Config</span><span class="nv"> </span><span class="s">CMP.&#39;</span>
+<span class="l-Scalar-Plain">properties</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">null</span>
+
+<span class="l-Scalar-Plain">-----</span>
+
+<span class="l-Scalar-Plain">/**</span>
+ <span class="l-Scalar-Plain">* ClientConfig</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* Copyright 2011 by Mark Hamstra &lt;hello@markhamstra.com&gt;</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* ClientConfig is free software; you can redistribute it and/or modify it under the</span>
+ <span class="l-Scalar-Plain">* terms of the GNU General Public License as published by the Free Software</span>
+ <span class="l-Scalar-Plain">* Foundation; either version 2 of the License, or (at your option) any later</span>
+ <span class="l-Scalar-Plain">* version.</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* ClientConfig is distributed in the hope that it will be useful, but WITHOUT ANY</span>
+ <span class="l-Scalar-Plain">* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span>
+ <span class="l-Scalar-Plain">* A PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* You should have received a copy of the GNU General Public License along with</span>
+ <span class="l-Scalar-Plain">* ClientConfig; if not, write to the Free Software Foundation, Inc., 59 Temple</span>
+ <span class="l-Scalar-Plain">* Place, Suite 330, Boston, MA 02111-1307 USA</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* @package clientconfig</span>
+ <span class="l-Scalar-Plain">*</span>
+ <span class="l-Scalar-Plain">* @var modX $modx</span>
+ <span class="l-Scalar-Plain">* @var int $id</span>
+ <span class="l-Scalar-Plain">* @var string $mode</span>
+ <span class="l-Scalar-Plain">* @var modResource $resource</span>
+ <span class="l-Scalar-Plain">* @var modTemplate $template</span>
+ <span class="l-Scalar-Plain">* @var modTemplateVar $tv</span>
+ <span class="l-Scalar-Plain">* @var modChunk $chunk</span>
+ <span class="l-Scalar-Plain">* @var modSnippet $snippet</span>
+ <span class="l-Scalar-Plain">* @var modPlugin $plugin</span>
+<span class="err">*</span><span class="l-Scalar-Plain">/</span>
+
+<span class="l-Scalar-Plain">$eventName = $modx-&gt;event-&gt;name;</span>
+
+<span class="l-Scalar-Plain">switch($eventName) {</span>
+    <span class="l-Scalar-Plain">case &#39;OnHandleRequest&#39;</span><span class="p-Indicator">:</span>
+        <span class="l-Scalar-Plain">/* Grab the class */</span>
+        <span class="l-Scalar-Plain">$path = $modx-&gt;getOption(&#39;clientconfig.core_path&#39;, null, $modx-&gt;getOption(&#39;core_path&#39;) . &#39;components/clientconfig/&#39;);</span>
+        <span class="l-Scalar-Plain">$path .= &#39;model/clientconfig/&#39;;</span>
+        <span class="l-Scalar-Plain">$clientConfig = $modx-&gt;getService(&#39;clientconfig&#39;,&#39;ClientConfig&#39;, $path);</span>
+
+        <span class="l-Scalar-Plain">/* If we got the class (gotta be careful of failed migrations), grab settings and go! */</span>
+        <span class="l-Scalar-Plain">if ($clientConfig instanceof ClientConfig) {</span>
+            <span class="l-Scalar-Plain">$settings = $clientConfig-&gt;getSettings();</span>
+
+            <span class="l-Scalar-Plain">/* Make settings available as [[++tags]] */</span>
+            <span class="l-Scalar-Plain">$modx-&gt;setPlaceholders($settings, &#39;+&#39;);</span>
+
+            <span class="l-Scalar-Plain">/* Make settings available for $modx-&gt;getOption() */</span>
+            <span class="l-Scalar-Plain">foreach ($settings as $key =&gt; $value) {</span>
+                <span class="l-Scalar-Plain">$modx-&gt;setOption($key, $value);</span>
+            <span class="l-Scalar-Plain">}</span>
+        <span class="l-Scalar-Plain">}</span>
+        <span class="l-Scalar-Plain">break;</span>
+<span class="err">}</span>
+
+<span class="l-Scalar-Plain">return;</span>
+</code></pre></div>
+    </div>
+</div>
                         </div>
                     
                 </div>

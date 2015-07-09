@@ -1,6 +1,6 @@
 # Site title and subtitle. This is used in _includes/header.html
-title: 'Gitify Docs'
-subtitle: 'Painless documentation for your projects'
+title: 'Gitify'
+subtitle: 'Command line toolkit to make managing a MODX site in git a lot easier.'
 
 # if you wish to integrate disqus on pages set your shortname here
 disqus_shortname: ''
@@ -9,9 +9,11 @@ disqus_shortname: ''
 google_analytics_id: ''
 
 sections: [
-    ['docs', 'Documentation'],
-    ['tutorials', 'Tutorials'],
-    ['references', 'References']
+    ['installation', 'Installation'],
+    ['usage', 'Usage'],
+    ['commands', 'Available Commands'],
+    ['config', 'Configuration'],
+    ['troubleshooting', 'Troubleshooting']
 ]
 
 # Enable/show navigation. There are there options:
@@ -36,3 +38,16 @@ future: true
 # Exclude non-site files
 exclude: ['bin', 'README.md']
 
+# Use the redcarpet Markdown renderer
+markdown: redcarpet
+redcarpet:
+    extensions: [
+        'no_intra_emphasis',
+        'fenced_code_blocks',
+        'autolink',
+        'strikethrough',
+        'superscript',
+        'with_toc_data',
+        'tables',
+        'hardwrap'
+    ]
