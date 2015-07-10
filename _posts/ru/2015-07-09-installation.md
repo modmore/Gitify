@@ -1,16 +1,18 @@
 ---
 layout: page
-title: "Установка"
+title: Установка
 category: ru/installation
 lang: ru
 order: 1
+published: true
 ---
+
 
 # Установка
 
-New as of v0.2 is that dependencies are managed via [Composer](https://getcomposer.org/), most notably it has been rebuilt on top of Symfony's Console component to provide a more feature-packed base to build from. [Follow these instructions if you haven't installed Composer before](https://getcomposer.org/doc/00-intro.md)
+Начиная с версии 0.2 зависимости управляются через [Composer](https://getcomposer.org/). Стоит отметить, что Gitify был создан на базе компонента Console из Symfony, который предоставляет богатые возможности для разработки. [Следуйте этим инструкция, если вы никогда ранее не устанавливали Composer](https://getcomposer.org/doc/00-intro.md)
 
-To get started with Gitify, it's easiest to set up a local clone of this repository. After that, run Composer to download the dependencies, and finally make the Gitify file executable to run it.
+Для начала работы с Gitify, проще всего установить локальную копию этого репозитория. После этого запустить Composer и скачать завивисимости и в завершение сделать файл Gitify исполняемым.
 
 ```bash
 $ git clone https://github.com/modmore/Gitify.git Gitify
@@ -19,7 +21,7 @@ $ composer install
 $ chmod +x Gitify
 ``` 
 
-At this point you should be able to type `./Gitify` and get a response like the following:
+Теперь вы должны иметь возможность набрать `./Gitify` и получить ответ, как показано ниже:
 
 ```
 Gitify version 1.0.0
@@ -43,13 +45,13 @@ install
 
 ```
 
-If that's working as expected, the next step is to add the Gitify executable to your PATH so you can run Gitify in any directory. Edit your `~/.bash_profile` and add the following, with the right path to the Gitify directory (not file) of course:
+Если все работает, как ожидалось, следующим шагом будет добавить Gitify в переменную PATH вашего окружения, что даст возможность запускать Gitify из любой папки. Откройте ваш файл `~/.bash_profile` и добавьте строки из примера, указав правильный путь к папке с Gitify (не к файлу):
 
 ```bash
 $ export PATH=/path/to/Gitify/:$PATH
 
 ```
 
-Restart your terminal and you should be good to go.
+Перезапустите ваш терминал и теперь все должно работать.
 
-For successfull installing of MODX by `Gitify install:modx` command you should have installed **unzip** command in your system. For Debian/Ubuntu you can use `sudo apt-get install unzip`.
+Для успешной становки MODX с помощью команды `Gitify modx:install` у вас в системе должна быть установлена команда **unzip**. Для Debian/Ubuntu вы можете использовать `sudo apt-get install unzip` для ее установки.
