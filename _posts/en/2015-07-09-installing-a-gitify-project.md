@@ -14,7 +14,7 @@ When you built a site with Gitify, and committed the data to a repository, you w
 
 To install a gitify project you first have to install Gitify:
 
-* [Install Gitify](/installation/installation.html)
+* [Install Gitify](/en/installation/installation.html)
 
 After it has been installed globally we can start installing the project:
 ### <a name="clone"></a>Cloning and Configuring
