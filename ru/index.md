@@ -2,18 +2,20 @@
 layout: default
 title: Начинаем работу с Gitify
 lang: ru
+published: true
 ---
+
 
 # Начинаем работу с Gitify
 
-The goal of Gitify is to provide a **two-way sync** of data typically stored in the MODX database, making it versionable with Git. To do this, it creates a representation of MODX objects in files. These files follow a certain [human and machine friendly format](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7), built from a block of YAML, followed by a separator, and then the main content (if there's a specific content field) below that.
+Цель Gitify  - обеспечить **двунаправленную синхронизацию** данных, обычно хранящихся в базе данных MODX, что позволит версионировать код через Git. Чтобы это сделать, программа создает отображение объектов MODX в файлы. Эти файлы следуют [формату](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7), дружелюбному как к людям, так и к машинам. Файлы состоят их из блока YAML, разделителя и обычного содержимого (если не задано специальное поле content).
 
-The project configuration, which determines what data is written to file and build to the database, is stored in a `.gitify` file in the project root.
+Настройки проекта, которые определяют какие данные записываются в файл и загружаются в базу данных, хранятся в файле `.gitify` в корне проекта.
 
 ## Введение в Gitify
 
-- [Video of Mark introduction Gitify](https://video.modmore.com/modx-weekend-2014/sunday-backend/staging-workflow-with-git-and-gitify/) at the MODX Weekend 2014, 2015-09-21. **Important:** This presentation talks about a very early version of Gitify. It has learned a lot of new tricks since!
+- [Видео от Марка о введении в Gitify](https://video.modmore.com/modx-weekend-2014/sunday-backend/staging-workflow-with-git-and-gitify/) с прошедшего 21 сентября 2015 _MODX Weekend 2014_. **Важно:** В этой презентации рассказывается об очень ранней версии Gitify. С тех пор Gitify умеет много новых трюков!
 
-- [Mark's slides of the MODX Meetup](http://www.slideshare.net/hamstramark1/solving-the-workflow-building-modxtoday-with-gitify-20150521-alkmaar) in Alkmaar, The Netherlands, where he talked about how Gitify is used to build and manage Gitify. This is based on Gitify 0.9, 2015-05-21, so a lot more up to date on what you can do with it, and how you can manage a workflow with Gitify. Unfortunately, no video footage of this one. 
+- [Слайды Марка с прошеднешл MODX Meetup](http://www.slideshare.net/hamstramark1/solving-the-workflow-building-modxtoday-with-gitify-20150521-alkmaar) в Алкмаар, Нидерланды, где он рассказывал о том, как Gitify используется для сборки и управления MODX. Доклад основан на версии 0.9 (21.05.2015), так что много чего нового того, что вы можете делать с Gitify и как вы можете настроить рабочий процесс с ним. К сожалению, нет видео с этого митапа. 
 
-- ["Building MODX.today"](https://modx.today/posts/2015/04/building-modx.today), an article published on 2015-04-22 about how the MODX.today site was built. Includes a short section about using Gitify.
+- [Сборка MODX.today](https://modx.today/posts/2015/04/building-modx.today), статья опубликованная 22 апреля 2015 о том, как собирается сайт MODX.today. Включает небольшой раздел о использовании Gitify.
