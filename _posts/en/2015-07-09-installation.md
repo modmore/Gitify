@@ -1,10 +1,12 @@
 ---
 layout: page
-title: "Installation"
+title: Installation
 category: en/installation
 lang: en
 order: 1
+published: true
 ---
+
 
 # Installation
 
@@ -18,8 +20,6 @@ $ cd Gitify
 $ composer install
 $ chmod +x Gitify
 ``` 
-
-
 
 At this point you should be able to type `./Gitify` and get a response like the following:
 
@@ -54,4 +54,4 @@ $ export PATH=/path/to/Gitify/:$PATH
 
 Restart your terminal and you should be good to go.
 
-For successfull installing of MODX by `Gitify install:modx` command you should have installed **unzip** command in your system. For Debian/Ubuntu you can use `sudo apt-get install unzip`.
+For successfull installing of MODX by `Gitify modx:install` command you should have installed **unzip** command in your system. For Debian/Ubuntu you can use `sudo apt-get install unzip`.
