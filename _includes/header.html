@@ -11,9 +11,9 @@
             <ul>
                 {% if page.category %}
                     {% if page.lang == 'ru' %}
-                        <li class="last"><a href="{{ site.baseurl }}{{ page.url | replace: 'ru', 'en' }}" title="In English">In English</a></li>
+                        <li class="last"><a href="{{ site.baseurl }}{{ page.url | replace: '/ru/', '/en/' }}" title="In English">In English</a></li>
                     {% else %} 
-                        <li class="last"><a href="{{ site.baseurl }}{{ page.url | replace: 'en', 'ru' }}" title="На русском">На русском</a></li>
+                        <li class="last"><a href="{{ site.baseurl }}{{ page.url | replace: '/en/', '/ru/' }}" title="На русском">На русском</a></li>
                     {% endif %}
                 {% else %}
                     {% if page.lang == 'ru' %}
