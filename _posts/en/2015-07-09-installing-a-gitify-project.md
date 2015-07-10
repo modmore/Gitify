@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "Installing a Gitify project"
-category: usage
+category: en/usage
+lang: en
 order: 1
 ---
 

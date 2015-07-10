@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "Example .gitify files"
-category: config
+category: en/config
+lang: en
 order: 2
 ---
 

@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "Data File Structure"
-category: config
+category: en/config
+lang: en
 order: 3
 ---
 

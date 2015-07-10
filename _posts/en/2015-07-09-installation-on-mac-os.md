@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "Installation on Mac OS X"
-category: installation
+category: en/installation
+lang: en
 order: 3
 ---
 

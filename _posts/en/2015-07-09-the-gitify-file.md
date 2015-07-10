@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "The .gitify File"
-category: config
+category: en/config
+lang: en
 order: 1
 ---
 

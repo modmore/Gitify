@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "modx:install"
-category: commands
+category: en/commands
+lang: en
 order: 5
 ---
 

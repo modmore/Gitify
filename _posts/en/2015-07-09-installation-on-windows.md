@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "Installation on Windows"
-category: installation
+category: en/installation
+lang: en
 order: 2
 ---
 

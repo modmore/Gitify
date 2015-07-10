@@ -1,7 +1,8 @@
 ---
 layout: page
 title: "Installation"
-category: installation
+category: en/installation
+lang: en
 order: 1
 ---
 

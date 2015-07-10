@@ -1,7 +1,9 @@
 ---
 layout: page
 title: "Troubleshooting"
-category: troubleshooting
+category: en/troubleshooting
+lang: en
+order: 1
 ---
 
 #Troubleshooting
