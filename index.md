@@ -1,9 +1,10 @@
 ---
 layout: default
+title: Getting started with Gitify
 lang: en
 ---
 
-# Gitify
+# Getting started with Gitify
 
 The goal of Gitify is to provide a **two-way sync** of data typically stored in the MODX database, making it versionable with Git. To do this, it creates a representation of MODX objects in files. These files follow a certain [human and machine friendly format](https://gist.github.com/Mark-H/5acafdc1c364f70fa4e7), built from a block of YAML, followed by a separator, and then the main content (if there's a specific content field) below that.
 

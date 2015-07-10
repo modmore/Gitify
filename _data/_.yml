@@ -9,8 +9,8 @@ en:
         troubleshooting: 'Troubleshooting'
 
 ru:
-    subtitle: 'Набор для управления MODX bp'
-    start: 'Начало работы'
+    subtitle: 'Набор инструментов для командной строки, облегчающий управление сайтом MODX через Git.'
+    start: 'Начинаем'
     sections: 
         installation: 'Установка'
         usage: 'Использование'
