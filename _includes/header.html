@@ -1,14 +1,27 @@
 <header class="siteheader blueending">
     <div class="row">
         <h1 class="large-5 medium-12 columns">
-            <a href="{{ site.baseurl }}/" class="logo">
+
+            <a href="{{ site.baseurl }}/{% if page.lang != site.deflang %}{{ page.lang }}/{% endif %}" class="logo">
                 <span>{{ site.title }}</span>
-                {% if site.subtitle %}<small>{{ site.subtitle }}</small>{% endif %}
+                {% if site.data._.[page.lang].subtitle %}<small>{{ site.data._.[page.lang].subtitle }}</small>{% endif %}
             </a>
         </h1>
         <nav class="large-7 medium-12 columns">
             <ul>
-                <li class="last"><a href="/ru/" title="На русском">На русском</a></li>
+                {% if page.category %}
+                    {% if page.lang == 'ru' %}
+                        <li class="last"><a href="{{ site.baseurl }}{{ page.url | replace: 'ru', 'en' }}" title="In English">In English</a></li>
+                    {% else %} 
+                        <li class="last"><a href="{{ site.baseurl }}{{ page.url | replace: 'en', 'ru' }}" title="На русском">На русском</a></li>
+                    {% endif %}
+                {% else %}
+                    {% if page.lang == 'ru' %}
+                        <li class="last"><a href="{{ site.baseurl }}/" title="In English">In English</a></li>
+                    {% else %} 
+                        <li class="last"><a href="{{ site.baseurl }}/ru/" title="На русском">На русском</a></li>
+                    {% endif %}
+                {% endif %}
                 <li class="first"><a href="https://github.com/modmore/Gitify" title="View on GitHub">View on GitHub</a></li>
                 <li class="last"><a href="https://modmore.com" title="modmore">modmore {+}</a></li>
             </ul>

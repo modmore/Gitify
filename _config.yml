@@ -1,22 +1,12 @@
 # Site title and subtitle. This is used in _includes/header.html
 title: 'Gitify'
-subtitle: 'Command line toolkit to make managing a MODX site in git a lot easier.'
 
-# if you wish to integrate disqus on pages set your shortname here
-disqus_shortname: ''
-
-# if you use google analytics, add your tracking id here
-google_analytics_id: ''
-
-permalink: /:title/
-
-sections: [
-    ['installation', 'Installation'],
-    ['usage', 'Usage'],
-    ['commands', 'Available Commands'],
-    ['config', 'Configuration'],
-    ['troubleshooting', 'Troubleshooting']
-]
+sections:
+    - installation
+    - usage
+    - commands
+    - config
+    - troubleshooting
 
 # Enable/show navigation. There are there options:
 #   0 - always hide
@@ -39,6 +29,8 @@ future: true
 
 # Exclude non-site files
 exclude: ['bin', 'README.md']
+
+deflang: en
 
 # Use the redcarpet Markdown renderer
 markdown: redcarpet

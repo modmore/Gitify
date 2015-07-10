@@ -1,11 +1,12 @@
 <div id="navigation">
     <ul class="subnav">
-        <li><a href="{{ site.baseurl }}/">Getting started</a></li>
+        <li><a href="{{ site.baseurl }}/{% if page.lang != site.deflang %}{{ page.lang }}/{% endif %}">{{ site.data._.[page.lang].start }}</a></li>
         {% for section in site.sections %}
-            {% assign attr = section[0] %}
-            {% assign label = section[1] %}
+            {% capture cat %}{{ page.lang }}/{{ section }}{% endcapture %}
+            {% assign label = site.data._.[page.lang].sections.[section] %}
 
-            {% for link in site.categories[attr] %}
+            {% assign pages = site.categories[cat] | where: "lang", page.lang %}
+            {% for link in pages %}
                 {% if forloop.first %}
                     <li class="nav-header"><h3><span>{{ label }}</span></h3></li>
                 {% endif %}
