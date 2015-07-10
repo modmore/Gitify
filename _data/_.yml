@@ -1,0 +1,19 @@
+en:
+    subtitle: 'Command line toolkit to make managing a MODX site in git a lot easier.'
+    start: 'Getting started'
+    sections: 
+        installation: 'Installation'
+        usage: 'Usage'
+        commands: 'Available Commands'
+        config: 'Configuration'
+        troubleshooting: 'Troubleshooting'
+
+ru:
+    subtitle: 'Набор инструментов для командной строки, облегчающий управление сайтом MODX через Git.'
+    start: 'Начинаем'
+    sections: 
+        installation: 'Установка'
+        usage: 'Использование'
+        commands: 'Доступные команды'
+        config: 'Настройка'
+        troubleshooting: 'Решение проблем'
