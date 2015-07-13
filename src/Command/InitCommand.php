@@ -75,7 +75,10 @@ class InitCommand extends BaseCommand
         if (empty($directory)) $directory = '_data/';
         $directory = trim($directory, '/') . '/';
         $data['data_directory'] = $directory;
-        mkdir($directory);
+
+        if ( ! file_exists($directory)) {
+            mkdir($directory);
+        }
 
         /**
          * Ask the user for a backup directory to store database backups in
@@ -85,7 +88,10 @@ class InitCommand extends BaseCommand
         if (empty($directory)) $directory = '_backup/';
         $directory = trim($directory, '/') . '/';
         $data['backup_directory'] = $directory;
-        mkdir($directory);
+
+        if ( ! file_exists($directory)) {
+            mkdir($directory);
+        }
 
         /**
          * Ask if we want to include some default data types
