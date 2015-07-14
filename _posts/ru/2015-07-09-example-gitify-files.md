@@ -8,9 +8,9 @@ order: 2
 
 # Пример файла .gitifs
 
-## Default
+## По умолчанию
 
-When using `Gitify init` and answering Yes to all questions, and keeping the data directory as the default, this is the `.gitify` file you and up with:
+Если использовать `Gitify init` и ответить на все вопросы Да, а так же сохранить папку с данными по умолчанию, то вы получите такой файл `.gitify`: 
 
 ```yaml
 data_directory: _data/
@@ -44,9 +44,9 @@ data:
         extension: .php
 ```
 
-## Almost a full site
+## Почти целый сайт
 
-Keep adding stuff to it, and you might end up with something more like this:
+Если добавлять сущности в него, то вполне возможно, что у вас получится что-то вроде этого:
 
 ```yaml
 name: modmore.com
@@ -164,5 +164,3 @@ data:
     primary: [namespace, reference]
     package: scheduler
 ```
-
-
