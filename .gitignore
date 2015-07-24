@@ -2,4 +2,4 @@
 config.core.php
 data/
 dev/
-vendor/
+/vendor/
