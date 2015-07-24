@@ -1,7 +1,8 @@
 {
     "require": {
         "symfony/console": "2.6.*",
-        "symfony/yaml": "2.6.*"
+        "symfony/yaml": "2.6.*",
+        "symfony/process": "2.6.*"
     },
 
     "require-dev": {
