@@ -8,9 +8,9 @@ order: 1
 
 # Файл .gitify
 
-To define what to export, to where and how, we're using a `.gitify` file formatted in YAML.
+Чтобы указать, что экспортировать, где и как, мы используем файл `.gitify` формата YAML.
 
-An example `.gitify` may look like this:
+Пример файла `.gitify` может выглядеть так:
 
 ```yaml
 data_directory: _data/
@@ -49,9 +49,9 @@ data:
         extension: .php
 ```
 
-The `.gitify` file structure is real simple. There are root nodes for `data_directory` (the relative path where to store the files), `backup_directory`, `data` and `packages`. 
+Структура `.gitify` файла очень проста. В нем есть корневые узлы `data_directory` (относительный путь к месту, где хранятся файлы), `backup_directory`, `data` и `packages`. 
 
-`data` contains an array of what we call "Partitions". These partitions are basically the name of the directory that holds all the files of that type, and can also be used in the `Gitify extract` and `Gitify build` commands. Each partition specifies either a `type` that has special processing going on (only `content` is available as type currently), or a `class` which specified the xPDOObject derivative that you want to use. The `primary` field determines the key to use in the name of the generated files. This defaults to `id`, but in many cases you may want to use the `name` as that is more human friendly. The primary is used for the file names and is also related to the automatic ID conflict resolution.
+`data` состоит из массива, который мы называем "Разделы". Раздел - это обычно имя папки, которая содержит все файлы этого типа, а так же может использоваться в командах `Gitify extract` и `Gitify build`. Каждый раздел описывает один тип `type`, который будет обрабатываться определенным способом (сейчас доступен как тип только `content`), или класс `class`, который является производным от xPDOObject и который вы хотите использовать. Поле `primary` определяет ключ, на основе которого будет дано имя генерируемому файлу. По умолчанию это `id`, но во многих случаях вы можете использовать `name`, так понятнее для людей. `primary` используется для имен файлов, а так же участвует в автоматическом разрешении конфликтов с ID.
 
 By default files will be created with a `.yaml` extension, but if you want you can override that with a `extension` property. This can help with syntax highlighting in IDEs.
 
