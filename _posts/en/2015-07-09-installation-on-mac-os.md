@@ -18,13 +18,14 @@ There are two solutions to this problem.
 
 By symlinking the mysql socket in `/var/mysql/`, you will be able to communicate with the right database server. This link can sometimes get lost when the socket is closed so you might need to run this from time to time. 
 
-````
+```bash
 cd /var/mysql/
 sudo ln -s /Applications/MAMP/tmp/mysql/mysql.sock
-````
+```
 
 If the `/var/mysql/` folder doesn't exist yet, you can create it like this:
-```
+
+```bash
 sudo mkdir /var/mysql/
 ```
 
@@ -32,7 +33,7 @@ sudo mkdir /var/mysql/
 
 The recommended approach would be to make sure that you're using the right PHP binary in the first place. This can be done by editing your `.bash_profile` file in your user directory, and adding the following line:
 
-```
+```bash
 export PATH=/Applications/MAMP/bin/php/php5.6.7/bin:$PATH
 ```
 

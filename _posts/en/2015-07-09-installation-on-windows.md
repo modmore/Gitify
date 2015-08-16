@@ -16,11 +16,11 @@ It's common on Windows that you need to add both PHP and the Gitify executables 
 
 Common locations of the PHP executable on windows include:
 
-````
+```text
 c:\php\php.exe
 c:\php5\php.exe
 c:\windows\php.exe
 c:\program files\php\php.exe
 c:\wamp\bin\php\php5\php.exe
 c:\xampp\php\php.exe
-````
+```

@@ -1,26 +1,27 @@
 ---
 layout: page
-title: "Установка в Windows"
+title: Установка в Windows
 category: ru/installation
 lang: ru
 order: 2
+published: true
 ---
 
 # Установка в Windows
 
-On Windows, some of the installation steps are bit more work, especially adding Gitify to your `PATH` variable.
+В Windows некоторые из шагов по установке требуют немного больше усилий, особенно добавление Gitify в переменную `PATH`.
 
-This question on Stack Overflow explains the procedure of editing the PATH variable on Windows 7: http://stackoverflow.com/questions/7307548/how-to-access-php-with-the-command-line-on-windows/7307581#7307581
+Этот вопрос на Stack Overflow объясняет процедуру добавления переменной PATH в  Windows 7: http://stackoverflow.com/questions/7307548/how-to-access-php-with-the-command-line-on-windows/7307581#7307581
 
-It's common on Windows that you need to add both PHP and the Gitify executables to the PATH. 
+В общем в Windows вам нужно только добавить исполняемые PHP и Gitify в PATH.
 
-Common locations of the PHP executable on windows include:
+Места, где обычно размещаются исполняемые файлы PHP в Windows:
 
-````
+```text
 c:\php\php.exe
 c:\php5\php.exe
 c:\windows\php.exe
 c:\program files\php\php.exe
 c:\wamp\bin\php\php5\php.exe
 c:\xampp\php\php.exe
-````
+```

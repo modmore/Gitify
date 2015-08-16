@@ -10,7 +10,7 @@ order: 6
 
 Renamed from `Gitify install:package` in v0.8. Installs the last version of a MODX Package with the PackageName you specified, or all packages defined in your `.gitify` file when specifying the `--all` flag. 
 
-````
+```bash
 Usage:
  package:install [--all] [-i|--interactive] [package_name]
 
@@ -23,5 +23,4 @@ Options:
  --help (-h)           Display this help message.
  --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
  --version (-V)        Display the Gitify version.
-
-````
+```

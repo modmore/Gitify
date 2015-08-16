@@ -8,32 +8,33 @@ order: 3
 
 # Установка в Mac OS X
 
-On Mac, there's a version of PHP and MySQL installed by default. However if you use MAMP/MAMP Pro or a similar tool, it's possible that you get unexpected results trying to run Gitify from the terminal.
+В Маке PHP и MySQL установлены по умолчанию. Однако, если вы пользуетесь MAMP/MAMP Pro или подобным инструментом, вполне возможно, что попытка запуска Gitify из терминала приведет к неожиданным результатам.
 
-This might include errors about missing sockets, no access to the database and stuff like that.
+Это могут быть ошибки о неработающих сокетах, об отстуствии доступа к базе данных и тому подобное.
 
-There are two solutions to this problem. 
+Есть два решения этой проблемы.
 
-## Add a mysql socket symlink
+## Добавить символическую ссылку для сокета mysql
 
-By symlinking the mysql socket in `/var/mysql/`, you will be able to communicate with the right database server. This link can sometimes get lost when the socket is closed so you might need to run this from time to time. 
+Создавая символическую ссылку на mysql сокет вида `/var/mysql/` вы получите возможность взаимодейстсовать с правильным сервером баз данных. Эта ссылка может иногда пропадать, когда сокет закрывается, поэтому вам придется ее создавать заново время от времени. 
 
-````
+```bash
 cd /var/mysql/
 sudo ln -s /Applications/MAMP/tmp/mysql/mysql.sock
-````
-
-If the `/var/mysql/` folder doesn't exist yet, you can create it like this:
 ```
+
+Если папка `/var/mysql/` не существует, то вы можете ее создать вот так:
+
+```bash
 sudo mkdir /var/mysql/
 ```
 
-## Use the right PHP binary
+## Использовать правильный исполняемый файл PHP
 
-The recommended approach would be to make sure that you're using the right PHP binary in the first place. This can be done by editing your `.bash_profile` file in your user directory, and adding the following line:
+Рекомендуемый подход в первую очередь позволяет убедиться в том, что вы используете правильный исполняемый файл PHP. Это можно сделать отредактировав файл `.bash_profile` в вашей пользователькой директории и добавив в него строку
 
-```
+```bash
 export PATH=/Applications/MAMP/bin/php/php5.6.7/bin:$PATH
 ```
 
-replacing the path with the right path for your PHP install. 
+и поменяв указанный путь на правильный путь к установленному интерпретатору PHP.

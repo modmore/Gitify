@@ -8,17 +8,19 @@ order: 5
 
 # gitify modx:install
 
-Renamed from `Gitify install:modx` in v0.8. Installs the latest version of MODX, or the one you specified, by downloading the zip and running a command line install. Database details and the likes will be asked for interactively.
+Переименованая команда `Gitify install:modx` с  версии 0.8. Устанавливает последнюю версию MODX или указанную через параметр, скаживает архив в zip и запускает установку из командной строки. Настройки базы данны и другие параметры задаются в интерактивном режиме.
 
-````
-Usage:
+_Ниже вывод команды с параметром `--help`, в консоли будет все на английском. Здесь переведено для лучшего понимания._
+
+```bash
+Использование:
  modx:install [modx_version]
 
-Arguments:
- modx_version          The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.
+Аргументы:
+ modx_version          Версия MODX для установки, в формате 2.3.2-pl. Оставьте пустым или укажите "latest" для установки последнего стабильного релиза.
 
-Options:
- --help (-h)           Display this help message.
- --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
- --version (-V)        Display the Gitify version.
-````
+Опции:
+ --help (-h)           Показывает документацию по команде.
+ --verbose (-v|vv|vvv) Увеличивает информативность сообщений: 1 - для обычного вывода, 2 - для более подробного вывода и 3 - для отладки.
+ --version (-V)        Показывает версию Gitify.
+```

@@ -8,8 +8,8 @@ order: 1
 
 # Решение проблем
 
-Having issues with Gitify? Please read all entries in this guide and search the [issues on Github](https://github.com/modmore/Gitify/issues). If you don't find an answer you might want to [open a new issue](https://github.com/modmore/Gitify/issues/new).
+Есть проблемы с Gitify? Пожалуйста, прочитайте все пункты этой документации и поищите в [ошибках на GitHub](https://github.com/modmore/Gitify/issues). Если вы не нашли ответ, вы можете [создать issue](https://github.com/modmore/Gitify/issues/new) и описать проблему.
 
 ## MIGX
 
-If you're using MIGX configs and the Gitify files for the configs changes after each `build` and `extract` command of Gitify, you might need to pay attention to your order of the MIGX objects in your `.gitify` file. The `migxConfig` should be the last item of the MIGX objects. For more details please read [issue #90](https://github.com/modmore/Gitify/issues/90).
+Если вы используете конфиги MIGX и файлы Gitify для изменения конфигов после каждого вызова команда `build` и `extract`, вы должны обратить внимание на порядок MIGX объектов в вашем файле `.gitify`. `migxConfig` должен быть последним из объектов MIGX. Более подробно все описано в [issue #90](https://github.com/modmore/Gitify/issues/90).

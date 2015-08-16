@@ -8,20 +8,21 @@ order: 6
 
 # gitify package:install
 
-Renamed from `Gitify install:package` in v0.8. Installs the last version of a MODX Package with the PackageName you specified, or all packages defined in your `.gitify` file when specifying the `--all` flag. 
+Переименованная команда `Gitify install:package` с версии 0.8. Устанавливает последнюю версию пакета с задаными именем PackageName, или всех пакетов, перечисленных в вашем файле `.gitify`, когда вызывается с параметром `--all`. 
 
-````
-Usage:
+_Ниже вывод команды с параметром `--help`, в консоли будет все на английском. Здесь переведено для лучшего понимания._
+
+```bash
+Использование:
  package:install [--all] [-i|--interactive] [package_name]
 
-Arguments:
- PackageName          The MODX Package to install. Installs the last stable release of the Package.
+Аргументы:
+ PackageName          Пакет для установки. Устанавливается последний стабильный релиз пакета.
 
-Options:
- --all                 When specified, all packages defined in the .gitify config will be installed.
- --interactive (-i)    When --all and --interactive are specified, all packages defined in the .gitify config will be installed interactively. Installing a single package is always done interactively. 
- --help (-h)           Display this help message.
- --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
- --version (-V)        Display the Gitify version.
-
-````
+Опции:
+ --all                 Если используется, будут установлены все пакеты, указанные в конфиге .gitify.
+ --interactive (-i)    Если --all и --interactive используются, все пакеты, указанные в конфиге .gitify, будут установлены в интерактивном режиме. Установка единичного пакета всегда происходит в интерактивном режиме. 
+ --help (-h)           Показывает документацию по команде.
+ --verbose (-v|vv|vvv) Увеличивает информативность сообщений: 1 - для обычного вывода, 2 - для более подробного вывода и 3 - для отладки.
+ --version (-V)        Показывает версию Gitify.
+```
