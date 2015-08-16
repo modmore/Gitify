@@ -23,7 +23,7 @@ $ chmod +x Gitify
 
 At this point you should be able to type `./Gitify` and get a response like the following:
 
-```
+```bash
 Gitify version 1.0.0
 
 Usage:

@@ -7,7 +7,6 @@ order: 2
 published: true
 ---
 
-
 # Установка в Windows
 
 В Windows некоторые из шагов по установке требуют немного больше усилий, особенно добавление Gitify в переменную `PATH`.
@@ -18,11 +17,11 @@ published: true
 
 Места, где обычно размещаются исполняемые файлы PHP в Windows:
 
-````
+```text
 c:\php\php.exe
 c:\php5\php.exe
 c:\windows\php.exe
 c:\program files\php\php.exe
 c:\wamp\bin\php\php5\php.exe
 c:\xampp\php\php.exe
-````
+```

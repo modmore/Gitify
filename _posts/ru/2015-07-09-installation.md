@@ -15,15 +15,15 @@ published: true
 Для начала работы с Gitify, проще всего установить локальную копию этого репозитория. После этого запустить Composer и скачать завивисимости и в завершение сделать файл Gitify исполняемым.
 
 ```bash
-$ git clone https://github.com/modmore/Gitify.git Gitify
-$ cd Gitify
-$ composer install
-$ chmod +x Gitify
+git clone https://github.com/modmore/Gitify.git Gitify
+cd Gitify
+composer install
+chmod +x Gitify
 ``` 
 
 Теперь вы должны иметь возможность набрать `./Gitify` и получить ответ, как показано ниже:
 
-```
+```bash
 Gitify version 1.0.0
 
 Usage:
@@ -48,7 +48,7 @@ install
 Если все работает, как ожидалось, следующим шагом будет добавить Gitify в переменную PATH вашего окружения, что даст возможность запускать Gitify из любой папки. Откройте ваш файл `~/.bash_profile` и добавьте строки из примера, указав правильный путь к папке с Gitify (не к файлу):
 
 ```bash
-$ export PATH=/path/to/Gitify/:$PATH
+export PATH=/path/to/Gitify/:$PATH
 
 ```
 

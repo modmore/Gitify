@@ -10,7 +10,7 @@ order: 5
 
 Renamed from `Gitify install:modx` in v0.8. Installs the latest version of MODX, or the one you specified, by downloading the zip and running a command line install. Database details and the likes will be asked for interactively.
 
-````
+```bash
 Usage:
  modx:install [modx_version]
 
@@ -21,4 +21,4 @@ Options:
  --help (-h)           Display this help message.
  --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
  --version (-V)        Display the Gitify version.
-````
+```

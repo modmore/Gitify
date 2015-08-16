@@ -38,7 +38,7 @@ triggered_last: '2014-08-03 13:18:51'
 
 This example shows the YAML meta data, followed by the content (the ClientConfig plugin):
 
-```yaml
+```php
 id: 9
 name: ClientConfig
 description: 'Sets system settings from the Client Config CMP.'
@@ -46,6 +46,7 @@ properties: null
 
 -----
 
+<?php
 /**
  * ClientConfig
  *
@@ -75,18 +76,27 @@ properties: null
  * @var modChunk $chunk
  * @var modSnippet $snippet
  * @var modPlugin $plugin
-*/
+ **/
 
 $eventName = $modx->event->name;
 
 switch($eventName) {
     case 'OnHandleRequest':
         /* Grab the class */
-        $path = $modx->getOption('clientconfig.core_path', null, $modx->getOption('core_path') . 'components/clientconfig/');
+        $path = $modx->getOption(
+            'clientconfig.core_path', 
+            null, 
+            $modx->getOption('core_path') . 'components/clientconfig/'
+        );
         $path .= 'model/clientconfig/';
-        $clientConfig = $modx->getService('clientconfig','ClientConfig', $path);
+        $clientConfig = $modx->getService(
+            'clientconfig',
+            'ClientConfig', 
+            $path
+        );
 
-        /* If we got the class (gotta be careful of failed migrations), grab settings and go! */
+        /* If we got the class (gotta be careful of failed migrations), 
+        grab settings and go! */
         if ($clientConfig instanceof ClientConfig) {
             $settings = $clientConfig->getSettings();
 
@@ -103,5 +113,3 @@ switch($eventName) {
 
 return;
 ```
-
-

@@ -33,7 +33,7 @@ git clone REPOSITORY-LINK PROJECT-NAME
 Теперь мы готовы попросить gitify установить последнюю версию MODX и все нужные пакеты:
 
 ```bash
-    Gitify install:modx
+Gitify install:modx
 ```
 
 После того, как вы запустили эту команду, Gitify задаст несколько вопросов. Если вы еще не создали базу данных, вы можете вписать данные пользователя MySQL, который имеет права на создание базы банных.
@@ -42,7 +42,7 @@ git clone REPOSITORY-LINK PROJECT-NAME
 
 ```bash
 Downloading MODX from http://modx.com/download/latest/...
-######################################################################## 100.0%
+################################################################# 100.0%
 Extracting zip...
 Moving unzipped files out of temporary directory...
 Please complete following details to install MODX. Leave empty to use the [default].
