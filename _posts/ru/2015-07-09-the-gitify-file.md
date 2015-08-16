@@ -53,15 +53,15 @@ data:
 
 `data` состоит из массива, который мы называем "Разделы". Раздел - это обычно имя папки, которая содержит все файлы этого типа, а так же может использоваться в командах `Gitify extract` и `Gitify build`. Каждый раздел описывает один тип `type`, который будет обрабатываться определенным способом (сейчас доступен как тип только `content`), или класс `class`, который является производным от xPDOObject и который вы хотите использовать. Поле `primary` определяет ключ, на основе которого будет дано имя генерируемому файлу. По умолчанию это `id`, но во многих случаях вы можете использовать `name`, так понятнее для людей. `primary` используется для имен файлов, а так же участвует в автоматическом разрешении конфликтов с ID.
 
-By default files will be created with a `.yaml` extension, but if you want you can override that with a `extension` property. This can help with syntax highlighting in IDEs.
+По умолчанию файлы будут созданы с расширением `.yaml`, но вы можете поменять его через свойство `extension`, если хотите. Это иногда может помочь с подстветкой синтаксиса в IDE.
 
-Each partition can also specify a `where` property. This contains an array which can be turned into a valid xPDO criteria. 
+Так же каждый раздел может включать свойство `where`. Оно содержит массив, который может быть превращен в валидный запрос xPDO (xPDO Criteria).
 
-When using GitifyWatch, there is also an `environments` root node in the gitify file, refer to the GitifyWatch documentation for more about that. 
+Когда используется GitifyWatch, в корне файла конфигурации gitify добавляется узел `environments`. Подробнее об этом смотрите в документации к GitifyWatch.
 
-### Third party packages (models)
+### Сторонние дополнения (модели)
 
-When a certain class is not part of the core models, you can define a `package` as well. This will run `$modx->addPackage` before attempting to load the data. The path is determined by looking at a `[package].core_path` setting suffixed with `model/`, `[[++core_path]]components/[package]/model/`or a hardcoded `package_path` property. For example, you could use the following in your `.gitify` file to load [ContentBlocks](http://modmo.re/cb) Layouts &amp; Fields:
+Если определенный класс не является частью ядра MODX, вы так же можете указать свойство `package`. Gitify выполнит `$modx->addPackage` перед попыткой загрузить данные. Путь определяется через системную настройку `[package].core_path`, дополненную строкой `model/`, через системную настройку `[[++core_path]]components/[package]/model/` или через непосредственное указание пути в свойстве `package_path`. Для примера, вы можете дополнить ваш файл `.gitify` для загрузки Layouts & Fields из [ContentBlocks](http://modmo.re/cb):
 
 ```yaml
 data:
@@ -74,15 +74,15 @@ data:
         primary: name
 ```
 
-As it'll load the package into memory, it's only required to add the package once. For clarify, it can't hurt to add it to each `data` entry that uses it.
+Так как пакет будет загружен в память, то требуется добавить пакет только 1 раз, но ничего не мешает добавить это свойство ко всем записям в `data`, использующих этот пакет.
 
-### Dealing with Closures
+### Взаимодействие с замыканиями
 
-A Closure is a separate table in the database that a core or third party extra may use to keep information about a hierarchy in a convenient format. These are often automatically generated when creating a new object, which can result in a error messages and other issues when building, especially with the `--force` flag. 
+Замыкание - это отдельная таблица в базе данных, которую ядро или строннее дополнение может использовать, чтобы хранить информацию об иерархии в удобном формате. Часто эти данные генерируются автоматически при создании новых объектов, что может привести к ошибкам и другим проблемам при сборке сайта, особенно когда используется флаг `--force`.
 
-To solve this, a `truncate_on_force` option was introduced in v0.6.0 that lets you define an array of class names that need their tables truncated on a force build. Truncating the closure table(s) before a forced build ensures that the model can properly create the rows in the closure table, without throwing errors.
+Чтобы решить эту проблему, в версии v0.6.0 добавился параметр `truncate_on_force`, который позволяет определить массив имен классов, таблицы которых нужно очистить при форсированной сборке. Очистка таблицы замыканий перед форсированной сборкой позволяет быть уверенным, что  модель сможет правильно создать строки в таблице и избежать ошибок.
 
-Here are two examples of using `truncate_on_force`:
+Ниже два примера использования `truncate_on_force`:
 
 ```yaml
 data:
@@ -99,9 +99,9 @@ data:
             - quipCommentClosure
 ```
 
-### Composite Primary Keys
+### Составные первичные ключи
 
-When an object doesn't have a single primary key, or you want to get fancy with file names, it's possible to define a composite primary key, by setting the `primary` attribute to an array. For example, like this:
+Когда у объекта не одинарный первичный ключ или когда вы хотите добавить возможность работы с именами файлов, есть возможность задать составной первичный ключ, задав свойство `primary` как массив. Например, так:
 
 ```yaml
 data:
@@ -111,29 +111,27 @@ data:
         extension: .html
 ```
 
-That would grab the category and the name as primary keys, and join them together with a dot in the file name. This is a pretty bad example, and you shouldn't really use it like this.
+В этом примере категория и имя будут использованы как первичный ключ и имя файла будет состоять из категории и имени, разделенных точкой. Это очень плохой пример и на самом деле вам так делать не нужно.
 
-### Install MODX Packages
+### Установка пакетов MODX
 
-You can also define packages to install. This uses the following format
+Вы так же можете указать пакеты, которые нужно установить. Делается это так:
 
 ```yaml
 packages:
-        modx.com:
-            service_url: http://rest.modx.com/extras/
-            packages:
-                - ace
-                - wayfinder
-        modmore.com:
-            service_url: https://rest.modmore.com/
-            username: username
-            api_key: .modmore.com.key
-            packages:
-                - clientconfig
+    modx.com:
+        service_url: http://rest.modx.com/extras/
+        packages:
+            - ace
+            - wayfinder
+    modmore.com:
+        service_url: https://rest.modmore.com/
+        username: username
+        api_key: .modmore.com.key
+        packages:
+            - clientconfig
 ```
 
-When specifying an api_key on a provider, like in the example above, the value provided is the name of a **file** that contains the actual API Key. So the value of `.modmore.com.key` in the example above loads the file `/path/to/your/base/directory/.modmore.com.key`. This file needs to be kept out of the git repository using a .gitignore file, and you will also want to protect direct read access to it with your .htaccess file or keeping it out of the webroot.
+Когда указывается `api_key` у провайдера, как в примере выше, значение ключа берется из файла, имя которого указано в свойстве `api_key`. Таким образом значение `.modmore.com.key` в примере выше загружает файл `/path/to/your/base/directory/.modmore.com.key`. Файлы с ключами должны быть исключены из контроля версий c помощью файла .gitignore, и вы так же должны защитить эти файлы от прямого чтения с помощью .htaccess или хранить их за пределами webroot.
 
-To install the packages that you added to the `packages` entry in the .gitify file, simply run the command `Gitify package:install --all`. That will attempt to install all packages that were mentioned, skipping any that are already installed. 
-
-
+Для установки пакетов, которые вы добавили в раздел `packages` в вашем файле `.gitify` просто запустите команду `Gitify package:install --all`. Эта команда попробует установить все пакеты, которые были указаны, пропуская только те, которые уже установлены.

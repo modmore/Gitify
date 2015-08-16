@@ -6,25 +6,25 @@ lang: ru
 order: 3
 ---
 
-# Структура файлов данных
+# Структура файлов с данными
 
-Data files are formatted in a combination of YAML and a content area if the object has a getContent method defined.
+Файл с данными - это комбинация YAML-блока с мета-данными и области содержимого, если у объекта задан метод `getContent()`.
 
-The top of the file contains the YAML meta data. This includes most of the objects' fields. 
+Верх файла занимают мета-данные в YAML формате. Этот блок включает почти все поля объекта.
 
-The separator is a blank line, followed by five dashes (`-----`) and another blank line. Anything before the separated is the YAML data, everything below it is the content.
+Разделитель состоит из пустой строки, за ним 5 тире (`-----`) и еще одной пустой строки. Все, что до разделителя - данные в YAML, все что после - содержимое (content).
 
-## YAML Formatting Notes
+## Важные замечания по форматированию в YAML
 
-When manually editing the data files, to build into MODX later, it's important to keep a few things in mind.
+Важно помнить о некоторых важных вещах во время ручного редактирования файлов и последующей загрузке их в MODX.
 
-1. Strings can be edited with or without quotes, however as soon as there's any non-alphanumeric characters inside the string (dots, slashes, brackets etc), there should be single or double quotes around the value. Otherwise, you might get a YAML parse error on build.
-2. _No_ commas at the end of a line; the line break is enough.
-3. Use the [YAML Linter](http://www.yamllint.com/) if you get a YAML parse error but can't figure out what's causing it. Don't include the separator or content below it though.
+1. Строки могут указываться как с кавычками, так и без, однако, как только в строке появляются не буквенно-цифровые символы (точки, слеши, скобки и т.д.), значения строк должны быть заключены в одинарные или двойные кавычки. Иначе вы получите ошибки разбора YAML во время сборки сайта.
+2. Точка с запятой в конце строки _не нужна_; перехода на новую строку будет достаточно.
+3. Используйте [YAML Linter](http://www.yamllint.com/), если у вас есть ошибки разбора YAML и вы не можете определить, что случилось. Не включайте разделитель или содержимое ниже в код для линтера.
 
-## Example data files
+## Примеры файлов с данными
 
-This example only has simple meta data (Redirector Redirect object):
+Этот пример содержит только мета-данные (объект Redirect из дополнения Redirector):
 
 ```yaml
 id: 2
@@ -36,7 +36,7 @@ triggered_first: '2014-08-02 06:32:29'
 triggered_last: '2014-08-03 13:18:51'
 ```
 
-This example shows the YAML meta data, followed by the content (the ClientConfig plugin):
+Этот пример содержит мета-данные в yaml и содержимое плагина (плагин ClientConfig):
 
 ```php
 id: 9
