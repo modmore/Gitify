@@ -96,7 +96,7 @@ class InstallModxCommand extends BaseCommand
         }
 
         $this->output->writeln("Extracting zip...");
-        exec('unzip modx.zip');
+        exec('unzip modx.zip -x "*/./"');
 
         $insideFolder = exec('ls -F | grep "modx-" | head -1');
         if(empty($insideFolder) || $insideFolder == '/') {
