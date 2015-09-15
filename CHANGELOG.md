@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Output result from command line install during `modx:install`
 - Fix unzip in `modx:install` on certain systems
 - Added support to get the git repository and environment specific options
 - Added symfony2/process and git.php dependencies
