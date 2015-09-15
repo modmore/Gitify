@@ -35,6 +35,7 @@ use modmore\Gitify\Command\BuildCommand;
 use modmore\Gitify\Command\ExtractCommand;
 use modmore\Gitify\Command\InitCommand;
 use modmore\Gitify\Command\InstallModxCommand;
+use modmore\Gitify\Command\UpgradeModxCommand;
 use modmore\Gitify\Command\InstallPackageCommand;
 use modmore\Gitify\Command\RestoreCommand;
 
@@ -43,6 +44,7 @@ $application->add(new InitCommand);
 $application->add(new BuildCommand);
 $application->add(new ExtractCommand);
 $application->add(new InstallModxCommand);
+$application->add(new UpgradeModxCommand);
 $application->add(new InstallPackageCommand);
 $application->add(new BackupCommand);
 $application->add(new RestoreCommand);
