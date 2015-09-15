@@ -163,7 +163,7 @@ class BuildCommand extends BaseCommand
         $this->resetConflicts();
         $this->getExistingObjects('modResource', $this->getPartitionCriteria($type['folder']));
 
-        $folder = getcwd() . DIRECTORY_SEPARATOR . $folder;
+        $folder = GITIFY_WORKING_DIR . $folder;
 
         $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
@@ -583,7 +583,7 @@ class BuildCommand extends BaseCommand
                 // Get the original/master copy of this conflict
                 $getPrimary = $conflict['existing_object_primary'];
                 if (!is_array($getPrimary)) {
-                    $getPrimary = array($type['primary'] => $getPrimary);
+                    $getPrimary = array('id' => $getPrimary);
                 }
                 $original = $this->modx->getObject($type['class'], $getPrimary);
                 if ($original instanceof \xPDOObject) {
