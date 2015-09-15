@@ -3,6 +3,8 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Added support to get the git repository and environment specific options
+- Added symfony2/process and git.php dependencies
 - Implement/improve support for `where` attributes on content and other objects
 
 ## 0.9.0 - 2015-05-15
