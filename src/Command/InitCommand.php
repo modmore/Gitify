@@ -108,6 +108,18 @@ class InitCommand extends BaseCommand
             );
         }
 
+        $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/N)</comment> ', true);
+        if ($helper->ask($input, $output, $question)) {
+            $dataTypes['template_variables'] = array(
+                'class' => 'modTemplateVar',
+                'primary' => 'name',
+            );
+            $dataTypes['template_variables_access'] = array(
+                'class' => 'modTemplateVarTemplate',
+                'primary' => array('tmplvarid', 'templateid')
+            );
+        }
+
         $question = new ConfirmationQuestion('Would you like to include <info>Content</info>? <comment>(Y/N)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['content'] = array(
@@ -132,18 +144,6 @@ class InitCommand extends BaseCommand
                 'class' => 'modTemplate',
                 'primary' => 'templatename',
                 'extension' => '.html',
-            );
-        }
-
-        $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/N)</comment> ', true);
-        if ($helper->ask($input, $output, $question)) {
-            $dataTypes['template_variables'] = array(
-                'class' => 'modTemplateVar',
-                'primary' => 'name',
-            );
-            $dataTypes['template_variables_access'] = array(
-                'class' => 'modTemplateVarTemplate',
-                'primary' => array('tmplvarid', 'templateid')
             );
         }
 
