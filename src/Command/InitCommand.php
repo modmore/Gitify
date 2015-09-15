@@ -113,6 +113,7 @@ class InitCommand extends BaseCommand
             $dataTypes['content'] = array(
                 'type' => 'content',
                 'exclude_keys' => array('editedby', 'editedon'),
+                'truncate_on_force' => array('modTemplateVarResource'),
             );
         }
 
