@@ -3,6 +3,8 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+
+## 0.10.0 - 2015-09-15
 - Make sure `modTemplateVar` is set before content in the gitify file (#88)
 - Add `modTemplateVarResource` to default `truncate_on_force` for content to make sure the DB is cleaned properly on force (#111) 
 - Store installed packages with the full signature instead of just the package name (#110)
