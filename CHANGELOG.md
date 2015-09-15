@@ -3,8 +3,9 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
-- Output result from command line install during `modx:install`
-- Fix unzip in `modx:install` on certain systems
+- Prevent `PHP Warning: mkdir(): File exists` errors during init if backup and data folders already exist (#128)
+- Output result from command line install during `modx:install` (#127)
+- Fix unzip in `modx:install` on certain systems (#126)
 - Added support to get the git repository and environment specific options
 - Added symfony2/process and git.php dependencies
 - Implement/improve support for `where` attributes on content and other objects
