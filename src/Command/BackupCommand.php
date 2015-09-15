@@ -28,13 +28,11 @@ class BackupCommand extends BaseCommand
         $this
             ->setName('backup')
             ->setDescription('Creates a quick backup of the entire MODX database. Runs automatically when using `Gitify build --force`, but can also be used manually.')
-
             ->addArgument(
                 'name',
                 InputArgument::OPTIONAL,
                 'Optionally the name of the backup file, useful for milestone backups. If not specified the file name will be a full timestamp.'
-            )
-        ;
+            );
     }
 
     /**
@@ -78,9 +76,8 @@ class BackupCommand extends BaseCommand
         $file = $input->getArgument('name');
         if (!empty($file)) {
             $file = $this->modx->filterPathSegment($file);
-        }
-        else {
-            $file = date(DATE_ATOM);
+        } else {
+            $file = strftime('%Y-%m-%d-%H%M%S-%z');
         }
         if (substr($file, -4) != '.sql') {
             $file .= '.sql';
@@ -96,7 +93,13 @@ class BackupCommand extends BaseCommand
 
         $output->writeln('Writing database backup to <info>' . $file . '</info>...');
         $database_password = str_replace("'", '\'', $database_password);
-        exec("mysqldump -u {$database_user} -p'{$database_password}' -h {$database_server} {$dbase} > {$targetFile} ");
+
+        $password_parameter = '';
+        if ($database_password != '') {
+            $password_parameter = "-p'{$database_password}'";
+        }
+
+        exec("mysqldump -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > {$targetFile} ");
         return 0;
     }
 }
