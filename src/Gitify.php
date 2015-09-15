@@ -24,6 +24,10 @@ class Gitify extends Application
      */
     public static $modx;
 
+    public $environment = array();
+    public $repository;
+    public $config;
+
     /**
      * Takes in an array of data, and turns it into blissful YAML using Symfony's YAML component.
      *
@@ -78,7 +82,7 @@ class Gitify extends Application
     /**
      * @throws \RuntimeException
      */
-    public static function loadConfig()
+    public function loadConfig()
     {
         if (!file_exists(GITIFY_WORKING_DIR . '.gitify')) {
             throw new \RuntimeException("Directory is not a Gitify directory: " . GITIFY_WORKING_DIR);
@@ -89,7 +93,75 @@ class Gitify extends Application
             throw new \RuntimeException("Error: " . GITIFY_WORKING_DIR . ".gitify file is not valid YAML, or is empty.");
         }
 
+        $this->config = $config;
         return $config;
+    }
+
+    /**
+     * @return \GitRepo|bool
+     */
+    public function getGitRepository()
+    {
+        try {
+            if (!$this->repository) {
+                $repositoryPath = self::loadMODX()->getOption('gitify.repository_path', null, MODX_BASE_PATH, true);
+                $this->repository = \Git::open($repositoryPath);
+            }
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+
+        return $this->repository;
+    }
+
+    /**
+     * Returns the current environment based on the HTTP HOST.
+     *
+     * @return array
+     */
+    public function getEnvironment ()
+    {
+        if (!empty($this->environment)) {
+            return $this->environment;
+        }
+
+        $config = $this->loadConfig();
+
+        $envs = array();
+
+        if (isset($config['environments']) && is_array($config['environments'])) {
+            $envs = $config['environments'];
+        }
+
+        $defaults = array(
+            'name' => '-unidentified environment-',
+            'branch' => 'develop',
+            'auto_commit_and_push' => true,
+            'remote' => 'origin',
+            'partitions' => array(
+                'modResource' => 'content',
+                'modTemplate' => 'templates',
+                'modCategory' => 'categories',
+                'modTemplateVar' => 'template_variables',
+                'modChunk' => 'chunks',
+                'modSnippet' => 'snippets',
+                'modPlugin' => 'plugins'
+            )
+        );
+
+        if (isset($envs['defaults']) && is_array($envs['defaults'])) {
+            $defaults = array_merge($defaults, $envs['defaults']);
+        }
+
+        $host = (isset($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : MODX_HTTP_HOST;
+        if (substr($host, 4) === 'www.') {
+            $host = substr($host, 0, 4);
+        }
+
+        $environment = (isset($envs[$host])) ? $envs[$host] : array();
+        $environment = array_merge($defaults, $environment);
+        $this->environment = $environment;
+        return $environment;
     }
 
     /**
