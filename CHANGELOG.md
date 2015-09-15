@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Store installed packages with the full signature instead of just the package name (#110)
 - Add `modx:upgrade` command to download a newer version and to run the upgrade (#116)
 - Prevent `PHP Warning: mkdir(): File exists` errors during init if backup and data folders already exist (#128)
 - Output result from command line install during `modx:install` (#127)

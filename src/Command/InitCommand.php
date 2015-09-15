@@ -285,8 +285,7 @@ class InitCommand extends BaseCommand
                         $c->groupby('package_name');
                         foreach ($modx->getIterator('transport.modTransportPackage', $c) as $package) {
                             $packageName = $package->get('signature');
-                            $packageName = explode('-', $packageName);
-                            $providers[$name]['packages'][] = $packageName[0];
+                            $providers[$name]['packages'][] = $packageName;
                         }
                     }
 
