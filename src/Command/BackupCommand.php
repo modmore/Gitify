@@ -32,6 +32,12 @@ class BackupCommand extends BaseCommand
                 'name',
                 InputArgument::OPTIONAL,
                 'Optionally the name of the backup file, useful for milestone backups. If not specified the file name will be a full timestamp.'
+            )
+            ->addOption(
+                'overwrite',
+                'o',
+                InputOption::VALUE_NONE,
+                'When specified, a backup with the same name will be overwritten if it exists.'
             );
     }
 
@@ -87,8 +93,15 @@ class BackupCommand extends BaseCommand
         $targetFile = $targetDirectory . $file;
 
         if (file_exists($targetFile)) {
-            $output->writeln('<error>A file with the name {$file} already exists in {$backupDirectory}.</error>');
-            return 1;
+            $overwrite = $input->getOption('overwrite');
+            if (!$overwrite) {
+                $output->writeln("<error>A file with the name {$file} already exists in {$backupDirectory}.</error>");
+                return 1;
+            }
+            else {
+                $output->writeln("Removing existing file {$file}.");
+                unlink($targetFile);
+            }
         }
 
         $output->writeln('Writing database backup to <info>' . $file . '</info>...');

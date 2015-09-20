@@ -3,6 +3,8 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Add optional `--overwrite` flag to backup to overwrite a named backup file
+- Fix broken error message in backup command if file already exists
 
 ## 0.10.0 - 2015-09-15
 - Make sure `modTemplateVar` is set before content in the gitify file (#88)
