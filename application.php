@@ -39,7 +39,7 @@ use modmore\Gitify\Command\UpgradeModxCommand;
 use modmore\Gitify\Command\InstallPackageCommand;
 use modmore\Gitify\Command\RestoreCommand;
 
-$application = new Gitify('Gitify', '0.9.0');
+$application = new Gitify('Gitify', '0.10.0');
 $application->add(new InitCommand);
 $application->add(new BuildCommand);
 $application->add(new ExtractCommand);
