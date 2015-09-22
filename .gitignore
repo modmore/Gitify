@@ -3,3 +3,4 @@ config.core.php
 data/
 dev/
 /vendor/
+/composer.lock
