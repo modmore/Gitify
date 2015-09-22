@@ -40,7 +40,11 @@ use modmore\Gitify\Command\UpgradeModxCommand;
 use modmore\Gitify\Command\InstallPackageCommand;
 use modmore\Gitify\Command\RestoreCommand;
 
-$application = new Gitify('Gitify', '0.10.0');
+$version = file_get_contents(__DIR__ . "/composer.json");
+$version = json_decode($version, true);
+$version = $version['version'];
+
+$application = new Gitify('Gitify', $version);
 $application->add(new InitCommand);
 $application->add(new BuildCommand);
 $application->add(new ExtractCommand);
