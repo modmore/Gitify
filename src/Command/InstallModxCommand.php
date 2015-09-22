@@ -50,7 +50,14 @@ class InstallModxCommand extends BaseCommand
         }
 
         // Create the XML config
-        $config = $this->createMODXConfig();
+
+        // if config.inc.php exists, then load config from $file
+        $configFile = GITIFY_WORKING_DIR . 'core/config/config.local.inc.php';
+        if ( file_exists($configFile) ) {
+          $config = $this->getMODXConfig($configFile);
+        } else {
+          $config = $this->createMODXConfig();
+        }
 
         // Variables for running the setup
         $tz = date_default_timezone_get();
@@ -157,6 +164,85 @@ class InstallModxCommand extends BaseCommand
             <context_connectors_url>{$baseUrl}connectors/</context_connectors_url>
             <context_web_path>{$directory}</context_web_path>
             <context_web_url>{$baseUrl}</context_web_url>
+            <remove_setup_directory>1</remove_setup_directory>
+        </modx>";
+
+        $fh = fopen($directory . 'config.xml', "w+");
+        fwrite($fh, $configXMLContents);
+        fclose($fh);
+
+        return $directory . 'config.xml';
+    }
+
+    /**
+     * render xml file from $configFile
+     */
+    protected function getMODXConfig($configFile)
+    {
+        $directory = GITIFY_WORKING_DIR;
+
+        include ($configFile);
+
+        // Creating config xml to install MODX with
+        $this->output->writeln("<info>Geting config from [{$configFile}]</info>");
+        $this->output->writeln("Please complete following details to install MODX. Leave empty to use the [default].");
+
+        $helper = $this->getHelper('question');
+
+        $question = new Question('Manager Language [en]: ', 'en');
+        $language = $helper->ask($this->input, $this->output, $question);
+
+        $defaultMgrUser = basename(GITIFY_WORKING_DIR) . '_admin';
+        $question = new Question('Manager User [' . $defaultMgrUser . ']: ', $defaultMgrUser);
+        $managerUser = $helper->ask($this->input, $this->output, $question);
+
+        $question = new Question('Manager User Password [generated]: ', 'generate');
+        $question->setHidden(true);
+        $question->setValidator(function ($value) {
+            if (empty($value) || strlen($value) < 8) {
+                throw new \RuntimeException(
+                    'Please specify a password of at least 8 characters to continue.'
+                );
+            }
+
+            return $value;
+        });
+        $managerPass = $helper->ask($this->input, $this->output, $question);
+
+        if ($managerPass == 'generate') {
+            $managerPass = substr(str_shuffle(md5(microtime(true))), 0, rand(8, 15));
+            $this->output->writeln("<info>Generated Manager Password: {$managerPass}</info>");
+        }
+
+        $question = new Question('Manager Email: ');
+        $managerEmail = $helper->ask($this->input, $this->output, $question);
+
+        $configXMLContents = "<modx>
+            <database_type>{$database_type}</database_type>
+            <database_server>{$database_server}</database_server>
+            <database>{$dbase}</database>
+            <database_user>{$database_user}</database_user>
+            <database_password>{$database_password}</database_password>
+            <database_connection_charset>utf8</database_connection_charset>
+            <database_charset>utf8</database_charset>
+            <database_collation>utf8_general_ci</database_collation>
+            <table_prefix>{$table_prefix}</table_prefix>
+            <https_port>443</https_port>
+            <http_host>{$database_server}</http_host>
+            <cache_disabled>0</cache_disabled>
+            <inplace>1</inplace>
+            <unpacked>0</unpacked>
+            <language>{$language}</language>
+            <cmsadmin>{$managerUser}</cmsadmin>
+            <cmspassword>{$managerPass}</cmspassword>
+            <cmsadminemail>{$managerEmail}</cmsadminemail>
+            <core_path>" . MODX_CORE_PATH . "</core_path>
+            <context_mgr_path>" . MODX_MANAGER_PATH . "</context_mgr_path>
+            <context_mgr_url>" . MODX_MANAGER_URL . "</context_mgr_url>
+            <context_connectors_path>" . MODX_CONNECTORS_PATH . "</context_connectors_path>
+            <context_connectors_url>" . MODX_CONNECTORS_URL . "</context_connectors_url>
+            <context_web_path>" . MODX_BASE_PATH . "</context_web_path>
+            <context_web_url>" . MODX_BASE_URL . "</context_web_url>
             <remove_setup_directory>1</remove_setup_directory>
         </modx>";
 

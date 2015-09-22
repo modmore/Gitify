@@ -3,11 +3,12 @@
 /**
  * Make sure dependencies have been installed, and load the autoloader.
  */
-$class = class_exists(modmore\Gitify\Gitify, false);
-$file = file_exists(dirname(__FILE__) . '/vendor/autoload.php');
-
-if ( !($class || $file) ) {
-  throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
+if (!class_exists(modmore\Gitify\Gitify, false)) {
+  if (!file_exists(dirname(__FILE__) . '/vendor/autoload.php') {
+    throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
+  } else {
+    require dirname(__FILE__) . '/vendor/autoload.php';
+  }
 }
 
 /**
