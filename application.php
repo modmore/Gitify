@@ -6,8 +6,6 @@
 if (!file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
     throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
 }
-require dirname(__FILE__) . '/vendor/autoload.php';
-require dirname(__FILE__) . '/src/vendor/kbjr_gitphp/Git.php';
 
 /**
  * Ensure the timezone is set; otherwise you'll get a shit ton (that's a technical term) of errors.
