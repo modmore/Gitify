@@ -29,7 +29,7 @@ if (!defined('GITIFY_WORKING_DIR')) {
 /**
  * Specify the user home directory, for save cache folder of gitify
  */
-if (!defined('USER_HOME_DIR')) {
+if (!defined('GITIFY_CACHE_DIR')) {
     $home = rtrim(getenv('HOME'), DIRECTORY_SEPARATOR);
     if (!$home) {
         $home = rtrim($_SERVER['HOME'], DIRECTORY_SEPARATOR);
@@ -42,7 +42,7 @@ if (!defined('USER_HOME_DIR')) {
         // fallback to working directory, if home directory can not be determined
         $home = rtrim(GITIFY_WORKING_DIR, DIRECTORY_SEPARATOR);
     }
-    define('USER_HOME_DIR', $home . DIRECTORY_SEPARATOR);
+    define('GITIFY_CACHE_DIR', join(DIRECTORY_SEPARATOR, [$home, '.gitify', '']));
 }
 
 /**
@@ -68,7 +68,7 @@ $application->add(new UpgradeModxCommand);
 $application->add(new InstallPackageCommand);
 $application->add(new BackupCommand);
 $application->add(new RestoreCommand);
-$application->add(new ClearCacheCommand());
+$application->add(new ClearCacheCommand);
 /**
  * We return it so the CLI controller in /Gitify can run it, or for other integrations to
  * work with the Gitify api directly.

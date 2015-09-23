@@ -8,6 +8,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ClearCacheCommand extends BaseCommand
 {
+    public $loadConfig = false;
+    public $loadMODX = false;
+
     protected function configure()
     {
         $this
@@ -18,6 +21,9 @@ class ClearCacheCommand extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
+        if (file_exists(GITIFY_CACHE_DIR)) {
+            exec("rm -rf " . GITIFY_CACHE_DIR);
+            $output->writeln('All caches cleared.');
+        }
     }
 }

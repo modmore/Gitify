@@ -5,6 +5,7 @@ use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Mixins\DownloadModx;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
@@ -32,6 +33,12 @@ class InstallModxCommand extends BaseCommand
                 'version',
                 InputArgument::OPTIONAL,
                 'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.'
+            )
+            ->addOption(
+                'download',
+                'd',
+                InputOption::VALUE_NONE,
+                'Download and install MODX even package exists in cache folder. Forced download'
             );
     }
 
@@ -45,7 +52,9 @@ class InstallModxCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $version = $this->input->getArgument('version');
-        if (!$this->download($version)) {
+        $forced = $this->input->getOption('download');
+
+        if (!$this->getMODX($version, $forced)) {
             return 1; // exit
         }
 
