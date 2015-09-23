@@ -21,7 +21,7 @@ trait DownloadModx
             }
         }
 
-        $this->retriveFromCache($realVersion);
+        $this->retrieveFromCache($realVersion);
 
         return true;
     }
@@ -96,7 +96,7 @@ trait DownloadModx
         return $direct;
     }
 
-    protected function retriveFromCache($version)
+    protected function retrieveFromCache($version)
     {
         $path = GITIFY_CACHE_DIR . $version;
 
