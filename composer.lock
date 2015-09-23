@@ -4,8 +4,23 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5ac23eb3120284efc693d696a6564814",
+    "hash": "f31b4b3dd53da8de5f432494e6e06c6d",
     "packages": [
+        {
+            "name": "kbjr/Git.php",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kbjr/Git.php",
+                "reference": "master"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "Git.php"
+                ]
+            }
+        },
         {
             "name": "symfony/console",
             "version": "v2.6.11",
