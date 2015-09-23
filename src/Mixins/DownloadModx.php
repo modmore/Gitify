@@ -12,11 +12,9 @@ trait DownloadModx
      */
     protected function download($version = 'latest')
     {
-        if (empty($version) || $version == 'latest') {
-            $url = 'http://modx.com/download/latest/';
-        } else {
-            $url = 'http://modx.com/download/direct/modx-' . $version . '.zip';
-        }
+        $url = empty($version) || $version == 'latest'
+            ? 'http://modx.com/download/latest/'
+            : 'http://modx.com/download/direct/modx-' . $version . '.zip';
 
         $this->output->writeln("Downloading MODX from {$url}...");
         exec('curl -Lo modx.zip ' . $url . ' -#');
@@ -45,6 +43,33 @@ trait DownloadModx
         $this->removeOutdatedArchive();
 
         return true;
+    }
+
+    private function unzip()
+    {
+
+    }
+
+    private function fetchUrl($url)
+    {
+        // пробуем получить прямую линку на файл. если такая версия уже есть, то не скачиваем,
+        // а отдаем из кеша
+        // можно указать флаг и принудительно скачать версию + заменить в кеше
+
+        $ch = curl_init($url);
+        $result = curl_exec($ch);
+
+        print_r($result);
+    }
+
+    private function retriveFromCache($version)
+    {
+
+    }
+
+    private function saveToCache()
+    {
+
     }
 
     private function removeOutdatedArchive()
