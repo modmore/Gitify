@@ -104,6 +104,10 @@ class Gitify extends Application
     {
         try {
             if (!$this->repository) {
+                $gitPath = self::loadMODX()->getOption('gitify.git_path', null, '/usr/bin/git');
+                if (!empty($gitPath)) {
+                    \Git::set_bin($gitPath);
+                }
                 $repositoryPath = self::loadMODX()->getOption('gitify.repository_path', null, MODX_BASE_PATH, true);
                 $this->repository = \Git::open($repositoryPath);
             }
