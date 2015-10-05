@@ -158,8 +158,8 @@ class Gitify extends Application
         }
 
         $host = (isset($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : MODX_HTTP_HOST;
-        if (substr($host, 4) === 'www.') {
-            $host = substr($host, 0, 4);
+        if (substr($host, 0, 4) == 'www.') {
+            $host = substr($host, 4);
         }
 
         $environment = (isset($envs[$host])) ? $envs[$host] : array();
