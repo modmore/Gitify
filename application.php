@@ -3,11 +3,12 @@
 /**
  * Make sure dependencies have been installed, and load the autoloader.
  */
-if (!file_exists(dirname(__FILE__) . '/vendor/autoload.php')) {
-    throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
+$file = $file = dirname(__FILE__) . '/vendor/autoload.php';
+if (file_exists($file)) {
+    require $file;
+} else if (!class_exists(modmore\Gitify\Gitify, false)) {
+    throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
 }
-require dirname(__FILE__) . '/vendor/autoload.php';
-require dirname(__FILE__) . '/src/vendor/kbjr_gitphp/Git.php';
 
 /**
  * Ensure the timezone is set; otherwise you'll get a shit ton (that's a technical term) of errors.
@@ -39,7 +40,11 @@ use modmore\Gitify\Command\UpgradeModxCommand;
 use modmore\Gitify\Command\InstallPackageCommand;
 use modmore\Gitify\Command\RestoreCommand;
 
-$application = new Gitify('Gitify', '0.10.0');
+$composerData = file_get_contents(__DIR__ . "/composer.json");
+$composerData = json_decode($composerData, true);
+$version = $composerData['version'];
+
+$application = new Gitify('Gitify', $version);
 $application->add(new InitCommand);
 $application->add(new BuildCommand);
 $application->add(new ExtractCommand);
