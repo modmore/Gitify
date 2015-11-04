@@ -20,6 +20,12 @@ class Gitify extends Application
      */
     public static $contentSeparator = "\n-----\n\n";
     /**
+     * Universal directory separator for *Nix and Windows
+     *
+     * @var string
+     */
+    public static $directorySeparator = "/";
+    /**
      * @var \modX
      */
     public static $modx;

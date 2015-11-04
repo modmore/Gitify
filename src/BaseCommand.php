@@ -77,6 +77,17 @@ abstract class BaseCommand extends Command
     }
 
     /**
+     * @param $path
+     * @return string
+     */
+    public function normalizePath($path)
+    {
+        $normalized_path = str_replace('\\', Gitify::$directorySeparator, $path);
+
+        return $normalized_path;
+    }
+
+    /**
      * @param string $partition
      * @return array|null
      */
