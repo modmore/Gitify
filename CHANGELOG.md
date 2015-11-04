@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Fix E_STRICT error in loadConfig (#136)
 - Fix file path comparisons to work properly across unix and windows (#99)
 - Cache MODX packages so it doesn't have to download every time (#133)
 - Change the way Git.php dependency is loaded and version number is managed (#135)

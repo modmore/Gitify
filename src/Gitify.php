@@ -32,7 +32,6 @@ class Gitify extends Application
 
     public $environment = array();
     public $repository;
-    public $config;
 
     /**
      * Takes in an array of data, and turns it into blissful YAML using Symfony's YAML component.
@@ -88,7 +87,7 @@ class Gitify extends Application
     /**
      * @throws \RuntimeException
      */
-    public function loadConfig()
+    public static function loadConfig()
     {
         if (!file_exists(GITIFY_WORKING_DIR . '.gitify')) {
             throw new \RuntimeException("Directory is not a Gitify directory: " . GITIFY_WORKING_DIR);
@@ -99,7 +98,6 @@ class Gitify extends Application
             throw new \RuntimeException("Error: " . GITIFY_WORKING_DIR . ".gitify file is not valid YAML, or is empty.");
         }
 
-        $this->config = $config;
         return $config;
     }
 
@@ -135,7 +133,7 @@ class Gitify extends Application
             return $this->environment;
         }
 
-        $config = $this->loadConfig();
+        $config = static::loadConfig();
 
         $envs = array();
 
