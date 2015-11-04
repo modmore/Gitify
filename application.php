@@ -28,17 +28,37 @@ if (!defined('GITIFY_WORKING_DIR')) {
 }
 
 /**
+ * Specify the user home directory, for save cache folder of gitify
+ */
+if (!defined('GITIFY_CACHE_DIR')) {
+    $home = rtrim(getenv('HOME'), DIRECTORY_SEPARATOR);
+    if (!$home && isset($_SERVER['HOME'])) {
+        $home = rtrim($_SERVER['HOME'], DIRECTORY_SEPARATOR);
+    }
+    if (!$home && isset($_SERVER['HOMEDRIVE']) && isset($_SERVER['HOMEPATH'])) {
+        // compatibility to Windows
+        $home = rtrim($_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'], DIRECTORY_SEPARATOR);
+    }
+    if (!$home) {
+        // fallback to working directory, if home directory can not be determined
+        $home = rtrim(GITIFY_WORKING_DIR, DIRECTORY_SEPARATOR);
+    }
+    define('GITIFY_CACHE_DIR', implode(DIRECTORY_SEPARATOR, array($home, '.gitify', '')));
+}
+
+/**
  * Load all the commands and create the Gitify instance
  */
-use modmore\Gitify\Gitify;
 use modmore\Gitify\Command\BackupCommand;
 use modmore\Gitify\Command\BuildCommand;
+use modmore\Gitify\Command\ClearCacheCommand;
 use modmore\Gitify\Command\ExtractCommand;
 use modmore\Gitify\Command\InitCommand;
 use modmore\Gitify\Command\InstallModxCommand;
-use modmore\Gitify\Command\UpgradeModxCommand;
 use modmore\Gitify\Command\InstallPackageCommand;
 use modmore\Gitify\Command\RestoreCommand;
+use modmore\Gitify\Command\UpgradeModxCommand;
+use modmore\Gitify\Gitify;
 
 $composerData = file_get_contents(__DIR__ . "/composer.json");
 $composerData = json_decode($composerData, true);
@@ -53,6 +73,7 @@ $application->add(new UpgradeModxCommand);
 $application->add(new InstallPackageCommand);
 $application->add(new BackupCommand);
 $application->add(new RestoreCommand);
+$application->add(new ClearCacheCommand);
 /**
  * We return it so the CLI controller in /Gitify can run it, or for other integrations to
  * work with the Gitify api directly.
