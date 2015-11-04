@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Cache MODX packages so it doesn't have to download every time (#133)
 - Change the way Git.php dependency is loaded and version number is managed
 - Fix stupid bug in Gitify->getEnvironment causing www to not get stripped off properly
 - Allow setting the path to a git binary in a `gitify.git_path` setting
