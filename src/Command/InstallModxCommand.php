@@ -69,7 +69,7 @@ class InstallModxCommand extends BaseCommand
 
         // Actually run the CLI setup
         exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}", $setupOutput);
-        $output->writeln($setupOutput[0]);
+        $output->writeln("<comment>{$setupOutput[0]}</comment>");
 
         // Try to clean up the config file
         if (!unlink($config)) {
