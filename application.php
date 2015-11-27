@@ -49,15 +49,16 @@ if (!defined('GITIFY_CACHE_DIR')) {
 /**
  * Load all the commands and create the Gitify instance
  */
-use modmore\Gitify\Command\BackupCommand;
-use modmore\Gitify\Command\BuildCommand;
-use modmore\Gitify\Command\ClearCacheCommand;
-use modmore\Gitify\Command\ExtractCommand;
-use modmore\Gitify\Command\InitCommand;
-use modmore\Gitify\Command\InstallModxCommand;
-use modmore\Gitify\Command\InstallPackageCommand;
-use modmore\Gitify\Command\RestoreCommand;
-use modmore\Gitify\Command\UpgradeModxCommand;
+use modmore\Gitify\Command\Init;
+use modmore\Gitify\Command\Build;
+use modmore\Gitify\Command\Extract;
+use modmore\Gitify\Command\Backup;
+use modmore\Gitify\Command\Restore;
+use modmore\Gitify\Command\ClearCache;
+use modmore\Gitify\Command\Modx\Install as ModxInstall;
+use modmore\Gitify\Command\Modx\Upgrade as ModxUpgrade;
+use modmore\Gitify\Command\Package\Install as PackageInstall;
+use modmore\Gitify\Command\Package\Dump as PackageDump;
 use modmore\Gitify\Gitify;
 
 $composerData = file_get_contents(__DIR__ . "/composer.json");
@@ -65,15 +66,17 @@ $composerData = json_decode($composerData, true);
 $version = $composerData['version'];
 
 $application = new Gitify('Gitify', $version);
-$application->add(new InitCommand);
-$application->add(new BuildCommand);
-$application->add(new ExtractCommand);
-$application->add(new InstallModxCommand);
-$application->add(new UpgradeModxCommand);
-$application->add(new InstallPackageCommand);
-$application->add(new BackupCommand);
-$application->add(new RestoreCommand);
-$application->add(new ClearCacheCommand);
+$application->add(new Init);
+$application->add(new Build);
+$application->add(new Extract);
+$application->add(new ClearCache);
+$application->add(new Backup);
+$application->add(new Restore);
+$application->add(new ModxInstall());
+$application->add(new ModxUpgrade());
+$application->add(new PackageInstall);
+$application->add(new PackageDump());
+
 /**
  * We return it so the CLI controller in /Gitify can run it, or for other integrations to
  * work with the Gitify api directly.

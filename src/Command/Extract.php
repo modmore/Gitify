@@ -1,4 +1,5 @@
 <?php
+
 namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
@@ -8,13 +9,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class BuildCommand
+ * Class Extract
  *
- * Builds a MODX site from the files and configuration.
+ * Extract a MODX site to the files.
  *
  * @package modmore\Gitify\Command
  */
-class ExtractCommand extends BaseCommand
+class Extract extends BaseCommand
 {
     public $categories = array();
 

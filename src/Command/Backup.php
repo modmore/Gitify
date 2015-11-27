@@ -12,13 +12,13 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 /**
- * Class BackupCommand
+ * Class Backup
  *
  * Used for creating a quick timestamped mysql dump of the database.
  *
  * @package modmore\Gitify\Command
  */
-class BackupCommand extends BaseCommand
+class Backup extends BaseCommand
 {
     public $loadConfig = true;
     public $loadMODX = true;

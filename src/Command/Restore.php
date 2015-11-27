@@ -19,7 +19,7 @@ use Symfony\Component\Console\Question\Question;
  *
  * @package modmore\Gitify\Command
  */
-class RestoreCommand extends BaseCommand
+class Restore extends BaseCommand
 {
     public $loadConfig = true;
     public $loadMODX = true;
