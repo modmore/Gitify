@@ -3,6 +3,7 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Add `credential_file` option to providers to contain the `username` and `api_key` (#155)
 
 ## 0.11.0 - 2015-11-04
 - Fix E_STRICT error in loadConfig (#136)

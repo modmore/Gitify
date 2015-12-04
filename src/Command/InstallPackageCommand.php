@@ -1,5 +1,6 @@
 <?php namespace modmore\Gitify\Command;
 
+use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -67,11 +68,20 @@ class InstallPackageCommand extends BaseCommand
 
                 // If no provider found, then we'll create it
                 if (!$provider) {
-                    $api_key = '';
+                    $credentials = array(
+                        'username' => isset($provider_data['username']) ? $provider_data['username'] : '',
+                        'api_key' => ''
+                    );
 
                     // Try to look for a file with the API Key from a file within the gitify working directory
                     if (!empty($provider_data['api_key']) && file_exists(GITIFY_WORKING_DIR . '/' . $provider_data['api_key'])) {
-                        $api_key = trim(file_get_contents(GITIFY_WORKING_DIR . '/' .$provider_data['api_key']));
+                        $credentials['api_key'] = trim(file_get_contents(GITIFY_WORKING_DIR . '/' . $provider_data['api_key']));
+                    }
+
+                    // load provider credentials from file
+                    if (!empty($provider_data['credential_file']) && file_exists(GITIFY_WORKING_DIR . '/' . $provider_data['credential_file'])) {
+                        $credentials_content = trim(file_get_contents(GITIFY_WORKING_DIR . '/' . $provider_data['credential_file']));
+                        $credentials = Gitify::fromYAML($credentials_content);
                     }
 
                     /** @var \modTransportProvider $provider */
@@ -80,8 +90,8 @@ class InstallPackageCommand extends BaseCommand
                         'name' => $provider_name,
                         'service_url' => $provider_data['service_url'],
                         'description' => isset($provider_data['description']) ? $provider_data['description'] : '',
-                        'username' => isset($provider_data['username']) ? $provider_data['username'] : '',
-                        'api_key' => $api_key,
+                        'username' => $credentials['username'],
+                        'api_key' => $credentials['api_key'],
                     ));
                     $provider->save();
                 }
