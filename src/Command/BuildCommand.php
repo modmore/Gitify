@@ -243,7 +243,13 @@ class BuildCommand extends BaseCommand
             // Normalize line-endings to \n to ensure consistency
             $file = str_replace("\r\n", "\n", $file);
             $file = str_replace("\r", "\n", $file);
-            list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
+
+            if (strpos($file, Gitify::$contentSeparator)) {
+                list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
+            } else {
+                $content = '';
+                $rawData = $file;
+            }
 
             try {
                 $data = Gitify::fromYAML($rawData);
@@ -298,7 +304,9 @@ class BuildCommand extends BaseCommand
 
         // Ensure all fields have a value
         foreach ($object->_fieldMeta as $field => $meta) {
-            if (!isset($data[$field])) $data[$field] = $meta['default'];
+            if (!isset($data[$field]) && isset($meta['default'])) {
+                $data[$field] = $meta['default'];
+            }
         }
 
         // Set the fields on the resource
@@ -403,8 +411,13 @@ class BuildCommand extends BaseCommand
             $file = str_replace("\r\n", "\n", $file);
             $file = str_replace("\r", "\n", $file);
 
-            // Get the raw data, and the content
-            list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
+            if (strpos($file, Gitify::$contentSeparator)) {
+                // Get the raw data, and the content
+                list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
+            } else {
+                $content = '';
+                $rawData = $file;
+            }
 
             // Turn the raw YAML data into an array
             $data = Gitify::fromYAML($rawData);
