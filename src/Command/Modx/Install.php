@@ -1,5 +1,5 @@
 <?php
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Modx;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Mixins\DownloadModx;
@@ -10,13 +10,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
 /**
- * Class BuildCommand
+ * Class Install
  *
  * Installs a clean version of MODX.
  *
  * @package modmore\Gitify\Command
  */
-class InstallModxCommand extends BaseCommand
+class Install extends BaseCommand
 {
     use DownloadModx;
 

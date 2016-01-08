@@ -1,6 +1,5 @@
 <?php
-
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Modx;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Mixins\DownloadModx;
@@ -10,10 +9,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class UpgradeModxCommand
+ * Class Upgrade
  * @package modmore\Gitify\Command
  */
-class UpgradeModxCommand extends BaseCommand
+class Upgrade extends BaseCommand
 {
     use DownloadModx;
 

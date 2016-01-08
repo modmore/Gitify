@@ -11,13 +11,13 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 /**
- * Class InitCommand
+ * Class Init
  *
  * Initiates a new Gitify project by asking some questions and creating the .gitify file.
  *
  * @package modmore\Gitify\Command
  */
-class InitCommand extends BaseCommand
+class Init extends BaseCommand
 {
     public $loadConfig = false;
     public $loadMODX = false;

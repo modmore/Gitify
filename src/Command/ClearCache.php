@@ -1,12 +1,18 @@
 <?php
-
 namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ClearCacheCommand extends BaseCommand
+/**
+ * Class ClearCache
+ *
+ * Run clearing of MODX system cache
+ *
+ * @package modmore\Gitify\Command
+ */
+class ClearCache extends BaseCommand
 {
     public $loadConfig = false;
     public $loadMODX = false;

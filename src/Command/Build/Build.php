@@ -1,5 +1,5 @@
 <?php
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Build;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
@@ -12,13 +12,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
- * Class BuildCommand
+ * Class Build
  *
  * Builds a MODX site from the files and configuration.
  *
- * @package modmore\Gitify\Command
+ * @package modmore\Gitify\Command\Build
  */
-class BuildCommand extends BaseCommand
+class Build extends BaseCommand
 {
     public $categories = array();
     public $isForce = false;

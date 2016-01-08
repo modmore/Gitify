@@ -1,4 +1,5 @@
-<?php namespace modmore\Gitify\Command;
+<?php
+namespace modmore\Gitify\Command\Package;
 
 use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
@@ -9,13 +10,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
- * Class InstallPackageCommand
+ * Class Install
  *
  * Installs a package
  *
- * @package modmore\Gitify\Command
+ * @package modmore\Gitify\Command\Package
  */
-class InstallPackageCommand extends BaseCommand
+class Install extends BaseCommand
 {
     public $loadConfig = true;
     public $loadMODX = true;
