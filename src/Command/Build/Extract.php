@@ -266,7 +266,7 @@ class Extract extends BaseCommand
     public function generate($object, array $options = array())
     {
         $fieldMeta = $object->_fieldMeta;
-        $data = $this->objectToArray($object);
+        $data = $this->objectToArray($object, $options);
 
         // If there's a dedicated content field, we put that below the yaml for easier managing,
         // unless the object is a modStaticResource, calling getContent on a static resource can break the
@@ -370,9 +370,10 @@ class Extract extends BaseCommand
      * Turns the object into an array, and do some more processing depending on the object.
      *
      * @param \xPDOObject $object
+     * @pram array $options
      * @return array
      */
-    protected function objectToArray(\xPDOObject $object)
+    protected function objectToArray(\xPDOObject $object, array $options = array())
     {
         $data = $object->toArray('', true, true);
         switch (true) {
@@ -383,7 +384,15 @@ class Extract extends BaseCommand
                 $templateVars = $object->getTemplateVars();
                 foreach ($templateVars as $tv) {
                     /** @var \modTemplateVar $tv */
-                    $tvs[$tv->get('name')] = $tv->get('value');
+                    $name = $tv->get('name');
+                    if (isset($options['exclude_tvs']) && is_array($options['exclude_tvs'])) {
+                        if (!in_array($name, $options['exclude_tvs'])) {
+                            $tvs[$tv->get('name')] = $tv->get('value');
+                        }
+                    }
+                    else {
+                        $tvs[$tv->get('name')] = $tv->get('value');
+                    }
                 }
                 ksort($tvs);
                 $data['tvs'] = $tvs;

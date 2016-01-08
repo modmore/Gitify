@@ -1,6 +1,6 @@
 {
     "name": "modmore/Gitify",
-    "version": "0.11.0",
+    "version": "0.12.0",
     "description": "Command line toolkit to make managing a MODX site in git a lot easier",
     "require": {
         "kbjr/Git.php": "*",

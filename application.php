@@ -24,7 +24,9 @@ if (version_compare(phpversion(),'5.3.0') >= 0) {
  * Specify the working directory, if it hasn't been set yet.
  */
 if (!defined('GITIFY_WORKING_DIR')) {
-    define ('GITIFY_WORKING_DIR', $cwd = getcwd() . DIRECTORY_SEPARATOR);
+    $cwd = getcwd() . DIRECTORY_SEPARATOR;
+    $cwd = str_replace('\\', '/', $cwd);
+    define ('GITIFY_WORKING_DIR', $cwd);
 }
 
 /**
