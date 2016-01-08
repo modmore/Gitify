@@ -50,10 +50,10 @@ if (!defined('GITIFY_CACHE_DIR')) {
  * Load all the commands and create the Gitify instance
  */
 use modmore\Gitify\Command\Init;
-use modmore\Gitify\Command\Build;
-use modmore\Gitify\Command\Extract;
-use modmore\Gitify\Command\Backup;
-use modmore\Gitify\Command\Restore;
+use modmore\Gitify\Command\Build\Build;
+use modmore\Gitify\Command\Build\Extract;
+use modmore\Gitify\Command\Backup\Backup;
+use modmore\Gitify\Command\Backup\Restore;
 use modmore\Gitify\Command\ClearCache;
 use modmore\Gitify\Command\Modx\Install as ModxInstall;
 use modmore\Gitify\Command\Modx\Upgrade as ModxUpgrade;

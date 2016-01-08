@@ -1,5 +1,4 @@
 <?php
-
 namespace modmore\Gitify\Command\Package;
 
 use modmore\Gitify\BaseCommand;
@@ -25,6 +24,7 @@ class Dump extends BaseCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
+     * @return void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

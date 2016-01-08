@@ -1,23 +1,18 @@
 <?php
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Backup;
 
-use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 
 /**
  * Class RestoreCommand
  *
  * Used for restoring database backups created with `Gitify backup` (or possibly any other type of mysql backup).
  *
- * @package modmore\Gitify\Command
+ * @package modmore\Gitify\Command\Backup
  */
 class Restore extends BaseCommand
 {

@@ -1,4 +1,5 @@
-<?php namespace modmore\Gitify\Command\Package;
+<?php
+namespace modmore\Gitify\Command\Package;
 
 use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\InputArgument;

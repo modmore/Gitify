@@ -1,6 +1,5 @@
 <?php
-
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Build;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
@@ -17,7 +16,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
  *
  * Builds a MODX site from the files and configuration.
  *
- * @package modmore\Gitify\Command
+ * @package modmore\Gitify\Command\Build
  */
 class Build extends BaseCommand
 {

@@ -1,5 +1,4 @@
 <?php
-
 namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;

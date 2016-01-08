@@ -1,22 +1,18 @@
 <?php
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Backup;
 
-use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 
 /**
  * Class Backup
  *
  * Used for creating a quick timestamped mysql dump of the database.
  *
- * @package modmore\Gitify\Command
+ * @package modmore\Gitify\Command\Backup
  */
 class Backup extends BaseCommand
 {

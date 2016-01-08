@@ -1,6 +1,5 @@
 <?php
-
-namespace modmore\Gitify\Command;
+namespace modmore\Gitify\Command\Build;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
@@ -13,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * Extract a MODX site to the files.
  *
- * @package modmore\Gitify\Command
+ * @package modmore\Gitify\Command\Build
  */
 class Extract extends BaseCommand
 {
