@@ -403,6 +403,11 @@ class BuildCommand extends BaseCommand
             $file = str_replace("\r\n", "\n", $file);
             $file = str_replace("\r", "\n", $file);
 
+            // Check if delimiter exists, otherwise add it to avoid WARN in explode()
+            // (WARN @ Gitify/src/Command/BuildCommand.php : 407) PHP notice: Undefined offset: 1
+            if (strpos($file, Gitify::$contentSeparator) === false) {
+                $file = $file . Gitify::$contentSeparator;
+            }
             // Get the raw data, and the content
             list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
