@@ -303,7 +303,7 @@ class BuildCommand extends BaseCommand
 
         // Ensure all fields have a value
         foreach ($object->_fieldMeta as $field => $meta) {
-            if (!isset($data[$field])) $data[$field] = isset($meta['default']) ? $meta['default'] : '';
+            if (!isset($data[$field])) $data[$field] = isset($meta['default']) ? $meta['default'] : null;
         }
 
         // Set the fields on the resource
