@@ -2,21 +2,31 @@
 cls
 
 REM This is a sample batch file to get things up and running quickly under windows
-REM
+
 REM It reduces the learning curve and takes a person from having no working folder
 REM to a fully installed MODx build environment with Gitify support
-REM
-REM I placed this batch file in my Ampps primary folder under a sub-folder I created
-REM called scripts. I then updated my Windows PATH environment variable and added the
-REM scripts folder in order to be able to run the script anywhere.
-REM
-REM Once the script has completed it's execution, it dump you into the development
+
+REM Place this batch file in location that makes sense to your build environment
+REM setup. I placed mine in my Ampps install folder under a sub-folder I created
+REM called scripts.
+
+REM You need to ensure the Windows PATH environment variable has an entry pointing
+REM to the location of the folder your deploy.bat folder is stored if you want to
+REM be able to use the batch file quickly and easily no matter where your command
+REM console opens.
+
+REM Once the script has completed it's execution, it will dump you into the project
 REM folder so you can continue to work on the newly created MODx build environment.
-REM
+
 REM Change the variable below in order to align with your configuration
-REM
-REM The root foler to create MODx install sub-folders in
-set gitifyModxRoot=k:\ampps\www
+
+REM The variable gitifyModxRoot should be changed to the destination base folder that
+REM you want to use for multiple MODx/Gitify projects
+
+REM change the variable below (your_projects_root_folder) to the path you want to use
+REM as a base folder for all of your project deployments
+
+set gitifyModxRoot=your_projects_root_folder
 
 echo.
 echo  Preparing new modx install with Gitify and composer support
