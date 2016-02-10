@@ -243,6 +243,11 @@ class BuildCommand extends BaseCommand
             // Normalize line-endings to \n to ensure consistency
             $file = str_replace("\r\n", "\n", $file);
             $file = str_replace("\r", "\n", $file);
+            // Check if delimiter exists, otherwise add it to avoid WARN in explode()
+            // (WARN @ Gitify/src/Command/BuildCommand.php : 246) PHP notice: Undefined offset: 1
+            if (strpos($file, Gitify::$contentSeparator) === false) {
+                $file = $file . Gitify::$contentSeparator;
+            }
             list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
             try {
@@ -298,7 +303,7 @@ class BuildCommand extends BaseCommand
 
         // Ensure all fields have a value
         foreach ($object->_fieldMeta as $field => $meta) {
-            if (!isset($data[$field])) $data[$field] = $meta['default'];
+            if (!isset($data[$field])) $data[$field] = isset($meta['default']) ? $meta['default'] : null;
         }
 
         // Set the fields on the resource
@@ -403,6 +408,11 @@ class BuildCommand extends BaseCommand
             $file = str_replace("\r\n", "\n", $file);
             $file = str_replace("\r", "\n", $file);
 
+            // Check if delimiter exists, otherwise add it to avoid WARN in explode()
+            // (WARN @ Gitify/src/Command/BuildCommand.php : 407) PHP notice: Undefined offset: 1
+            if (strpos($file, Gitify::$contentSeparator) === false) {
+                $file = $file . Gitify::$contentSeparator;
+            }
             // Get the raw data, and the content
             list($rawData, $content) = explode(Gitify::$contentSeparator, $file);
 
