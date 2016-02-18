@@ -45,7 +45,7 @@ if (!defined('GITIFY_CACHE_DIR')) {
         // fallback to working directory, if home directory can not be determined
         $home = rtrim(GITIFY_WORKING_DIR, DIRECTORY_SEPARATOR);
     }
-    define('GITIFY_CACHE_DIR', implode(DIRECTORY_SEPARATOR, array($home, '.gitify', '')));
+    define('GITIFY_CACHE_DIR', implode(DIRECTORY_SEPARATOR, array($home, '.gitify-cache', '')));
 }
 
 /**
