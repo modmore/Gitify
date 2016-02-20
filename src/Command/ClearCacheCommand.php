@@ -20,7 +20,7 @@ class ClearCacheCommand extends BaseCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (file_exists(GITIFY_CACHE_DIR)) {
+        if (file_exists(GITIFY_CACHE_DIR) && is_folder(GITIFY_CACHE_DIR)) {
             exec("rm -rf " . GITIFY_CACHE_DIR);
             $output->writeln('Cleared the Gitify cache.');
         }
