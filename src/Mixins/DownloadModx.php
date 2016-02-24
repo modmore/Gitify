@@ -48,7 +48,7 @@ trait DownloadModx
     {
         $link = $this->fetchUrl($version);
 
-        if (!file_exists(GITIFY_CACHE_DIR) && !is_folder(GITIFY_CACHE_DIR)) {
+        if (!file_exists(GITIFY_CACHE_DIR)) {
             mkdir(GITIFY_CACHE_DIR);
         }
 
