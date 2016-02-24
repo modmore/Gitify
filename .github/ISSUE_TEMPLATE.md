@@ -11,4 +11,4 @@ How it behaved after following steps above.
 How it should behave after following steps above.
 
 ### Environment
-MODX version, Operating System, MySQL version, PHP version, etc. Any relevant information.
+Gitify version, MODX version, Operating System, MySQL version, PHP version, etc.
