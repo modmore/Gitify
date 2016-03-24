@@ -227,6 +227,7 @@ class ExtractCommand extends BaseCommand
             }
 
             $path = $this->filterPathSegment($path);
+            $path = str_replace('/', '-', $path);
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
