@@ -103,6 +103,9 @@ class InstallModxCommand extends BaseCommand
         $question->setHidden(true);
         $dbPass = $helper->ask($this->input, $this->output, $question);
 
+        $question = new Question('Database Prefix [modx_]: ', 'modx_');
+        $dbPrefix = $helper->ask($this->input, $this->output, $question);
+
         $question = new Question('Hostname [' . gethostname() . ']: ', gethostname());
         $host = $helper->ask($this->input, $this->output, $question);
         $host = rtrim(trim($host), '/');
@@ -150,7 +153,7 @@ class InstallModxCommand extends BaseCommand
             <database_connection_charset>utf8</database_connection_charset>
             <database_charset>utf8</database_charset>
             <database_collation>utf8_general_ci</database_collation>
-            <table_prefix>modx_</table_prefix>
+            <table_prefix>{$dbPrefix}</table_prefix>
             <https_port>443</https_port>
             <http_host>{$host}</http_host>
             <cache_disabled>0</cache_disabled>
