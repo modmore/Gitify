@@ -301,7 +301,9 @@ class ExtractCommand extends BaseCommand
 
         $out = Gitify::toYAML($data);
 
-        if (!empty($content)) {
+        if (!empty($content) && !empty($data['static'])) {
+            $out .= Gitify::$contentSeparator;
+        } else {
             $out .= Gitify::$contentSeparator . $content;
         }
         return $out;
