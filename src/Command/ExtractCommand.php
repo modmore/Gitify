@@ -280,7 +280,7 @@ class ExtractCommand extends BaseCommand
         if (method_exists($object, 'getContent')
             && !($object instanceof \modStaticResource)
             && !($object instanceof \modDashboardWidget)
-            && !array_key_exists('content', $excludes)
+            && !in_array('content', $excludes)
         ) {
             $content = $object->getContent();
 
