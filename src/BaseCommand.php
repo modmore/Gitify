@@ -83,6 +83,10 @@ abstract class BaseCommand extends Command
     public function normalizePath($path)
     {
         $normalized_path = str_replace('\\', Gitify::$directorySeparator, $path);
+        // especially for windows, convert utf8 to local encoding to fix umlauts in filenames
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $normalized_path = utf8_decode($normalized_path);
+        }
 
         return $normalized_path;
     }
