@@ -1,13 +1,33 @@
 {
+    "name": "modmore/Gitify",
+    "version": "0.12.0",
+    "description": "Command line toolkit to make managing a MODX site in git a lot easier",
     "require": {
+        "kbjr/Git.php": "*",
         "symfony/console": "2.6.*",
-        "symfony/yaml": "2.6.*"
+        "symfony/yaml": "2.6.*",
+        "symfony/process": "2.6.*"
     },
-
     "require-dev": {
         "phpunit/phpunit": "4.3.*"
     },
-
+    "repositories":[
+        {
+            "type":"package",
+            "package":{
+                "name":"kbjr/Git.php",
+                "version":"0.2.0",
+                "source":{
+                    "type":"git",
+                    "url":"https://github.com/kbjr/Git.php",
+                    "reference":"master"
+                },
+                "autoload": {
+                    "classmap": ["Git.php"]
+                }
+            }
+        }
+     ],
     "autoload": {
         "psr-4": {"modmore\\Gitify\\":"src/"}
     }

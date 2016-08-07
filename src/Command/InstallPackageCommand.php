@@ -1,5 +1,6 @@
 <?php namespace modmore\Gitify\Command;
 
+use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -67,11 +68,20 @@ class InstallPackageCommand extends BaseCommand
 
                 // If no provider found, then we'll create it
                 if (!$provider) {
-                    $api_key = '';
+                    $credentials = array(
+                        'username' => isset($provider_data['username']) ? $provider_data['username'] : '',
+                        'api_key' => ''
+                    );
 
                     // Try to look for a file with the API Key from a file within the gitify working directory
                     if (!empty($provider_data['api_key']) && file_exists(GITIFY_WORKING_DIR . '/' . $provider_data['api_key'])) {
-                        $api_key = trim(file_get_contents(GITIFY_WORKING_DIR . '/' .$provider_data['api_key']));
+                        $credentials['api_key'] = trim(file_get_contents(GITIFY_WORKING_DIR . '/' . $provider_data['api_key']));
+                    }
+
+                    // load provider credentials from file
+                    if (!empty($provider_data['credential_file']) && file_exists(GITIFY_WORKING_DIR . '/' . $provider_data['credential_file'])) {
+                        $credentials_content = trim(file_get_contents(GITIFY_WORKING_DIR . '/' . $provider_data['credential_file']));
+                        $credentials = Gitify::fromYAML($credentials_content);
                     }
 
                     /** @var \modTransportProvider $provider */
@@ -80,8 +90,8 @@ class InstallPackageCommand extends BaseCommand
                         'name' => $provider_name,
                         'service_url' => $provider_data['service_url'],
                         'description' => isset($provider_data['description']) ? $provider_data['description'] : '',
-                        'username' => isset($provider_data['username']) ? $provider_data['username'] : '',
-                        'api_key' => $api_key,
+                        'username' => $credentials['username'],
+                        'api_key' => $credentials['api_key'],
                     ));
                     $provider->save();
                 }
@@ -168,28 +178,61 @@ class InstallPackageCommand extends BaseCommand
         $provider->getClient();
         $this->output->writeln("Searching <comment>{$provider->get('name')}</comment> for <comment>$packageName</comment>...");
 
-        // Request package information from the chosen provider
+        $packages = array();
+
+        // first try to find an exact match via signature from the chosen package provider
         $response = $provider->request('package', 'GET', array(
             'supports' => $product_version,
-            'query' => $packageName
+            'signature' => $packageName,
         ));
+        
+        // when we got a match (non 404), extract package information
+        if (!$response->isError()) {
 
-        // Check for a proper response
-        if (!empty($response)) {
-            $foundPackages = simplexml_load_string($response->response);
-            $helper = $this->getHelper('question');
+            $foundPkg = simplexml_load_string ( $response->response );
+            
+            $packages [strtolower((string) $foundPkg->name)] = array (
+                'name' => (string) $foundPkg->name,
+                'version' => (string) $foundPkg->version,
+                'location' => (string) $foundPkg->location,
+                'signature' => (string) $foundPkg->signature
+            );
+        }
 
-            $packages = array();
-
-            foreach ($foundPackages as $foundPkg) {
-                $packages[strtolower((string)$foundPkg->name)] = array(
-                    'name' => (string)$foundPkg->name,
-                    'version' => (string)$foundPkg->version,
-                    'location' => (string)$foundPkg->location,
-                    'signature' => (string)$foundPkg->signature,
-                );
+        // if no exact match, try it with via query
+        if (empty($packages)) {
+            $response = $provider->request('package', 'GET', array(
+                'supports' => $product_version,
+                'query' => $packageName,
+            ));
+            
+            // Check for a proper response
+            if (!empty($response)) {
+                 
+                $foundPackages = simplexml_load_string($response->response);
+                // no matches, simply return
+                if ($foundPackages['total'] == 0) {
+                    return true;
+                }
+                
+                foreach ($foundPackages as $foundPkg) {
+                    $packages[strtolower((string)$foundPkg->name)] = array(
+                        'name' => (string)$foundPkg->name,
+                        'version' => (string)$foundPkg->version,
+                        'location' => (string)$foundPkg->location,
+                        'signature' => (string)$foundPkg->signature,
+                    );
+                }
             }
+        }
 
+        // process found packages
+        if (!empty($packages)) {
+
+            $this->output->writeln('Found ' . count($packages) . ' package(s).');
+
+            $helper = $this->getHelper('question');            
+            
             // Ensure the exact match is always first
             if (isset($packages[strtolower($packageName)])) {
                 $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;

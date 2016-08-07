@@ -75,7 +75,9 @@ class InitCommand extends BaseCommand
         if (empty($directory)) $directory = '_data/';
         $directory = trim($directory, '/') . '/';
         $data['data_directory'] = $directory;
-        mkdir($directory);
+        if (!file_exists($directory)) {
+            mkdir($directory);
+        }
 
         /**
          * Ask the user for a backup directory to store database backups in
@@ -85,7 +87,9 @@ class InitCommand extends BaseCommand
         if (empty($directory)) $directory = '_backup/';
         $directory = trim($directory, '/') . '/';
         $data['backup_directory'] = $directory;
-        mkdir($directory);
+        if (!file_exists($directory)) {
+            mkdir($directory);
+        }
 
         /**
          * Ask if we want to include some default data types
@@ -104,11 +108,24 @@ class InitCommand extends BaseCommand
             );
         }
 
+        $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/N)</comment> ', true);
+        if ($helper->ask($input, $output, $question)) {
+            $dataTypes['template_variables'] = array(
+                'class' => 'modTemplateVar',
+                'primary' => 'name',
+            );
+            $dataTypes['template_variables_access'] = array(
+                'class' => 'modTemplateVarTemplate',
+                'primary' => array('tmplvarid', 'templateid')
+            );
+        }
+
         $question = new ConfirmationQuestion('Would you like to include <info>Content</info>? <comment>(Y/N)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['content'] = array(
                 'type' => 'content',
                 'exclude_keys' => array('editedby', 'editedon'),
+                'truncate_on_force' => array('modTemplateVarResource'),
             );
         }
 
@@ -127,18 +144,6 @@ class InitCommand extends BaseCommand
                 'class' => 'modTemplate',
                 'primary' => 'templatename',
                 'extension' => '.html',
-            );
-        }
-
-        $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/N)</comment> ', true);
-        if ($helper->ask($input, $output, $question)) {
-            $dataTypes['template_variables'] = array(
-                'class' => 'modTemplateVar',
-                'primary' => 'name',
-            );
-            $dataTypes['template_variables_access'] = array(
-                'class' => 'modTemplateVarTemplate',
-                'primary' => array('tmplvarid', 'templateid')
             );
         }
 
@@ -281,8 +286,7 @@ class InitCommand extends BaseCommand
                         $c->groupby('package_name');
                         foreach ($modx->getIterator('transport.modTransportPackage', $c) as $package) {
                             $packageName = $package->get('signature');
-                            $packageName = explode('-', $packageName);
-                            $providers[$name]['packages'][] = $packageName[0];
+                            $providers[$name]['packages'][] = $packageName;
                         }
                     }
 

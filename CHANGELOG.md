@@ -3,6 +3,33 @@
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
 ## Current development (master)
+- Prevent E_WARN errors in build
+
+## 0.12.0 - 2015-12-17
+- Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
+- Add `credential_file` option to providers to contain the `username` and `api_key` (#155)
+- Fix GITIFY_WORKING_DIR constant on windows (#149)
+
+## 0.11.0 - 2015-11-04
+- Fix E_STRICT error in loadConfig (#136)
+- Fix file path comparisons to work properly across unix and windows (#99)
+- Cache MODX packages so it doesn't have to download every time (#133)
+- Change the way Git.php dependency is loaded and version number is managed (#135)
+- Fix stupid bug in Gitify->getEnvironment causing www to not get stripped off properly
+- Allow setting the path to a git binary in a `gitify.git_path` setting
+- Add optional `--overwrite` flag to backup to overwrite a named backup file
+- Fix broken error message in backup command if file already exists
+
+## 0.10.0 - 2015-09-15
+- Make sure `modTemplateVar` is set before content in the gitify file (#88)
+- Add `modTemplateVarResource` to default `truncate_on_force` for content to make sure the DB is cleaned properly on force (#111) 
+- Store installed packages with the full signature instead of just the package name (#110)
+- Add `modx:upgrade` command to download a newer version and to run the upgrade (#116)
+- Prevent `PHP Warning: mkdir(): File exists` errors during init if backup and data folders already exist (#128)
+- Output result from command line install during `modx:install` (#127)
+- Fix unzip in `modx:install` on certain systems (#126)
+- Added support to get the git repository and environment specific options
+- Added symfony2/process and git.php dependencies
 - Implement/improve support for `where` attributes on content and other objects
 
 ## 0.9.0 - 2015-05-15

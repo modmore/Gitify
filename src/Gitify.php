@@ -20,9 +20,18 @@ class Gitify extends Application
      */
     public static $contentSeparator = "\n-----\n\n";
     /**
+     * Universal directory separator for *Nix and Windows
+     *
+     * @var string
+     */
+    public static $directorySeparator = "/";
+    /**
      * @var \modX
      */
     public static $modx;
+
+    public $environment = array();
+    public $repository;
 
     /**
      * Takes in an array of data, and turns it into blissful YAML using Symfony's YAML component.
@@ -90,6 +99,77 @@ class Gitify extends Application
         }
 
         return $config;
+    }
+
+    /**
+     * @return \GitRepo|bool
+     */
+    public function getGitRepository()
+    {
+        try {
+            if (!$this->repository) {
+                $gitPath = self::loadMODX()->getOption('gitify.git_path', null, '/usr/bin/git');
+                if (!empty($gitPath)) {
+                    \Git::set_bin($gitPath);
+                }
+                $repositoryPath = self::loadMODX()->getOption('gitify.repository_path', null, MODX_BASE_PATH, true);
+                $this->repository = \Git::open($repositoryPath);
+            }
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+
+        return $this->repository;
+    }
+
+    /**
+     * Returns the current environment based on the HTTP HOST.
+     *
+     * @return array
+     */
+    public function getEnvironment ()
+    {
+        if (!empty($this->environment)) {
+            return $this->environment;
+        }
+
+        $config = static::loadConfig();
+
+        $envs = array();
+
+        if (isset($config['environments']) && is_array($config['environments'])) {
+            $envs = $config['environments'];
+        }
+
+        $defaults = array(
+            'name' => '-unidentified environment-',
+            'branch' => 'develop',
+            'auto_commit_and_push' => true,
+            'remote' => 'origin',
+            'partitions' => array(
+                'modResource' => 'content',
+                'modTemplate' => 'templates',
+                'modCategory' => 'categories',
+                'modTemplateVar' => 'template_variables',
+                'modChunk' => 'chunks',
+                'modSnippet' => 'snippets',
+                'modPlugin' => 'plugins'
+            )
+        );
+
+        if (isset($envs['defaults']) && is_array($envs['defaults'])) {
+            $defaults = array_merge($defaults, $envs['defaults']);
+        }
+
+        $host = (isset($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : MODX_HTTP_HOST;
+        if (substr($host, 0, 4) == 'www.') {
+            $host = substr($host, 4);
+        }
+
+        $environment = (isset($envs[$host])) ? $envs[$host] : array();
+        $environment = array_merge($defaults, $environment);
+        $this->environment = $environment;
+        return $environment;
     }
 
     /**

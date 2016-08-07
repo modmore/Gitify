@@ -147,6 +147,9 @@ class ExtractCommand extends BaseCommand
 
                 // Write the file
                 $fn = $folder . DIRECTORY_SEPARATOR . $contextKey . DIRECTORY_SEPARATOR . $uri . $extension;
+
+                $fn = $this->normalizePath($fn);
+
                 $after[] = $fn;
 
                 // Only write stuff if it doesn't exist already, or is not the same
@@ -224,9 +227,13 @@ class ExtractCommand extends BaseCommand
             }
 
             $path = $this->filterPathSegment($path);
+            $path = str_replace('/', '-', $path);
 
             $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
             $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
+
+            $fn = $this->normalizePath($fn);
+
             $after[] = $fn;
 
             $written = false;
@@ -260,7 +267,7 @@ class ExtractCommand extends BaseCommand
     public function generate($object, array $options = array())
     {
         $fieldMeta = $object->_fieldMeta;
-        $data = $this->objectToArray($object);
+        $data = $this->objectToArray($object, $options);
 
         // If there's a dedicated content field, we put that below the yaml for easier managing,
         // unless the object is a modStaticResource, calling getContent on a static resource can break the
@@ -336,7 +343,8 @@ class ExtractCommand extends BaseCommand
         foreach($it as $file)
         {
             /** @var \SplFileInfo $file */
-            $files[] = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
+            $file_path = $file->getPath() . DIRECTORY_SEPARATOR . $file->getFilename();
+            $files[] = $this->normalizePath($file_path);
         }
         return $files;
     }
@@ -363,9 +371,10 @@ class ExtractCommand extends BaseCommand
      * Turns the object into an array, and do some more processing depending on the object.
      *
      * @param \xPDOObject $object
+     * @pram array $options
      * @return array
      */
-    protected function objectToArray(\xPDOObject $object)
+    protected function objectToArray(\xPDOObject $object, array $options = array())
     {
         $data = $object->toArray('', true, true);
         switch (true) {
@@ -376,7 +385,15 @@ class ExtractCommand extends BaseCommand
                 $templateVars = $object->getTemplateVars();
                 foreach ($templateVars as $tv) {
                     /** @var \modTemplateVar $tv */
-                    $tvs[$tv->get('name')] = $tv->get('value');
+                    $name = $tv->get('name');
+                    if (isset($options['exclude_tvs']) && is_array($options['exclude_tvs'])) {
+                        if (!in_array($name, $options['exclude_tvs'])) {
+                            $tvs[$tv->get('name')] = $tv->get('value');
+                        }
+                    }
+                    else {
+                        $tvs[$tv->get('name')] = $tv->get('value');
+                    }
                 }
                 ksort($tvs);
                 $data['tvs'] = $tvs;

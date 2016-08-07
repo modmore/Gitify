@@ -2,6 +2,7 @@
 namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
+use modmore\Gitify\Mixins\DownloadModx;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -11,28 +12,35 @@ use Symfony\Component\Console\Question\Question;
 /**
  * Class BuildCommand
  *
- * Builds a MODX site from the files and configuration.
+ * Installs a clean version of MODX.
  *
  * @package modmore\Gitify\Command
  */
 class InstallModxCommand extends BaseCommand
 {
+    use DownloadModx;
+
     public $loadConfig = false;
     public $loadMODX = false;
-    
+
     protected function configure()
     {
         $this
             ->setName('modx:install')
             ->setAliases(array('install:modx'))
             ->setDescription('Downloads, configures and installs a fresh MODX installation. [Note: <info>install:modx</info> will be removed in 1.0, use <info>modx:install</info> instead]')
-
             ->addArgument(
-                'modx_version',
+                'version',
                 InputArgument::OPTIONAL,
-                'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.'
+                'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.',
+                'latest'
             )
-        ;
+            ->addOption(
+                'download',
+                'd',
+                InputOption::VALUE_NONE,
+                'Force download the MODX package even if it already exists in the cache folder.'
+            );
     }
 
     /**
@@ -44,10 +52,11 @@ class InstallModxCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $downloaded = $this->download();
-        if (!$downloaded)
-        {
-            return 1;
+        $version = $this->input->getArgument('version');
+        $forced = $this->input->getOption('download');
+
+        if (!$this->getMODX($version, $forced)) {
+            return 1; // exit
         }
 
         // Create the XML config
@@ -59,11 +68,11 @@ class InstallModxCommand extends BaseCommand
         $output->writeln("Running MODX Setup...");
 
         // Actually run the CLI setup
-        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}");
+        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}", $setupOutput);
+        $output->writeln("<comment>{$setupOutput[0]}</comment>");
 
         // Try to clean up the config file
-        if (!unlink($config))
-        {
+        if (!unlink($config)) {
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
         }
 
@@ -71,51 +80,6 @@ class InstallModxCommand extends BaseCommand
         return 0;
     }
 
-    /**
-     * Downloads the latest version of MODX, and puts it into place in the working directory.
-     *
-     * @return bool
-     */
-    protected function download()
-    {
-        $version = $this->input->getArgument('modx_version');
-
-        if (empty($version) || $version == 'latest') {
-            $url = 'http://modx.com/download/latest/';
-        }
-        else {
-            $url = 'http://modx.com/download/direct/modx-' . $version . '.zip';
-        }
-
-        $this->output->writeln("Downloading MODX from {$url}...");
-        exec('curl -Lo modx.zip ' . $url . ' -#');
-
-        if (!file_exists('modx.zip')) {
-            $this->output->writeln('<error>Error: Could not download the MODX zip</error>');
-            return false;
-        }
-
-        $this->output->writeln("Extracting zip...");
-        exec('unzip modx.zip');
-
-        $insideFolder = exec('ls -F | grep "modx-" | head -1');
-        if(empty($insideFolder) || $insideFolder == '/') {
-            $this->output->writeln("<error>Error: Could not locate unzipped MODX folder; perhaps the download failed or unzip is not available on your system.</error>");
-            return false;
-        }
-
-        $this->output->writeln("Moving unzipped files out of temporary directory...");
-
-        exec("mv ./{$insideFolder}* ./");
-        exec("rm -r ./{$insideFolder}");
-
-        if (!unlink('modx.zip')) {
-            $this->output->writeln("<info>Note: unable to clean up modx.zip file.</info>");
-        }
-        return true;
-    }
-
-    
     /**
      * Asks the user to complete a bunch of details and creates a MODX CLI config xml file
      */
@@ -139,6 +103,9 @@ class InstallModxCommand extends BaseCommand
         $question->setHidden(true);
         $dbPass = $helper->ask($this->input, $this->output, $question);
 
+        $question = new Question('Database Prefix [modx_]: ', 'modx_');
+        $dbPrefix = $helper->ask($this->input, $this->output, $question);
+
         $question = new Question('Hostname [' . gethostname() . ']: ', gethostname());
         $host = $helper->ask($this->input, $this->output, $question);
         $host = rtrim(trim($host), '/');
@@ -147,13 +114,13 @@ class InstallModxCommand extends BaseCommand
         $question = new Question('Base URL [' . $defaultBaseUrl . ']: ', $defaultBaseUrl);
         $baseUrl = $helper->ask($this->input, $this->output, $question);
         $baseUrl = '/' . trim(trim($baseUrl), '/') . '/';
-        $baseUrl = str_replace('//','/', $baseUrl);
+        $baseUrl = str_replace('//', '/', $baseUrl);
 
         $question = new Question('Manager Language [en]: ', 'en');
         $language = $helper->ask($this->input, $this->output, $question);
 
         $defaultMgrUser = basename(GITIFY_WORKING_DIR) . '_admin';
-        $question = new Question('Manager User ['.$defaultMgrUser.']: ', $defaultMgrUser);
+        $question = new Question('Manager User [' . $defaultMgrUser . ']: ', $defaultMgrUser);
         $managerUser = $helper->ask($this->input, $this->output, $question);
 
         $question = new Question('Manager User Password [generated]: ', 'generate');
@@ -164,6 +131,7 @@ class InstallModxCommand extends BaseCommand
                     'Please specify a password of at least 8 characters to continue.'
                 );
             }
+
             return $value;
         });
         $managerPass = $helper->ask($this->input, $this->output, $question);
@@ -185,7 +153,7 @@ class InstallModxCommand extends BaseCommand
             <database_connection_charset>utf8</database_connection_charset>
             <database_charset>utf8</database_charset>
             <database_collation>utf8_general_ci</database_collation>
-            <table_prefix>modx_</table_prefix>
+            <table_prefix>{$dbPrefix}</table_prefix>
             <https_port>443</https_port>
             <http_host>{$host}</http_host>
             <cache_disabled>0</cache_disabled>
