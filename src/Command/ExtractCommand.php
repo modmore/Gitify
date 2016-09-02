@@ -109,7 +109,7 @@ class ExtractCommand extends BaseCommand
 
             // Prepare the criteria for this context
             $contextCriteria = ($criteria) ? $criteria : array();
-            if (count(array_filter(array_keys($contextCriteria), 'is_string')) > 0) {
+            if (empty($contextCriteria) || count(array_filter(array_keys($contextCriteria), 'is_string')) > 0) {
                 // associative array => and conditions
                 $contextCriteria['context_key'] = $contextKey;
             } else {
