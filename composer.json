@@ -30,5 +30,6 @@
      ],
     "autoload": {
         "psr-4": {"modmore\\Gitify\\":"src/"}
-    }
+    },
+    "bin": ["Gitify"]
 }
