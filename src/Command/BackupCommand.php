@@ -38,6 +38,12 @@ class BackupCommand extends BaseCommand
                 'o',
                 InputOption::VALUE_NONE,
                 'When specified, a backup with the same name will be overwritten if it exists.'
+            )
+            ->addOption(
+                'compress',
+                'c',
+                InputOption::VALUE_NONE,
+                'When specified, resulting backup file will be gzip compressed.'
             );
     }
 
@@ -88,6 +94,9 @@ class BackupCommand extends BaseCommand
         if (substr($file, -4) != '.sql') {
             $file .= '.sql';
         }
+        if ($input->getOption('compress') && substr($file, -3) != '.gz') {
+            $file .= '.gz';
+        }
 
         // Full target directory and file
         $targetFile = $targetDirectory . $file;
@@ -112,7 +121,12 @@ class BackupCommand extends BaseCommand
             $password_parameter = "-p'{$database_password}'";
         }
 
-        exec("mysqldump -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > {$targetFile} ");
+        $compress = $input->getOption('compress');
+        if (!$compress) {
+            exec("mysqldump -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > {$targetFile} ");
+        } else {
+            exec("mysqldump -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} | gzip - > {$targetFile} ");
+        }
         return 0;
     }
 }
