@@ -21,6 +21,13 @@ class ExtractCommand extends BaseCommand
     protected $_useResource = null;
     protected $_resource = false;
 
+    protected $_options = array();
+    protected $_class = '';
+    protected $_fieldMeta = array();
+    protected $_fieldAliases = array();
+    protected $_tvNames = array();
+    protected $_tvIds = array();
+
     protected function configure()
     {
         $this
@@ -89,6 +96,20 @@ class ExtractCommand extends BaseCommand
      */
     public function extractContent($folder, $options)
     {
+        // Make variables available to other methods
+        $this->_options = $options;
+        $this->_class = 'modResource';
+        $this->_fieldMeta = $this->modx->getFieldMeta($this->_class);
+        $this->_fieldAliases = $this->modx->getFieldAliases($this->_class);
+
+        // Grab all TVs and prepare them for refering to later
+        /** @var \modTemplateVar[] $tvs */
+        $tvs = $this->modx->getCollection('modTemplateVar');
+        foreach ($tvs as $tv) {
+            $this->_tvNames[(string)$tv->get('name')] = $tv->get('id');
+            $this->_tvIds[(int)$tv->get('id')] = $tv->get('name');
+        }
+
         // Read the current files
         $before = $this->getAllFiles($folder);
         $after = array();
@@ -117,52 +138,72 @@ class ExtractCommand extends BaseCommand
 
             // Grab the resources in the context
             $c = $this->modx->newQuery('modResource');
+            $c->select($this->modx->getSelectColumns('modResource'));
             $c->where($contextCriteria);
+//            foreach ($this->_tvNames as $tvName => $tvId) {
+//                $c->leftJoin('modTemplateVarResource', 'TV_' . $tvId, "`modResource`.`id` = `TV_{$tvId}`.`contentid` AND `TV_{$tvId}`.`tmplvarid` = {$tvId}");
+//                $c->select("`TV_{$tvId}`.`value` as `tv_{$tvName}`");
+//            }
             $c->sortby('uri', 'ASC');
-            $resources = $this->modx->getIterator('modResource', $c);
-            foreach ($resources as $resource) {
-                /** @var \modResource $resource */
-                $file = $this->generate($resource, $options);
 
-                // Somewhat normalize uris into something we can use as file path that makes (human) sense
-                $uri = $resource->uri;
-                // Trim trailing slash if there is one
-                if (substr($uri, -1) == '/')
-                {
-                    $uri = rtrim($uri, '/');
+            // Turn it into a PDO query
+            $c->prepare();
+            $sql = $c->toSQL();
+            $stmt = $this->modx->query($sql);
+
+            if (!$stmt) {
+                var_dump($this->modx->errorInfo());
+            }
+
+            if ($stmt && $stmt->execute()) {
+                $resources = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+                foreach ($resources as $resource) {
+                    /** @var array $resource */
+                    $file = $this->generateResource($resource);
+
+                    // Somewhat normalize uris into something we can use as file path that makes (human) sense
+                    $uri = $resource['uri'];
+                    // Trim trailing slash if there is one
+                    if (substr($uri, -1) === '/') {
+                        $uri = rtrim($uri, '/');
+                    }
+                    else {
+                        // Get rid of the extension by popping off the last part, and adding just the alias back.
+                        $uri = explode('/', $uri);
+                        array_pop($uri);
+
+                        // The alias might contain slashes too, so cover that
+                        $alias = explode('/', trim($resource['alias'], '/'));
+                        $uri[] = end($alias);
+                        $uri = implode(DIRECTORY_SEPARATOR, $uri);
+                    }
+
+                    if (empty($uri)) {
+                        $uri = $resource->id;
+                    }
+
+                    // Write the file
+                    $fn = $folder . DIRECTORY_SEPARATOR . $contextKey . DIRECTORY_SEPARATOR . $uri . $extension;
+
+                    $fn = $this->normalizePath($fn);
+
+                    $after[] = $fn;
+
+                    // Only write stuff if it doesn't exist already, or is not the same
+                    $written = false;
+                    if (!file_exists($fn) || file_get_contents($fn) != $file) {
+                        $this->modx->cacheManager->writeFile($fn, $file);
+                        $written = true;
+                    }
+
+                    // If we're in verbose mode (-v/--verbose), output a message with what we did
+                    if ($this->output->isVerbose()) {
+                        $this->output->writeln('  \ ' . ($written ? "Generated {$uri}{$extension}" : "Skipped {$uri}{$extension}, no change"));
+                    }
                 }
-                else
-                {
-                    // Get rid of the extension by popping off the last part, and adding just the alias back.
-                    $uri = explode('/', $uri);
-                    array_pop($uri);
-
-                    // The alias might contain slashes too, so cover that
-                    $alias = explode('/', trim($resource->alias, '/'));
-                    $uri[] = end($alias);
-                    $uri = implode(DIRECTORY_SEPARATOR, $uri);
-                }
-
-                if (empty($uri)) $uri = $resource->id;
-
-                // Write the file
-                $fn = $folder . DIRECTORY_SEPARATOR . $contextKey . DIRECTORY_SEPARATOR . $uri . $extension;
-
-                $fn = $this->normalizePath($fn);
-
-                $after[] = $fn;
-
-                // Only write stuff if it doesn't exist already, or is not the same
-                $written = false;
-                if (!file_exists($fn) || file_get_contents($fn) != $file) {
-                    $this->modx->cacheManager->writeFile($fn, $file);
-                    $written = true;
-                }
-
-                // If we're in verbose mode (-v/--verbose), output a message with what we did
-                if ($this->output->isVerbose()) {
-                    $this->output->writeln('  \ ' . ($written ? "Generated {$uri}{$extension}" : "Skipped {$uri}{$extension}, no change"));
-                }
+            }
+            else {
+                $this->output->writeln('Could not create SQL query to retrieve resources in ' . $contextKey);
             }
         }
 
@@ -188,7 +229,6 @@ class ExtractCommand extends BaseCommand
     public function extractObjects($folder, array $options = array())
     {
         $criteria = $this->getPartitionCriteria($options['folder']);
-
         $count = $this->modx->getCount($options['class'], $criteria);
         $this->output->writeln("Extracting {$options['class']} into {$options['folder']} ({$count} records)...");
 
@@ -196,117 +236,227 @@ class ExtractCommand extends BaseCommand
         $before = $this->getAllFiles($folder);
         $after = array();
 
-        // Grab the stuff
-        $c = $this->modx->newQuery($options['class']);
+        $this->modx->getCacheManager();
+
+        // Determine the primary key for this object
+        $pk = isset($options['primary']) ? $options['primary'] : $this->modx->getPK($options['class']);
+
+        // Make variables available to other methods
+        $this->_options = $options;
+        $this->_class = $options['class'];
+        $this->_fieldMeta = $this->modx->getFieldMeta($options['class']);
+        $this->_fieldAliases = $this->modx->getFieldAliases($options['class']);
+
+        // Grab the data objects we need to extract
+        $data = array();
+
+        // Prepare the query with xPDO
+        $c = $this->modx->newQuery($this->_class);
+        // Select all fields; without this line it will rename fields to "modSnippet.field_name" instead of just "field_name"
+        $c->select($this->modx->getSelectColumns($this->_class));
+
+        // Apply criteria if we have any
         if (!empty($criteria)) {
             $c->where(array($criteria));
         }
-        $collection = $this->modx->getCollection($options['class'], $c);
 
-        $this->modx->getCacheManager();
+        $c->prepare();
+        $stmt = $this->modx->query($c->toSQL());
+        if ($stmt && $stmt->execute()) {
+            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            // Loop over stuff to generate
+            foreach ($data as $item) {
+                /** @var \array $item */
+                $file = $this->generate($item);
 
-        // Loop over stuff to generate
-        $pk = isset($options['primary']) ? $options['primary'] : '';
-        foreach ($collection as $object) {
-            /** @var \xPDOObject $object */
-            $file = $this->generate($object, $options);
-
-            // Grab the primary key on the object, including support for composite primary keys
-            if (empty($pk)) {
-                $path = $object->getPrimaryKey();
-            }
-            elseif (is_array($pk)) {
-                $paths = array();
-                foreach ($pk as $pkVal) {
-                    $paths[] = $object->get($pkVal);
+                // Grab the primary key on the object for the file name, including support for composite primary keys
+                if (is_array($pk)) {
+                    $paths = array();
+                    foreach ($pk as $pkVal) {
+                        $paths[] = $item[$pkVal];
+                    }
+                    $path = implode('.', $paths);
+                } else {
+                    $path = $item[$pk];
                 }
-                $path = implode('.' , $paths);
+                $path = $this->filterPathSegment($path);
+                $path = str_replace('/', '-', $path);
+
+                $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
+                $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
+                $fn = $this->normalizePath($fn);
+
+                $after[] = $fn;
+
+                $written = false;
+                if (!file_exists($fn) || file_get_contents($fn) != $file) {
+                    $this->modx->cacheManager->writeFile($fn, $file);
+                    $written = true;
+                }
+                if ($this->output->isVerbose()) {
+                    $this->output->writeln($written ? "- Generated {$path}{$ext}" : "- Skipped {$path}{$ext}, no change");
+                }
             }
-            else {
-                $path = $object->get($pk);
-            }
 
-            $path = $this->filterPathSegment($path);
-            $path = str_replace('/', '-', $path);
-
-            $ext = (isset($options['extension'])) ? $options['extension'] : '.yaml';
-            $fn = $folder . DIRECTORY_SEPARATOR . $path . $ext;
-
-            $fn = $this->normalizePath($fn);
-
-            $after[] = $fn;
-
-            $written = false;
-            if (!file_exists($fn) || file_get_contents($fn) != $file) {
-                $this->modx->cacheManager->writeFile($fn, $file);
-                $written = true;
-            }
-            if ($this->output->isVerbose()) {
-                $this->output->writeln($written ? "- Generated {$path}{$ext}" : "- Skipped {$path}{$ext}, no change");
+            // Clean up removed object files
+            $old = array_diff($before, $after);
+            foreach ($old as $oldFile)
+            {
+                unlink($oldFile);
+                // If in verbose mode, let it be known to the world
+                if ($this->output->isVerbose()) {
+                    $oldFileName = substr($oldFile, strlen($folder));
+                    $this->output->writeln("- Removed {$oldFileName}, no longer exists");
+                }
             }
         }
-
-        // Clean up removed object files
-        $old = array_diff($before, $after);
-        foreach ($old as $oldFile)
-        {
-            unlink($oldFile);
-            // If in verbose mode, let it be known to the world
-            if ($this->output->isVerbose()) {
-                $oldFileName = substr($oldFile, strlen($folder));
-                $this->output->writeln("- Removed {$oldFileName}, no longer exists");
-            }
+        else {
+            $this->output->writeln('Could not create SQL query to retrieve objects');
         }
     }
 
     /**
-     * @param \xPDOObject|\modElement $object
-     * @param array $options
+     * @param array $item
      * @return string
      */
-    public function generate($object, array $options = array())
+    public function generate($item)
     {
         // Strip out keys that have the same value as the default, or are excluded per the .gitify
         $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
 
-        $fieldMeta = $object->_fieldMeta;
-        $data = $this->objectToArray($object, $options);
+        $meta = $item;
 
-        // If there's a dedicated content field, we put that below the yaml for easier managing,
-        // unless the object is a modStaticResource, calling getContent on a static resource can break the
-        // extracting because it tries to return the (possibly binary) file.
-        // the same problem with modDashboardWidget, it's have custom getContent method
+        foreach ($item as $key => $value) {
+            $dbType = array_key_exists($key, $this->_fieldMeta) ? $this->_fieldMeta[$key]['dbtype'] : 'varchar';
+            $phpType = array_key_exists($key, $this->_fieldMeta) ? $this->_fieldMeta[$key]['phptype'] : 'string';
+
+            switch ($phpType) {
+                case 'boolean' :
+                    $value = (boolean) $value;
+                    break;
+                case 'integer' :
+                    $value = (int) $value;
+                    break;
+                case 'float' :
+                    $value = (float) $value;
+                    break;
+                case 'timestamp' :
+                case 'datetime' :
+                    if (preg_match('/int/i', $dbType)) {
+                        $ts = (int)$value;
+                    } elseif (in_array($value, $this->modx->driver->_currentTimestamps, true)) {
+                        $ts = time();
+                    } else {
+                        $ts = strtotime($value);
+                    }
+                    if ($ts !== false && !empty($value)) {
+                        $value= strftime('%Y-%m-%d %H:%M:%S', $ts);
+                    }
+                    break;
+                case 'date' :
+                    if (preg_match('/int/i', $dbType)) {
+                        $ts = (int)$value;
+                    } elseif (in_array($value, $this->modx->driver->_currentDates, true)) {
+                        $ts = time();
+                    } else {
+                        $ts = strtotime($value);
+                    }
+                    if ($ts !== false && !empty($value)) {
+                        $value= strftime('%Y-%m-%d', $ts);
+                    }
+                    break;
+                case 'array' :
+                    if (is_string($value)) {
+                        $value = unserialize($value);
+                    }
+                    break;
+                case 'json' :
+                    if (is_string($value) && strlen($value) > 1) {
+                        $value = $this->modx->fromJSON($value, true);
+                    }
+                    break;
+            }
+            $meta[$key] = $value;
+        }
+
+
+        // The content is extracted into a separate part of the file. This should make it easier and cleaner
+        // to edit in the file directly.
+        // As the content may not always be in an actual `content` column, first check the field aliases.
+        $contentKey = 'content';
+        if (array_key_exists('content', $this->_fieldAliases)) {
+            $contentKey = $this->_fieldAliases['content'];
+        }
+
         $content = '';
-        if (method_exists($object, 'getContent')
-            && !($object instanceof \modStaticResource)
-            && !($object instanceof \modDashboardWidget)
-            && !in_array('content', $excludes)
+        if (array_key_exists($contentKey, $this->_fieldMeta)
+//            && !in_array($class, array('modStaticResource', 'modDashboardWidget'), true)
         ) {
-            $content = $object->getContent();
+            $content = $meta[$contentKey];
 
             if (!empty($content)) {
-                foreach ($data as $key => $value) {
-                    if ($value === $content) unset($data[$key]);
+                foreach ($meta as $key => $value) {
+                    if ($value === $content) unset($meta[$key]);
                 }
             }
         }
 
-        foreach ($data as $key => $value) {
+        // Strip out keys that have the same value as the default, or are excluded per the .gitify
+        $excludes = (isset($this->_options['exclude_keys']) && is_array($this->_options['exclude_keys'])) ? $this->_options['exclude_keys'] : array();
+        foreach ($meta as $key => $value) {
             if (
-                (isset($fieldMeta[$key]['default']) && $value === $fieldMeta[$key]['default']) //@fixme
+                (isset($this->_fieldMeta[$key]['default']) && $value === $this->_fieldMeta[$key]['default']) //@fixme
                 || in_array($key, $excludes)
-            )
-            {
-                unset($data[$key]);
+            ) {
+                unset($meta[$key]);
             }
         }
 
-        $out = Gitify::toYAML($data);
+        $output = Gitify::toYAML($meta);
 
         if (!empty($content)) {
-            $out .= Gitify::$contentSeparator . $content;
+            $output .= Gitify::$contentSeparator . $content;
         }
-        return $out;
+        return $output;
+    }
+
+    public function generateResource($item)
+    {
+        $c = $this->modx->newQuery('modTemplateVarResource');
+        $c->query['distinct'] = 'DISTINCT';
+        $c->leftJoin('modTemplateVar', 'TemplateVar');
+        $c->select($this->modx->getSelectColumns('modTemplateVarResource', 'modTemplateVarResource'));
+        $c->select($this->modx->getSelectColumns('modTemplateVar', 'TemplateVar', 'tv_', array('id', 'name')));
+        $c->select($this->modx->getSelectColumns('modTemplateVarTemplate', 'tvtpl', 'tvtpl_', array('tmplvarid', 'templateid')));
+        $c->innerJoin('modTemplateVarTemplate','tvtpl',array(
+            'tvtpl.tmplvarid = modTemplateVarResource.tmplvarid',
+            'tvtpl.templateid' => $item['template'],
+        ));
+        $c->where(array(
+            'contentid' => $item['id'],
+        ));
+
+        $c->prepare();
+        $sql = $c->toSQL();
+        $stmt = $this->modx->query($sql);
+        if ($stmt && $stmt->execute()) {
+            $tvs = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $item['tvs'] = array();
+            foreach ($tvs as $tv) {
+                $name = (string)$tv['tv_name'];
+                if (array_key_exists('exclude_tvs', $this->_options) && is_array($this->_options['exclude_tvs'])) {
+                    if (!in_array($name, $this->_options['exclude_tvs'], true)) {
+                        $item['tvs'][$name] = $tv['value'];
+                    }
+                } else {
+                    $item['tvs'][$name] = $tv['value'];
+                }
+            }
+            ksort($item['tvs']);
+        }
+
+        return $this->generate($item);
     }
 
     /**
@@ -372,49 +522,6 @@ class ExtractCommand extends BaseCommand
             return $this->categories[$id];
         }
         return '';
-    }
-
-    /**
-     * Turns the object into an array, and do some more processing depending on the object.
-     *
-     * @param \xPDOObject $object
-     * @pram array $options
-     * @return array
-     */
-    protected function objectToArray(\xPDOObject $object, array $options = array())
-    {
-        $data = $object->toArray('', true, true);
-        switch (true) {
-            // Handle TVs for resources automatically
-            case $object instanceof \modResource:
-                /** @var \modResource $object */
-                $tvs = array();
-                $templateVars = $object->getTemplateVars();
-                foreach ($templateVars as $tv) {
-                    /** @var \modTemplateVar $tv */
-                    $name = $tv->get('name');
-                    if (isset($options['exclude_tvs']) && is_array($options['exclude_tvs'])) {
-                        if (!in_array($name, $options['exclude_tvs'])) {
-                            $tvs[$tv->get('name')] = $tv->get('value');
-                        }
-                    }
-                    else {
-                        $tvs[$tv->get('name')] = $tv->get('value');
-                    }
-                }
-                ksort($tvs);
-                $data['tvs'] = $tvs;
-                break;
-
-            // Handle string-based categories automagically on elements
-            case $object instanceof \modElement && !($object instanceof \modCategory):
-                if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
-                    $data['category'] = $this->getCategoryName($data['category']);
-                }
-                break;
-        }
-
-        return $data;
     }
 
     /**
