@@ -326,13 +326,16 @@ class ExtractCommand extends BaseCommand
 
         $meta = $item;
 
+        // Keys that are excluded by the .gitify config
+        $excludes = (isset($this->_options['exclude_keys']) && is_array($this->_options['exclude_keys'])) ? $this->_options['exclude_keys'] : array();
+
         foreach ($item as $key => $value) {
             $dbType = array_key_exists($key, $this->_fieldMeta) ? $this->_fieldMeta[$key]['dbtype'] : 'varchar';
             $phpType = array_key_exists($key, $this->_fieldMeta) ? $this->_fieldMeta[$key]['phptype'] : 'string';
 
             switch ($phpType) {
                 case 'boolean' :
-                    $value = (boolean) $value;
+                    $value = (int) $value;
                     break;
                 case 'integer' :
                     $value = (int) $value;
@@ -377,8 +380,27 @@ class ExtractCommand extends BaseCommand
                     break;
             }
             $meta[$key] = $value;
-        }
 
+            // Remove the key from the meta if it's the default or a null value where null is accepted
+            if (array_key_exists($key, $this->_fieldMeta)) {
+                if (array_key_exists('default', $this->_fieldMeta[$key])) {
+                    $default = $this->_fieldMeta[$key]['default'];
+                    if ($default === $value || (empty($value) && empty($default))) {
+                        unset($meta[$key]);
+                    }
+                }
+                elseif (array_key_exists('null', $this->_fieldMeta[$key]) && $this->_fieldMeta['null']) {
+                    if (empty($value)) {
+                        unset($meta[$key]);
+                    }
+                }
+            }
+
+            // Remove excluded keys
+            if (in_array($key, $excludes, true)) {
+                unset($meta[$key]);
+            }
+        }
 
         // The content is extracted into a separate part of the file. This should make it easier and cleaner
         // to edit in the file directly.
@@ -388,10 +410,9 @@ class ExtractCommand extends BaseCommand
             $contentKey = $this->_fieldAliases['content'];
         }
 
+        // Grab the actual content
         $content = '';
-        if (array_key_exists($contentKey, $this->_fieldMeta)
-//            && !in_array($class, array('modStaticResource', 'modDashboardWidget'), true)
-        ) {
+        if (array_key_exists($contentKey, $this->_fieldMeta)) {
             $content = $meta[$contentKey];
 
             if (!empty($content)) {
@@ -401,19 +422,24 @@ class ExtractCommand extends BaseCommand
             }
         }
 
-        // Strip out keys that have the same value as the default, or are excluded per the .gitify
-        $excludes = (isset($this->_options['exclude_keys']) && is_array($this->_options['exclude_keys'])) ? $this->_options['exclude_keys'] : array();
-        foreach ($meta as $key => $value) {
-            if (
-                (isset($this->_fieldMeta[$key]['default']) && $value === $this->_fieldMeta[$key]['default']) //@fixme
-                || in_array($key, $excludes)
-            ) {
-                unset($meta[$key]);
-            }
+        // Some class-specific tweaks
+        switch ($this->_class) {
+            // For modElements we update the category to refer to it by name instead of ID
+            case 'modTemplate':
+            case 'modTemplateVar':
+            case 'modChunk':
+            case 'modSnippet':
+            case 'modPlugin':
+                if (array_key_exists('category', $meta) && is_numeric($meta['category']) && $meta['category'] > 0) {
+                    $meta['category'] = $this->getCategoryName($meta['category']);
+                }
+                break;
         }
 
+        // Turn the meta into YAML
         $output = Gitify::toYAML($meta);
 
+        // If we have specific content, we attach it to the output
         if (!empty($content)) {
             $output .= Gitify::$contentSeparator . $content;
         }
