@@ -144,37 +144,46 @@ class InstallModxCommand extends BaseCommand
         $question = new Question('Manager Email: ');
         $managerEmail = $helper->ask($this->input, $this->output, $question);
 
-        $configXMLContents = "<modx>
-            <database_type>mysql</database_type>
-            <database_server>localhost</database_server>
-            <database>{$dbName}</database>
-            <database_user>{$dbUser}</database_user>
-            <database_password>{$dbPass}</database_password>
-            <database_connection_charset>utf8</database_connection_charset>
-            <database_charset>utf8</database_charset>
-            <database_collation>utf8_general_ci</database_collation>
-            <table_prefix>{$dbPrefix}</table_prefix>
-            <https_port>443</https_port>
-            <http_host>{$host}</http_host>
-            <cache_disabled>0</cache_disabled>
-            <inplace>1</inplace>
-            <unpacked>0</unpacked>
-            <language>{$language}</language>
-            <cmsadmin>{$managerUser}</cmsadmin>
-            <cmspassword>{$managerPass}</cmspassword>
-            <cmsadminemail>{$managerEmail}</cmsadminemail>
-            <core_path>{$directory}core/</core_path>
-            <context_mgr_path>{$directory}manager/</context_mgr_path>
-            <context_mgr_url>{$baseUrl}manager/</context_mgr_url>
-            <context_connectors_path>{$directory}connectors/</context_connectors_path>
-            <context_connectors_url>{$baseUrl}connectors/</context_connectors_url>
-            <context_web_path>{$directory}</context_web_path>
-            <context_web_url>{$baseUrl}</context_web_url>
-            <remove_setup_directory>1</remove_setup_directory>
-        </modx>";
+        $config = array(
+            'database_type' => 'mysql',
+            'database_server' => 'localhost',
+            'database' => $dbName,
+            'database_user' => $dbUser,
+            'database_password' => $dbPass,
+            'database_connection_charset' => 'utf8',
+            'database_charset' => 'utf8',
+            'database_collation' => 'utf8_general_ci',
+            'table_prefix' => $dbPrefix,
+            'https_port' => 443,
+            'http_host' => $host,
+            'cache_disabled' => 0,
+            'inplace' => 1,
+            'unpacked' => 0,
+            'language' => $language,
+            'cmsadmin' => $managerUser,
+            'cmspassword' => $managerPass,
+            'cmsadminemail' => $managerEmail,
+            'core_path' => $directory . 'core/',
+            'context_mgr_path' => $directory . 'manager/',
+            'context_mgr_url' => $baseUrl . 'manager/',
+            'context_connectors_path' => $directory . 'connectors/',
+            'context_connectors_url' => $baseUrl . 'connectors/',
+            'context_web_path' => $directory,
+            'context_web_url' => $baseUrl,
+            'remove_setup_directory' => true
+        );
+
+        $xml = new \DOMDocument('1.0', 'utf-8');
+        $modx = $xml->createElement('modx');
+
+        foreach ($config as $key => $value) {
+            $modx->appendChild($xml->createElement($key, htmlentities($value, ENT_QUOTES|ENT_XML1)));
+        }
+
+        $xml->appendChild($modx);
 
         $fh = fopen($directory . 'config.xml', "w+");
-        fwrite($fh, $configXMLContents);
+        fwrite($fh, $xml->saveXML());
         fclose($fh);
 
         return $directory . 'config.xml';
