@@ -33,6 +33,9 @@ if (!defined('GITIFY_WORKING_DIR')) {
  * Specify the user home directory, for save cache folder of gitify
  */
 if (!defined('GITIFY_CACHE_DIR')) {
+
+    $cacheDir = '.gitify';
+
     $home = rtrim(getenv('HOME'), DIRECTORY_SEPARATOR);
     if (!$home && isset($_SERVER['HOME'])) {
         $home = rtrim($_SERVER['HOME'], DIRECTORY_SEPARATOR);
@@ -44,12 +47,11 @@ if (!defined('GITIFY_CACHE_DIR')) {
     if (!$home) {
         // fallback to working directory, if home directory can not be determined
         $home = rtrim(GITIFY_WORKING_DIR, DIRECTORY_SEPARATOR);
+        // in working directory .gitify file contains the main configuration,
+        // cache folder cannot be with the same name (file systems restricts)
+        $cacheDir = '.gitify-cache';
     }
-    $cacheDir = '.gitify';
-    if (is_file(implode(DIRECTORY_SEPARATOR, array($home, $cacheDir)))) {
-        // needed when home directory is also the working directory of gitify
-        $cacheDir .= '-cache';
-    }
+
     define('GITIFY_CACHE_DIR', implode(DIRECTORY_SEPARATOR, array($home, $cacheDir, '')));
 }
 
