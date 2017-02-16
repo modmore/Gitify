@@ -91,6 +91,10 @@ class InstallModxCommand extends BaseCommand
         $this->output->writeln("Please complete following details to install MODX. Leave empty to use the [default].");
 
         $helper = $this->getHelper('question');
+        
+        $defaultDbHost = 'localhost';
+        $question = new Question("Database Host [{$defaultDbHost}]: ", $defaultDbHost);
+        $dbHost = $helper->ask($this->input, $this->output, $question);
 
         $defaultDbName = basename(GITIFY_WORKING_DIR);
         $question = new Question("Database Name [{$defaultDbName}]: ", $defaultDbName);
@@ -146,7 +150,7 @@ class InstallModxCommand extends BaseCommand
 
         $config = array(
             'database_type' => 'mysql',
-            'database_server' => 'localhost',
+            'database_server' => $dbHost,
             'database' => $dbName,
             'database_user' => $dbUser,
             'database_password' => $dbPass,
