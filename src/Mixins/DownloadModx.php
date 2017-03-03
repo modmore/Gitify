@@ -13,9 +13,10 @@ trait DownloadModx
      *
      * @param string $version
      * @param bool $download
+     * @param bool $noCache
      * @return bool
      */
-    protected function getMODX($version = 'latest', $download = false)
+    protected function getMODX($version = 'latest', $download = false, $noCache = false)
     {
         if ($version === 'latest') {
             $this->output->writeln('Looking up latest MODX version...');
@@ -24,16 +25,22 @@ trait DownloadModx
             $this->output->writeln('<comment>Latest version: ' . $version . '</comment>');
         }
 
-        // Force download the MODX package
-        if ($download) {
+        // Force download the MODX package if parameter specified and using cache
+        if ($download && !$noCache) {
             $this->output->writeln('<comment>Ignoring local cache, downloading MODX package...</comment>');
             if (!$this->download($version)) {
                 return false;
             }
         }
 
-        // Copy the files from the local cache (and download version if necessary)
-        $this->retrieveFromCache($version);
+        if ($noCache) {
+            $this->download($version, true);
+            exec("mv $version/* ./");
+            exec("rm -rf $version $version.zip");
+        } else {
+            // Copy the files from the local cache (and download version if necessary)
+            $this->retrieveFromCache($version);
+        }
 
         return true;
     }
@@ -42,19 +49,23 @@ trait DownloadModx
      * Downloads specified package to local storage
      *
      * @param $version
+     * @param $dir
      * @return bool
      */
-    protected function download($version)
+    protected function download($version, $noCache = false)
     {
+        $dir = $noCache ? GITIFY_WORKING_DIR : GITIFY_CACHE_DIR;
         $link = $this->fetchUrl($version);
 
-        if (!file_exists(GITIFY_CACHE_DIR)) {
-            mkdir(GITIFY_CACHE_DIR);
+        if (!file_exists($dir)) {
+            mkdir($dir);
         }
 
-        $this->removeOutdatedArchive($version); // remove old files
+        if (!$noCache) {
+            $this->removeOutdatedArchive($version); // remove old files
+        }
 
-        $zip = GITIFY_CACHE_DIR . $version . '.zip';
+        $zip = $dir . $version . '.zip';
         $this->output->writeln("Downloading {$version} from {$link}...");
         exec("curl -Lo $zip $link -#");
 

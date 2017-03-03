@@ -40,6 +40,12 @@ class InstallModxCommand extends BaseCommand
                 'd',
                 InputOption::VALUE_NONE,
                 'Force download the MODX package even if it already exists in the cache folder.'
+            )
+            ->addOption(
+                'no-cache',
+                null,
+                InputOption::VALUE_NONE,
+                'When specified, cache is not used for storing MODX install packages. This is useful when user dir is not writable.'
             );
     }
 
@@ -54,8 +60,9 @@ class InstallModxCommand extends BaseCommand
     {
         $version = $this->input->getArgument('version');
         $forced = $this->input->getOption('download');
+        $noCache = $this->input->getOption('no-cache');
 
-        if (!$this->getMODX($version, $forced)) {
+        if (!$this->getMODX($version, $forced, $noCache)) {
             return 1; // exit
         }
 
