@@ -60,19 +60,28 @@ class InstallModxCommand extends BaseCommand
         }
 
         // Create the XML config
-        $config = $this->createMODXConfig();
+        $config = [];
+        $configXmlFile = $this->createMODXConfig($config);
 
         // Variables for running the setup
         $tz = date_default_timezone_get();
         $wd = GITIFY_WORKING_DIR;
         $output->writeln("Running MODX Setup...");
 
+        $corePathParameter = '';
+        if ($config['core_path'] <> $wd . 'core/') {
+            $corePathParameter = '--core_path='.$config['core_path'];
+            if (!rename($wd . 'core', $config['core_path'])) {
+                $output->writeln("<warning>moving core folder wasn't possible</warning>");
+                // should stop here?
+            }
+        }
         // Actually run the CLI setup
-        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}", $setupOutput);
+        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$configXmlFile} ".$corePathParameter, $setupOutput);
         $output->writeln("<comment>{$setupOutput[0]}</comment>");
 
         // Try to clean up the config file
-        if (!unlink($config)) {
+        if (!unlink($configXmlFile)) {
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
         }
 
@@ -82,8 +91,10 @@ class InstallModxCommand extends BaseCommand
 
     /**
      * Asks the user to complete a bunch of details and creates a MODX CLI config xml file
+     * @param $config
+     * @return string
      */
-    protected function createMODXConfig()
+    protected function createMODXConfig(&$config)
     {
         $directory = GITIFY_WORKING_DIR;
 
@@ -148,6 +159,15 @@ class InstallModxCommand extends BaseCommand
         $question = new Question('Manager Email: ');
         $managerEmail = $helper->ask($this->input, $this->output, $question);
 
+        /**
+         * Ask the user for the core directory
+         */
+        $defaultCorePath = dirname(GITIFY_WORKING_DIR) .'/modx-core';
+        $question = new Question('Please enter the name of the core directory (defaults to '. $defaultCorePath .'): ', $defaultCorePath);
+        $corePath = $helper->ask($this->input, $this->output, $question);
+        if (empty($corePath)) $corePath = $defaultCorePath;
+        $corePath = '/'.trim($corePath, '/') . '/';
+
         $config = array(
             'database_type' => 'mysql',
             'database_server' => $dbHost,
@@ -167,7 +187,7 @@ class InstallModxCommand extends BaseCommand
             'cmsadmin' => $managerUser,
             'cmspassword' => $managerPass,
             'cmsadminemail' => $managerEmail,
-            'core_path' => $directory . 'core/',
+            'core_path' => $corePath,
             'context_mgr_path' => $directory . 'manager/',
             'context_mgr_url' => $baseUrl . 'manager/',
             'context_connectors_path' => $directory . 'connectors/',
