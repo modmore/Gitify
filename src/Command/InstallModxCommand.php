@@ -66,7 +66,10 @@ class InstallModxCommand extends BaseCommand
             return 1; // exit
         }
 
-        if ($configFile) {
+        if ($configFile && !file_exists($configFile)) {
+            $output->writeln("<error>Could not find a valid config file.</error>");
+            return 1;
+        } else if ($configFile && file_exists($configFile)) {
             // Load config from file
             $config = $configFile;
         } else {
@@ -84,7 +87,7 @@ class InstallModxCommand extends BaseCommand
         $output->writeln("<comment>{$setupOutput[0]}</comment>");
 
         // Try to clean up the config file
-        if (!unlink($config)) {
+        if (!$configFile && !unlink($config)) {
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
         }
 
