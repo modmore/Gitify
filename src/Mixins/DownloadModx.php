@@ -79,7 +79,14 @@ trait DownloadModx
         $this->output->writeln("Extracting package... ");
 
         $destination = dirname($package);
-        exec("unzip $package -d $destination");
+        $zipArchive = new \ZipArchive();
+        if ($zipArchive->open($package)) {
+            $zipArchive->extractTo($destination);
+            $zipArchive->close();
+            $this->output->writeln("Package extracted successfully.");
+        } else {
+            throw new \Exception("Error opening the package: $package");
+        }
     }
 
     /**
