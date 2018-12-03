@@ -10,7 +10,7 @@ The project configuration, which determines what data is written to file and bui
 ```` shell
 $ git clone https://github.com/modmore/Gitify.git Gitify
 $ cd Gitify
-$ composer install
+$ composer install --no-dev
 $ chmod +x Gitify
 ````
 
