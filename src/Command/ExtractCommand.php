@@ -323,7 +323,12 @@ class ExtractCommand extends BaseCommand
             $path .= 'model/';
         }
 
-        $this->modx->addPackage($package, $path);
+	if ($options['service']) {
+	    $path .= $package . '/';
+	    $this->modx->getService($package, $options['service'], $path);
+	} else {
+	    $this->modx->addPackage($package, $path);
+	}
     }
 
     /**
