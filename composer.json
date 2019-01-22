@@ -6,7 +6,7 @@
         "kbjr/Git.php": "*",
         "symfony/console": "2.6.*",
         "symfony/yaml": "2.6.*",
-        "symfony/process": "2.6.*"
+        "symfony/process": "4.2.*"
     },
     "require-dev": {
         "phpunit/phpunit": "7.5.*"
