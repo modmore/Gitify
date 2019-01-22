@@ -266,6 +266,9 @@ class ExtractCommand extends BaseCommand
      */
     public function generate($object, array $options = array())
     {
+        // Strip out keys that have the same value as the default, or are excluded per the .gitify
+        $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
+
         $fieldMeta = $object->_fieldMeta;
         $data = $this->objectToArray($object, $options);
 
@@ -277,6 +280,7 @@ class ExtractCommand extends BaseCommand
         if (method_exists($object, 'getContent')
             && !($object instanceof \modStaticResource)
             && !($object instanceof \modDashboardWidget)
+            && !in_array('content', $excludes)
         ) {
             $content = $object->getContent();
 
@@ -287,8 +291,6 @@ class ExtractCommand extends BaseCommand
             }
         }
 
-        // Strip out keys that have the same value as the default, or are excluded per the .gitify
-        $excludes = (isset($options['exclude_keys']) && is_array($options['exclude_keys'])) ? $options['exclude_keys'] : array();
         foreach ($data as $key => $value) {
             if (
                 (isset($fieldMeta[$key]['default']) && $value === $fieldMeta[$key]['default']) //@fixme
