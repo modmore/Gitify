@@ -190,13 +190,18 @@ class InstallPackageCommand extends BaseCommand
         if (!$response->isError()) {
 
             $foundPkg = simplexml_load_string ( $response->response );
-            
-            $packages [strtolower((string) $foundPkg->name)] = array (
-                'name' => (string) $foundPkg->name,
-                'version' => (string) $foundPkg->version,
-                'location' => (string) $foundPkg->location,
-                'signature' => (string) $foundPkg->signature
-            );
+
+            // no matches, skip empty package name
+            if ($foundPackages['total'] > 0) {
+
+              $packages [strtolower((string) $foundPkg->name)] = array (
+                  'name' => (string) $foundPkg->name,
+                  'version' => (string) $foundPkg->version,
+                  'location' => (string) $foundPkg->location,
+                  'signature' => (string) $foundPkg->signature
+              );
+              
+            }
         }
 
         // if no exact match, try it with via query
