@@ -14,12 +14,12 @@ $ composer install --no-dev
 $ chmod +x Gitify
 ````
 
-Please see [the Installation wiki](https://github.com/modmore/Gitify/wiki/1.-Installation) for more details.
+Please see [the Installation documentation](https://docs.modmore.com/en/Open_Source/Gitify/Installation/index.html) for more details.
 
 
 ## Documentation
 
-[Check the Wiki!](https://github.com/modmore/Gitify/wiki) It contains information about the available commands and the way you would go about setting up a suitable workflow.
+[Check the modmore Gitify documentation!](https://docs.modmore.com/en/Open_Source/Gitify/index.html) It contains information about the available commands and the way you would go about setting up a suitable workflow.
 
 Please feel free to contribute to the wiki by editing existing pages, or adding new pages with extra information not covered elsewhere yet.
 
