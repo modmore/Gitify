@@ -773,6 +773,7 @@ class BuildCommand extends BaseCommand
             $obj = $this->modx->getObject($type['class'], $getPrimary);
             if ($obj instanceof \xPDOObject) {
                 $showPrimary = $this->_getPrimaryKey($type['class'], $primary, $obj->toArray());
+                $showPrimary = (is_array($showPrimary)) ? json_encode($showPrimary) : $showPrimary;
                 if ($obj->remove()) {
                     $this->output->writeln("- <info>Removed orphaned {$type['class']} with primary {$showPrimary}</info>");
                 } else {
