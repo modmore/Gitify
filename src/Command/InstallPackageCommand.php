@@ -40,6 +40,12 @@ class InstallPackageCommand extends BaseCommand
                 'When specified, all packages defined in the .gitify config will be installed.'
             )
             ->addOption(
+                'local',
+                'l',
+                InputOption::VALUE_NONE,
+                'When specified, any packages inside the /core/packages folder will be installed.'
+            )
+            ->addOption(
                 'interactive',
                 'i',
                 InputOption::VALUE_NONE,
@@ -105,6 +111,73 @@ class InstallPackageCommand extends BaseCommand
             }
 
             $this->output->writeln("<info>Done!</info>");
+            return 0;
+        }
+
+        // check for packages that were manually added to the core/packages folder
+        if ($input->getOption('local')) {
+            // most of this code is copied from:
+            // core/model/modx/processors/workspace/packages/scanlocal.class.php
+            $corePackagesDirectory = $this->modx->getOption('core_path').'packages/';
+            $corePackagesDirectoryObject = dir($corePackagesDirectory);
+
+            while (false !== ($name = $corePackagesDirectoryObject->read())) {
+                if (in_array($name,array('.','..','.svn','.git','_notes'))) continue;
+                $packageFilename = $corePackagesDirectory.'/'.$name;
+
+                // dont add in unreadable files or directories
+                if (!is_readable($packageFilename) || is_dir($packageFilename)) continue;
+
+                // must be a .transport.zip file
+                if (strlen($name) < 14 || substr($name,strlen($name)-14,strlen($name)) != '.transport.zip') continue;
+                $packageSignature = substr($name,0,strlen($name)-14);
+
+                // must have a name and version at least
+                $p = explode('-',$packageSignature);
+                if (count($p) < 2) continue;
+
+                // install if package was not found in database
+                if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $packageSignature))) {
+                    $this->output->writeln("Package $packageSignature is already installed.");
+
+                } else {
+                    $this->output->writeln("<comment>Installing $packageSignature...</comment>");
+
+                    $package = $this->modx->newObject('transport.modTransportPackage');
+                    $package->set('signature', $packageSignature);
+                    $package->set('state', 1);
+                    $package->set('created',strftime('%Y-%m-%d %H:%M:%S'));
+                    $package->set('workspace', 1);
+
+                    // set package version data
+                    $sig = explode('-',$packageSignature);
+                    if (is_array($sig)) {
+                        $package->set('package_name',$sig[0]);
+                        if (!empty($sig[1])) {
+                            $v = explode('.',$sig[1]);
+                            if (isset($v[0])) $package->set('version_major',$v[0]);
+                            if (isset($v[1])) $package->set('version_minor',$v[1]);
+                            if (isset($v[2])) $package->set('version_patch',$v[2]);
+                        }
+                        if (!empty($sig[2])) {
+                            $r = preg_split('/([0-9]+)/',$sig[2],-1,PREG_SPLIT_DELIM_CAPTURE);
+                            if (is_array($r) && !empty($r)) {
+                                $package->set('release',$r[0]);
+                                $package->set('release_index',(isset($r[1]) ? $r[1] : '0'));
+                            } else {
+                                $package->set('release',$sig[2]);
+                            }
+                        }
+                    }
+
+                    $package->save();
+                    $package->install();
+
+                    $this->output->writeln("<info>Package $packageSignature successfully installed.</info>");
+                }
+
+            }
+
             return 0;
         }
 
@@ -185,7 +258,7 @@ class InstallPackageCommand extends BaseCommand
             'supports' => $product_version,
             'signature' => $packageName,
         ));
-        
+
         // when we got a match (non 404), extract package information
         if (!$response->isError()) {
 
@@ -200,7 +273,7 @@ class InstallPackageCommand extends BaseCommand
                   'location' => (string) $foundPkg->location,
                   'signature' => (string) $foundPkg->signature
               );
-              
+
             }
         }
 
@@ -210,16 +283,16 @@ class InstallPackageCommand extends BaseCommand
                 'supports' => $product_version,
                 'query' => $packageName,
             ));
-            
+
             // Check for a proper response
             if (!empty($response)) {
-                 
+
                 $foundPackages = simplexml_load_string($response->response);
                 // no matches, simply return
                 if ($foundPackages['total'] == 0) {
                     return true;
                 }
-                
+
                 foreach ($foundPackages as $foundPkg) {
                     $packages[strtolower((string)$foundPkg->name)] = array(
                         'name' => (string)$foundPkg->name,
@@ -236,8 +309,8 @@ class InstallPackageCommand extends BaseCommand
 
             $this->output->writeln('Found ' . count($packages) . ' package(s).');
 
-            $helper = $this->getHelper('question');            
-            
+            $helper = $this->getHelper('question');
+
             // Ensure the exact match is always first
             if (isset($packages[strtolower($packageName)])) {
                 $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;
