@@ -96,7 +96,7 @@ class InitCommand extends BaseCommand
          */
         $dataTypes = array();
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Contexts</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Contexts</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['contexts'] = array(
                 'class' => 'modContext',
@@ -108,7 +108,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Template Variables</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['template_variables'] = array(
                 'class' => 'modTemplateVar',
@@ -120,7 +120,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Content</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Content</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['content'] = array(
                 'type' => 'content',
@@ -129,7 +129,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Categories</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Categories</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['categories'] = array(
                 'class' => 'modCategory',
@@ -138,7 +138,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Templates</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Templates</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['templates'] = array(
                 'class' => 'modTemplate',
@@ -147,7 +147,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Chunks</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Chunks</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['chunks'] = array(
                 'class' => 'modChunk',
@@ -156,7 +156,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Snippets</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Snippets</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['snippets'] = array(
                 'class' => 'modSnippet',
@@ -165,7 +165,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Plugins</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Plugins</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['plugins'] = array(
                 'class' => 'modPlugin',
@@ -182,7 +182,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Namespaces</info>, <info>Extension Packages</info> and <info>System Settings</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Namespaces</info>, <info>Extension Packages</info> and <info>System Settings</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['namespaces'] = array(
                 'class' => 'modNamespace',
@@ -200,7 +200,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Form Customization</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Form Customization</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['fc_sets'] = array(
                 'class' => 'modFormCustomizationSet',
@@ -232,7 +232,7 @@ class InitCommand extends BaseCommand
             );
         }
 
-        $question = new ConfirmationQuestion('Would you like to include <info>Dashboards</info>? <comment>(Y/N)</comment> ', true);
+        $question = new ConfirmationQuestion('Would you like to include <info>Dashboards</info>? <comment>(Y/n)</comment> ', true);
         if ($helper->ask($input, $output, $question)) {
             $dataTypes['dashboards'] = array(
                 'class' => 'modDashboard',
@@ -251,7 +251,7 @@ class InitCommand extends BaseCommand
         $data['data'] = $dataTypes;
 
         if (file_exists(GITIFY_WORKING_DIR . 'config.core.php')) {
-            $question = new ConfirmationQuestion('Would you like to include a list of <info>Currently Installed Packages</info>? <comment>(Y/N)</comment> ', true);
+            $question = new ConfirmationQuestion('Would you like to include a list of <info>Currently Installed Packages</info>? <comment>(Y/n)</comment> ', true);
             if ($helper->ask($input, $output, $question)) {
                 $modx = false;
                 try {
@@ -307,7 +307,7 @@ class InitCommand extends BaseCommand
          */
         if (!file_exists(GITIFY_WORKING_DIR . 'config.core.php')) {
 
-            $question = new ConfirmationQuestion('No MODX installation found in the current directory. Would you like to install the latest stable version? <comment>(Y/N)</comment> ', false);
+            $question = new ConfirmationQuestion('No MODX installation found in the current directory. Would you like to install the latest stable version? <comment>(y/N)</comment> ', false);
             if ($helper->ask($input, $output, $question)) {
 
                 $command = $this->getApplication()->find('modx:install');
