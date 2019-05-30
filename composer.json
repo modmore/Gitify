@@ -4,7 +4,7 @@
     "description": "Command line toolkit to make managing a MODX site in git a lot easier",
     "require": {
         "kbjr/Git.php": "*",
-        "symfony/console": "2.6.*",
+        "symfony/console": "3.3.*",
         "symfony/yaml": "2.6.*",
         "symfony/process": "2.6.*"
     },
