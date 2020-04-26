@@ -35,8 +35,9 @@ class InstallModxCommand extends BaseCommand
                 'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.',
                 'latest'
             )
-            ->addArgument(
-                'configFile',
+            ->addOption(
+                'config',
+                'c',
                 InputArgument::OPTIONAL,
                 'Path to XML configuration file. Leave empty to enter configuration details through the command line.',
                 ''
@@ -59,7 +60,7 @@ class InstallModxCommand extends BaseCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $version = $this->input->getArgument('version');
-        $configFile = $this->input->getArgument('configFile');
+        $configFile = $this->input->getOption('config');
         $forced = $this->input->getOption('download');
 
         if (!$this->getMODX($version, $forced)) {
