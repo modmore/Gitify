@@ -21,7 +21,7 @@
                 },
                 "autoload": {
                     "classmap": [
-                        "git.php"
+                        "Git.php"
                     ]
                 }
             }
