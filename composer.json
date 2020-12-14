@@ -8,9 +8,6 @@
         "symfony/yaml": "2.6.*",
         "symfony/process": "2.6.*"
     },
-    "require-dev": {
-        "phpunit/phpunit": "8.1.*"
-    },
     "repositories": [
         {
             "type": "package",
@@ -24,7 +21,7 @@
                 },
                 "autoload": {
                     "classmap": [
-                        "git.php"
+                        "Git.php"
                     ]
                 }
             }
