@@ -185,14 +185,14 @@ class InstallPackageCommand extends BaseCommand
             'supports' => $product_version,
             'signature' => $packageName,
         ));
-        
+
         // when we got a match (non 404), extract package information
         if (!$response->isError()) {
 
             $foundPkg = simplexml_load_string ( $response->response );
 
             // no matches, skip empty package name
-            if ($foundPackages['total'] > 0) {
+            if ($foundPkg->name) {
 
               $packages [strtolower((string) $foundPkg->name)] = array (
                   'name' => (string) $foundPkg->name,
@@ -200,7 +200,7 @@ class InstallPackageCommand extends BaseCommand
                   'location' => (string) $foundPkg->location,
                   'signature' => (string) $foundPkg->signature
               );
-              
+
             }
         }
 
@@ -210,16 +210,16 @@ class InstallPackageCommand extends BaseCommand
                 'supports' => $product_version,
                 'query' => $packageName,
             ));
-            
+
             // Check for a proper response
             if (!empty($response)) {
-                 
+
                 $foundPackages = simplexml_load_string($response->response);
                 // no matches, simply return
                 if ($foundPackages['total'] == 0) {
                     return true;
                 }
-                
+
                 foreach ($foundPackages as $foundPkg) {
                     $packages[strtolower((string)$foundPkg->name)] = array(
                         'name' => (string)$foundPkg->name,
@@ -236,8 +236,8 @@ class InstallPackageCommand extends BaseCommand
 
             $this->output->writeln('Found ' . count($packages) . ' package(s).');
 
-            $helper = $this->getHelper('question');            
-            
+            $helper = $this->getHelper('question');
+
             // Ensure the exact match is always first
             if (isset($packages[strtolower($packageName)])) {
                 $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;
