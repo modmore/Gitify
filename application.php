@@ -61,6 +61,7 @@ if (!defined('GITIFY_CACHE_DIR')) {
 use modmore\Gitify\Command\BackupCommand;
 use modmore\Gitify\Command\BuildCommand;
 use modmore\Gitify\Command\ClearCacheCommand;
+use modmore\Gitify\Command\DownloadModxCommand;
 use modmore\Gitify\Command\ExtractCommand;
 use modmore\Gitify\Command\InitCommand;
 use modmore\Gitify\Command\InstallModxCommand;
@@ -76,6 +77,7 @@ $version = $composerData['version'];
 $application = new Gitify('Gitify', $version);
 $application->add(new InitCommand);
 $application->add(new BuildCommand);
+$application->add(new DownloadModxCommand);
 $application->add(new ExtractCommand);
 $application->add(new InstallModxCommand);
 $application->add(new UpgradeModxCommand);
