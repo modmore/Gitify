@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6fe2bcfb0b0b4bebe1e861ce02d38e62",
+    "content-hash": "7a14b76b4c40c6c0f582a553f241d813",
     "packages": [
         {
             "name": "kbjr/git.php",
@@ -14,12 +14,7 @@
                 "url": "https://github.com/kbjr/git.php",
                 "reference": "master"
             },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "git.php"
-                ]
-            }
+            "type": "library"
         },
         {
             "name": "symfony/console",
@@ -77,6 +72,9 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/console/tree/v2.6.11"
+            },
             "time": "2015-07-26T09:08:40+00:00"
         },
         {
@@ -127,6 +125,9 @@
             ],
             "description": "Symfony Process Component",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/process/tree/v2.6.11"
+            },
             "time": "2015-06-30T16:10:16+00:00"
         },
         {
@@ -177,6 +178,9 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/yaml/tree/v2.6.11"
+            },
             "time": "2015-07-26T08:59:42+00:00"
         }
     ],

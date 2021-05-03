@@ -18,11 +18,6 @@
                     "type": "git",
                     "url": "https://github.com/kbjr/git.php",
                     "reference": "master"
-                },
-                "autoload": {
-                    "classmap": [
-                        "Git.php"
-                    ]
                 }
             }
         }
