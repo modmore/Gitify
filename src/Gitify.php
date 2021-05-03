@@ -2,6 +2,7 @@
 
 namespace modmore\Gitify;
 
+use Kbjr\Git\Git;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -110,10 +111,10 @@ class Gitify extends Application
             if (!$this->repository) {
                 $gitPath = self::loadMODX()->getOption('gitify.git_path', null, '/usr/bin/git');
                 if (!empty($gitPath)) {
-                    \Git::set_bin($gitPath);
+                    Git::setBin($gitPath);
                 }
                 $repositoryPath = self::loadMODX()->getOption('gitify.repository_path', null, MODX_BASE_PATH, true);
-                $this->repository = \Git::open($repositoryPath);
+                $this->repository = Git::open($repositoryPath);
             }
         } catch (\Exception $e) {
             return $e->getMessage();
