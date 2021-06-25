@@ -1,0 +1,23 @@
+version: 2
+updates:
+- package-ecosystem: composer
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: phpunit/phpunit
+    versions:
+    - ">= 9.a, < 10"
+  - dependency-name: symfony/console
+    versions:
+    - ">= 3.a, < 4"
+  - dependency-name: symfony/process
+    versions:
+    - ">= 5.a, < 6"
+  - dependency-name: symfony/yaml
+    versions:
+    - ">= 3.a, < 4"
+  - dependency-name: symfony/process
+    versions:
+    - 4.4.19
