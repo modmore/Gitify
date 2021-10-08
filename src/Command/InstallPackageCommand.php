@@ -169,12 +169,31 @@ class InstallPackageCommand extends BaseCommand
                         }
                     }
 
-                    $package->save();
-                    $package->install();
+                    // Determine if there are any package dependencies
+                    $package->getTransport();
+                    $package->getOne('Workspace');
+                    $wc = isset($package->Workspace->config) && is_array($package->Workspace->config) ? $package->Workspace->config : [];
+                    $at = is_array($package->get('attributes')) ? $package->get('attributes') : [];
+                    $attributes = array_merge($wc, $at);
+                    $requires = isset($attributes['requires']) && is_array($attributes['requires'])
+                        ? $attributes['requires']
+                        : [];
+                    $unsatisfied = $package->checkDependencies($requires);
 
-                    $this->output->writeln("<info>Package $packageSignature successfully installed.</info>");
+                    if (empty($unsatisfied)) {
+                        $package->save();
+                        $package->install();
+                        $this->output->writeln("<info>Package $packageSignature successfully installed.</info>");
+                    }
+                    // If dependencies exist, output an error message and list the packages needed.
+                    else {
+                        $this->output->writeln("\n<info>Unable to install $packageSignature! There are currently unmet dependencies:</info>");
+                        foreach ($unsatisfied as $dependency => $v) {
+                            $this->output->writeln("<info> - $dependency</info>");
+                        }
+                        $this->output->writeln("\n<info>$packageSignature has been added to the MODX package management grid, but is not yet installed.</info>\n");
+                    }
                 }
-
             }
 
             return 0;
