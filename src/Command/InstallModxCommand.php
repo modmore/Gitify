@@ -27,12 +27,11 @@ class InstallModxCommand extends BaseCommand
     {
         $this
             ->setName('modx:install')
-            ->setAliases(array('install:modx'))
-            ->setDescription('Downloads, configures and installs a fresh MODX installation. [Note: <info>install:modx</info> will be removed in 1.0, use <info>modx:install</info> instead]')
+            ->setDescription('Downloads, configures and installs a fresh MODX installation.')
             ->addArgument(
                 'version',
                 InputArgument::OPTIONAL,
-                'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.',
+                'The version of MODX to install, in the format 2.8.3-pl. Leave empty or specify "latest" to install the last stable release.',
                 'latest'
             )
             ->addOption(
