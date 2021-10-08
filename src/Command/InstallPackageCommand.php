@@ -26,8 +26,7 @@ class InstallPackageCommand extends BaseCommand
     {
         $this
             ->setName('package:install')
-            ->setAliases(array('install:package'))
-            ->setDescription('Downloads and installs MODX packages. [Note: <info>install:package</info> will be removed in 1.0, use <info>package:install</info> instead]')
+            ->setDescription('Downloads and installs MODX packages.')
             ->addArgument(
                 'package_name',
                 InputArgument::OPTIONAL,
