@@ -112,7 +112,7 @@ class BackupCommand extends BaseCommand
             $password_parameter = "-p'{$database_password}'";
         }
 
-        exec("mysqldump -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > \"{$targetFile}\" ");
+        exec("mysqldump --no-tablespaces -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > \"{$targetFile}\" ");
         return 0;
     }
 }
