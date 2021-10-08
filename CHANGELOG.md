@@ -5,6 +5,13 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 ## Current development (master)
 - Prevent E_WARN errors in build
 - Fix fallback Gitify-Cache-Folder
+- Bump symfony/console to 5.3.7
+- Bump symfony/process to 5.3.7
+- Bump symfony/yaml to 5.3.6
+- Add --no-tablespaces option for "backup" command.
+- Remove deprecated CLI install arguments
+- Add "local" option to package:install (thanks @hugopeek) (#261)
+- Check for unmet dependencies when installing local packages.
 
 ## 0.12.0 - 2015-12-17
 - Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
