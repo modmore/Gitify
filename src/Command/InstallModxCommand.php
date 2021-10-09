@@ -27,11 +27,12 @@ class InstallModxCommand extends BaseCommand
     {
         $this
             ->setName('modx:install')
-            ->setDescription('Downloads, configures and installs a fresh MODX installation.')
+            ->setAliases(['install:modx'])
+            ->setDescription('Downloads, configures and installs a fresh MODX installation. [Note: <info>install:modx</info> will be removed in 1.0, use <info>modx:install</info> instead]')
             ->addArgument(
                 'version',
                 InputArgument::OPTIONAL,
-                'The version of MODX to install, in the format 2.8.3-pl. Leave empty or specify "latest" to install the last stable release.',
+                'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.',
                 'latest'
             )
             ->addOption(
@@ -49,7 +50,7 @@ class InstallModxCommand extends BaseCommand
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $version = $this->input->getArgument('version');
         $forced = $this->input->getOption('download');
@@ -69,18 +70,22 @@ class InstallModxCommand extends BaseCommand
         $output->writeln("Running MODX Setup...");
 
         $corePathParameter = '';
-        if ($config['core_path'] !== $wd . 'core/') {
-            $corePathParameter = '--core_path='.$config['core_path'];
-            if (!rename($wd . 'core', $config['core_path'])) {
-                $output->writeln("<warning>moving core folder wasn't possible</warning>");
-                // should stop here?
+        if ($config['core_path_full'] !== $wd . 'core/') {
+            if (!file_exists($config['core_path'])) {
+                mkdir($config['core_path'], 0777, true);
+            }
+            $corePathParameter = '--core_path=' . $config['core_path'] . $config['core_name'] . '/';
+            if (!rename($wd . 'core', $config['core_path'] . $config['core_name'])) {
+                $output->writeln("<warning>Moving core folder wasn't possible</warning>");
+                return 0;
             }
         }
 
+        // Only the manager directory name can be changed on install. It can't be moved.
         if ($config['context_mgr_path'] !== $wd . 'manager/') {
             if (!rename($wd . 'manager', $config['context_mgr_path'])) {
-                $output->writeln("<warning>rename manager folder wasn't possible</warning>");
-                // should stop here?
+                $output->writeln("<warning>Renaming manager folder wasn't possible</warning>");
+                return 0;
             }
         }
         // Actually run the CLI setup
@@ -98,10 +103,9 @@ class InstallModxCommand extends BaseCommand
 
     /**
      * Asks the user to complete a bunch of details and creates a MODX CLI config xml file
-     * @param $config
      * @return array
      */
-    protected function createMODXConfig($config = [])
+    protected function createMODXConfig(): array
     {
         $directory = GITIFY_WORKING_DIR;
 
@@ -166,28 +170,24 @@ class InstallModxCommand extends BaseCommand
         $question = new Question('Manager Email: ');
         $managerEmail = $helper->ask($this->input, $this->output, $question);
 
-        /**
-         * Ask the user for the core directory
-         * this can be a good setting: dirname(GITIFY_WORKING_DIR) .'/modx-core';
-         */
+
+        // Ask the user for the core directory
         $defaultCorePath = 'core/';
-        $question = new Question('Please enter the name of the core directory, can be relative to working dir (defaults to '. $defaultCorePath .'): ', $defaultCorePath);
+        $question = new Question('Please enter the path of the core directory, can be renamed and relative to working dir (defaults to '. $defaultCorePath .'): ', $defaultCorePath);
         $corePathEntry = $helper->ask($this->input, $this->output, $question);
 
-        $corePath = $this->buildPath($corePathEntry, $directory, $defaultCorePath);
+        $corePathData = $this->buildPath($corePathEntry, $directory, $defaultCorePath);
 
-        /**
-         * Ask the user for the manager directory
-         * this can be a good setting: dirname(GITIFY_WORKING_DIR) .'/modx';
-         */
+
+        // Ask the user for the manager directory
         $defaultManagerPath = 'manager/';
         $question = new Question('Please enter the name of the manager directory, it must be relative to working dir (defaults to '. $defaultManagerPath .'): ', $defaultManagerPath);
         $managerPathEntry = $helper->ask($this->input, $this->output, $question);
 
-        $managerPath = $this->buildPath($managerPathEntry, $directory, $defaultManagerPath);
-        $managerUrl = $baseUrl . trim($managerPathEntry, '/') . '/';
+        $managerPathData = $this->buildPath($managerPathEntry, $directory, $defaultManagerPath);
+        $managerUrl = $baseUrl . trim($managerPathData['name'], '/') . '/';
 
-        $config = array(
+        $config = [
             'database_type' => 'mysql',
             'database_server' => $dbHost,
             'database' => $dbName,
@@ -206,15 +206,17 @@ class InstallModxCommand extends BaseCommand
             'cmsadmin' => $managerUser,
             'cmspassword' => $managerPass,
             'cmsadminemail' => $managerEmail,
-            'core_path' => $corePath,
-            'context_mgr_path' => $managerPath,
+            'core_name' => $corePathData['name'],
+            'core_path' => $corePathData['path'],
+            'core_path_full' => $corePathData['full_path'],
+            'context_mgr_path' => $managerPathData['full_path'],
             'context_mgr_url' => $managerUrl,
             'context_connectors_path' => $directory . 'connectors/',
             'context_connectors_url' => $baseUrl . 'connectors/',
             'context_web_path' => $directory,
             'context_web_url' => $baseUrl,
             'remove_setup_directory' => true
-        );
+        ];
 
         $xml = new \DOMDocument('1.0', 'utf-8');
         $modx = $xml->createElement('modx');
@@ -236,9 +238,10 @@ class InstallModxCommand extends BaseCommand
      * @param $path
      * @param $directory
      * @param $defaultPath
-     * @return string
+     * @return array
      */
-    protected function buildPath($path, $directory, $defaultPath) {
+    protected function buildPath($path, $directory, $defaultPath): array
+    {
         if (empty($path)) {
             $path = $directory . $defaultPath;
         } elseif (substr($path, 0, 1) == '/') {
@@ -248,7 +251,16 @@ class InstallModxCommand extends BaseCommand
             // relative
             $path = $directory . trim($path, '/') . '/';
         }
-        return $path;
+
+        // Remove directory name from path and return separately.
+        $parts = explode('/', trim($path, '/'));
+        $coreDirectoryName = array_pop($parts);
+
+        return [
+            'full_path' => $path,
+            'path' => '/' . implode('/', $parts) . '/',
+            'name' => $coreDirectoryName
+        ];
     }
 
 }
