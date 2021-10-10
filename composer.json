@@ -2,6 +2,7 @@
     "name": "modmore/gitify",
     "version": "1.1.0",
     "description": "Command line toolkit to make managing a MODX site in git a lot easier",
+    "license": "MIT",
     "require": {
         "kbjr/git.php": "*",
         "symfony/console": "2.6.*",
