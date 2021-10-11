@@ -3,6 +3,7 @@
 namespace modmore\Gitify;
 
 use Kbjr\Git\Git;
+use Kbjr\Git\GitRepo;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -103,7 +104,7 @@ class Gitify extends Application
     }
 
     /**
-     * @return \GitRepo|bool
+     * @return GitRepo|bool
      */
     public function getGitRepository()
     {

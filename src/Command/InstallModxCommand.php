@@ -27,12 +27,11 @@ class InstallModxCommand extends BaseCommand
     {
         $this
             ->setName('modx:install')
-            ->setAliases(array('install:modx'))
-            ->setDescription('Downloads, configures and installs a fresh MODX installation. [Note: <info>install:modx</info> will be removed in 1.0, use <info>modx:install</info> instead]')
+            ->setDescription('Downloads, configures and installs a fresh MODX installation.')
             ->addArgument(
                 'version',
                 InputArgument::OPTIONAL,
-                'The version of MODX to install, in the format 2.3.2-pl. Leave empty or specify "latest" to install the last stable release.',
+                'The version of MODX to install, in the format 2.8.3-pl. Leave empty or specify "latest" to install the last stable release.',
                 'latest'
             )
             ->addOption(
@@ -57,7 +56,7 @@ class InstallModxCommand extends BaseCommand
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $version = $this->input->getArgument('version');
         $configFile = $this->input->getOption('config');
@@ -67,6 +66,8 @@ class InstallModxCommand extends BaseCommand
             return 1; // exit
         }
 
+        // Create the XML config and config array
+        $config = $this->createMODXConfig();
         if ($configFile && !file_exists($configFile)) {
             $output->writeln("<error>Could not find a valid config file.</error>");
             return 1;
@@ -81,14 +82,35 @@ class InstallModxCommand extends BaseCommand
         // Variables for running the setup
         $tz = date_default_timezone_get();
         $wd = GITIFY_WORKING_DIR;
+        $configXmlFile = $wd . 'config.xml';
+
         $output->writeln("Running MODX Setup...");
 
+        $corePathParameter = '';
+        if ($config['core_path_full'] !== $wd . 'core/') {
+            if (!file_exists($config['core_path'])) {
+                mkdir($config['core_path'], 0777, true);
+            }
+            $corePathParameter = '--core_path=' . $config['core_path'] . $config['core_name'] . '/';
+            if (!rename($wd . 'core', $config['core_path'] . $config['core_name'])) {
+                $output->writeln("<warning>Moving core folder wasn't possible</warning>");
+                return 0;
+            }
+        }
+
+        // Only the manager directory name can be changed on install. It can't be moved.
+        if ($config['context_mgr_path'] !== $wd . 'manager/') {
+            if (!rename($wd . 'manager', $config['context_mgr_path'])) {
+                $output->writeln("<warning>Renaming manager folder wasn't possible</warning>");
+                return 0;
+            }
+        }
         // Actually run the CLI setup
-        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$config}", $setupOutput);
+        exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$configXmlFile} {$corePathParameter}", $setupOutput);
         $output->writeln("<comment>{$setupOutput[0]}</comment>");
 
         // Try to clean up the config file
-        if (!$configFile && !unlink($config)) {
+        if (!$configFile && !unlink($configXmlFile)) {
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
         }
 
@@ -98,8 +120,9 @@ class InstallModxCommand extends BaseCommand
 
     /**
      * Asks the user to complete a bunch of details and creates a MODX CLI config xml file
+     * @return array
      */
-    protected function createMODXConfig()
+    protected function createMODXConfig(): array
     {
         $directory = GITIFY_WORKING_DIR;
 
@@ -107,7 +130,7 @@ class InstallModxCommand extends BaseCommand
         $this->output->writeln("Please complete following details to install MODX. Leave empty to use the [default].");
 
         $helper = $this->getHelper('question');
-        
+
         $defaultDbHost = 'localhost';
         $question = new Question("Database Host [{$defaultDbHost}]: ", $defaultDbHost);
         $dbHost = $helper->ask($this->input, $this->output, $question);
@@ -164,7 +187,24 @@ class InstallModxCommand extends BaseCommand
         $question = new Question('Manager Email: ');
         $managerEmail = $helper->ask($this->input, $this->output, $question);
 
-        $config = array(
+
+        // Ask the user for the core directory
+        $defaultCorePath = 'core/';
+        $question = new Question('Please enter the path of the core directory, can be renamed and relative to working dir (defaults to '. $defaultCorePath .'): ', $defaultCorePath);
+        $corePathEntry = $helper->ask($this->input, $this->output, $question);
+
+        $corePathData = $this->buildPath($corePathEntry, $directory, $defaultCorePath);
+
+
+        // Ask the user for the manager directory
+        $defaultManagerPath = 'manager/';
+        $question = new Question('Please enter the name of the manager directory, it must be relative to working dir (defaults to '. $defaultManagerPath .'): ', $defaultManagerPath);
+        $managerPathEntry = $helper->ask($this->input, $this->output, $question);
+
+        $managerPathData = $this->buildPath($managerPathEntry, $directory, $defaultManagerPath);
+        $managerUrl = $baseUrl . trim($managerPathData['name'], '/') . '/';
+
+        $config = [
             'database_type' => 'mysql',
             'database_server' => $dbHost,
             'database' => $dbName,
@@ -183,15 +223,17 @@ class InstallModxCommand extends BaseCommand
             'cmsadmin' => $managerUser,
             'cmspassword' => $managerPass,
             'cmsadminemail' => $managerEmail,
-            'core_path' => $directory . 'core/',
-            'context_mgr_path' => $directory . 'manager/',
-            'context_mgr_url' => $baseUrl . 'manager/',
+            'core_name' => $corePathData['name'],
+            'core_path' => $corePathData['path'],
+            'core_path_full' => $corePathData['full_path'],
+            'context_mgr_path' => $managerPathData['full_path'],
+            'context_mgr_url' => $managerUrl,
             'context_connectors_path' => $directory . 'connectors/',
             'context_connectors_url' => $baseUrl . 'connectors/',
             'context_web_path' => $directory,
             'context_web_url' => $baseUrl,
             'remove_setup_directory' => true
-        );
+        ];
 
         $xml = new \DOMDocument('1.0', 'utf-8');
         $modx = $xml->createElement('modx');
@@ -206,7 +248,36 @@ class InstallModxCommand extends BaseCommand
         fwrite($fh, $xml->saveXML());
         fclose($fh);
 
-        return $directory . 'config.xml';
+        return $config;
+    }
+
+    /**
+     * @param $path
+     * @param $directory
+     * @param $defaultPath
+     * @return array
+     */
+    protected function buildPath($path, $directory, $defaultPath): array
+    {
+        if (empty($path)) {
+            $path = $directory . $defaultPath;
+        } elseif (substr($path, 0, 1) == '/') {
+            // absolute
+            $path = '/' . trim($path, '/') . '/';
+        } else {
+            // relative
+            $path = $directory . trim($path, '/') . '/';
+        }
+
+        // Remove directory name from path and return separately.
+        $parts = explode('/', trim($path, '/'));
+        $coreDirectoryName = array_pop($parts);
+
+        return [
+            'full_path' => $path,
+            'path' => '/' . implode('/', $parts) . '/',
+            'name' => $coreDirectoryName
+        ];
     }
 
 }

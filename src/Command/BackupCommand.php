@@ -38,6 +38,13 @@ class BackupCommand extends BaseCommand
                 'o',
                 InputOption::VALUE_NONE,
                 'When specified, a backup with the same name will be overwritten if it exists.'
+            )
+            ->addOption(
+            // https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-21.html#mysqld-8-0-21-security
+                'no-tablespaces',
+                'ntbs',
+                InputOption::VALUE_NONE,
+                'As of MySQL 8.0.21 (and MySQL 5.7.31), the PROCESS privilege is required to backup tablespaces. To ignore tablespaces in your backup, include this option.'
             );
     }
 
@@ -112,7 +119,9 @@ class BackupCommand extends BaseCommand
             $password_parameter = "-p'{$database_password}'";
         }
 
-        exec("mysqldump -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > \"{$targetFile}\" ");
+        $tablespaces = $input->getOption('no-tablespaces') ? '--no-tablespaces' : '';
+
+        exec("mysqldump $tablespaces -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > \"{$targetFile}\" ");
         return 0;
     }
 }

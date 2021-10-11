@@ -26,8 +26,7 @@ class InstallPackageCommand extends BaseCommand
     {
         $this
             ->setName('package:install')
-            ->setAliases(array('install:package'))
-            ->setDescription('Downloads and installs MODX packages. [Note: <info>install:package</info> will be removed in 1.0, use <info>package:install</info> instead]')
+            ->setDescription('Downloads and installs MODX packages.')
             ->addArgument(
                 'package_name',
                 InputArgument::OPTIONAL,
@@ -38,6 +37,12 @@ class InstallPackageCommand extends BaseCommand
                 null,
                 InputOption::VALUE_NONE,
                 'When specified, all packages defined in the .gitify config will be installed.'
+            )
+            ->addOption(
+                'local',
+                'l',
+                InputOption::VALUE_NONE,
+                'When specified, any packages inside the /core/packages folder will be installed.'
             )
             ->addOption(
                 'interactive',
@@ -105,6 +110,92 @@ class InstallPackageCommand extends BaseCommand
             }
 
             $this->output->writeln("<info>Done!</info>");
+            return 0;
+        }
+
+        // check for packages that were manually added to the core/packages folder
+        if ($input->getOption('local')) {
+            // most of this code is copied from:
+            // core/model/modx/processors/workspace/packages/scanlocal.class.php
+            $corePackagesDirectory = $this->modx->getOption('core_path').'packages/';
+            $corePackagesDirectoryObject = dir($corePackagesDirectory);
+
+            while (false !== ($name = $corePackagesDirectoryObject->read())) {
+                if (in_array($name,array('.','..','.svn','.git','_notes'))) continue;
+                $packageFilename = $corePackagesDirectory.'/'.$name;
+
+                // dont add in unreadable files or directories
+                if (!is_readable($packageFilename) || is_dir($packageFilename)) continue;
+
+                // must be a .transport.zip file
+                if (strlen($name) < 14 || substr($name,strlen($name)-14,strlen($name)) != '.transport.zip') continue;
+                $packageSignature = substr($name,0,strlen($name)-14);
+
+                // must have a name and version at least
+                $p = explode('-',$packageSignature);
+                if (count($p) < 2) continue;
+
+                // install if package was not found in database
+                if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $packageSignature))) {
+                    $this->output->writeln("Package $packageSignature is already installed.");
+
+                } else {
+                    $this->output->writeln("<comment>Installing $packageSignature...</comment>");
+
+                    $package = $this->modx->newObject('transport.modTransportPackage');
+                    $package->set('signature', $packageSignature);
+                    $package->set('state', 1);
+                    $package->set('created',strftime('%Y-%m-%d %H:%M:%S'));
+                    $package->set('workspace', 1);
+
+                    // set package version data
+                    $sig = explode('-',$packageSignature);
+                    if (is_array($sig)) {
+                        $package->set('package_name',$sig[0]);
+                        if (!empty($sig[1])) {
+                            $v = explode('.',$sig[1]);
+                            if (isset($v[0])) $package->set('version_major',$v[0]);
+                            if (isset($v[1])) $package->set('version_minor',$v[1]);
+                            if (isset($v[2])) $package->set('version_patch',$v[2]);
+                        }
+                        if (!empty($sig[2])) {
+                            $r = preg_split('/([0-9]+)/',$sig[2],-1,PREG_SPLIT_DELIM_CAPTURE);
+                            if (is_array($r) && !empty($r)) {
+                                $package->set('release',$r[0]);
+                                $package->set('release_index',(isset($r[1]) ? $r[1] : '0'));
+                            } else {
+                                $package->set('release',$sig[2]);
+                            }
+                        }
+                    }
+
+                    // Determine if there are any package dependencies
+                    $package->getTransport();
+                    $package->getOne('Workspace');
+                    $wc = isset($package->Workspace->config) && is_array($package->Workspace->config) ? $package->Workspace->config : [];
+                    $at = is_array($package->get('attributes')) ? $package->get('attributes') : [];
+                    $attributes = array_merge($wc, $at);
+                    $requires = isset($attributes['requires']) && is_array($attributes['requires'])
+                        ? $attributes['requires']
+                        : [];
+                    $unsatisfied = $package->checkDependencies($requires);
+
+                    if (empty($unsatisfied)) {
+                        $package->save();
+                        $package->install();
+                        $this->output->writeln("<info>Package $packageSignature successfully installed.</info>");
+                    }
+                    // If dependencies exist, output an error message and list the packages needed.
+                    else {
+                        $this->output->writeln("\n<info>Unable to install $packageSignature! There are currently unmet dependencies:</info>");
+                        foreach ($unsatisfied as $dependency => $v) {
+                            $this->output->writeln("<info> - $dependency</info>");
+                        }
+                        $this->output->writeln("\n<info>$packageSignature has been added to the MODX package management grid, but is not yet installed.</info>\n");
+                    }
+                }
+            }
+
             return 0;
         }
 
