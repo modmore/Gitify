@@ -38,8 +38,7 @@ class InstallModxCommand extends BaseCommand
                 'config',
                 'c',
                 InputArgument::OPTIONAL,
-                'Path to XML configuration file. Leave empty to enter configuration details through the command line.',
-                ''
+                'Path to XML configuration file. If specified, Gitify won\'t ask for configuration details through the command line.'
             )
             ->addOption(
                 'download',
@@ -66,28 +65,29 @@ class InstallModxCommand extends BaseCommand
             return 1; // exit
         }
 
-        // Create the XML config and config array
-        $config = $this->createMODXConfig();
-        if ($configFile && !file_exists($configFile)) {
-            $output->writeln("<error>Could not find a valid config file.</error>");
-            return 1;
-        } else if ($configFile && file_exists($configFile)) {
-            // Load config from file
-            $config = $configFile;
-        } else {
-            // Create the XML config
-            $config = $this->createMODXConfig();
-        }
-
         // Variables for running the setup
         $tz = date_default_timezone_get();
         $wd = GITIFY_WORKING_DIR;
         $configXmlFile = $wd . 'config.xml';
+        $config = [];
+
+        // Create the XML config and config array
+        if ($configFile && !file_exists($configFile)) {
+            $output->writeln("<error>Could not find a valid config file.</error>");
+            return 1;
+        } else if ($configFile && file_exists($configFile)) {
+            // Load XML config from file
+            $configXmlFile = $configFile;
+        } else {
+            // Create XML config based on user input
+            $config = $this->createMODXConfig();
+        }
 
         $output->writeln("Running MODX Setup...");
 
+        // Move core to alternative location if specified
         $corePathParameter = '';
-        if ($config['core_path_full'] !== $wd . 'core/') {
+        if ($config && $config['core_path_full'] !== $wd . 'core/') {
             if (!file_exists($config['core_path'])) {
                 mkdir($config['core_path'], 0777, true);
             }
@@ -99,12 +99,13 @@ class InstallModxCommand extends BaseCommand
         }
 
         // Only the manager directory name can be changed on install. It can't be moved.
-        if ($config['context_mgr_path'] !== $wd . 'manager/') {
+        if ($config && $config['context_mgr_path'] !== $wd . 'manager/') {
             if (!rename($wd . 'manager', $config['context_mgr_path'])) {
                 $output->writeln("<warning>Renaming manager folder wasn't possible</warning>");
                 return 0;
             }
         }
+
         // Actually run the CLI setup
         exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=new --config={$configXmlFile} {$corePathParameter}", $setupOutput);
         $output->writeln("<comment>{$setupOutput[0]}</comment>");
