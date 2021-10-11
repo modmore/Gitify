@@ -69,25 +69,30 @@ class InstallModxCommand extends BaseCommand
         $tz = date_default_timezone_get();
         $wd = GITIFY_WORKING_DIR;
         $configXmlFile = $wd . 'config.xml';
-        $config = [];
+        $providedConfig = [];
 
         // Create the XML config and config array
         if ($configFile && !file_exists($configFile)) {
             $output->writeln("<error>Could not find a valid config file.</error>");
             return 1;
-        } else if ($configFile && file_exists($configFile)) {
-            // Load XML config from file
-            $configXmlFile = $configFile;
-        } else {
-            // Create XML config based on user input
-            $config = $this->createMODXConfig();
         }
+
+        // Load XML config from file
+        if ($configFile && file_exists($configFile)) {
+            $configXmlFile = $configFile;
+            $xml = simplexml_load_file($configXmlFile, "SimpleXMLElement", LIBXML_NOCDATA);
+            $json = json_encode($xml);
+            $providedConfig = json_decode($json, true);
+            unset($providedConfig['comment']);
+        }
+
+        $config = $this->createMODXConfig($providedConfig);
 
         $output->writeln("Running MODX Setup...");
 
         // Move core to alternative location if specified
         $corePathParameter = '';
-        if ($config && $config['core_path_full'] !== $wd . 'core/') {
+        if ($config['core_path_full'] !== $wd . 'core/') {
             if (!file_exists($config['core_path'])) {
                 mkdir($config['core_path'], 0777, true);
             }
@@ -99,7 +104,7 @@ class InstallModxCommand extends BaseCommand
         }
 
         // Only the manager directory name can be changed on install. It can't be moved.
-        if ($config && $config['context_mgr_path'] !== $wd . 'manager/') {
+        if ($config['context_mgr_path'] !== $wd . 'manager/') {
             if (!rename($wd . 'manager', $config['context_mgr_path'])) {
                 $output->writeln("<warning>Renaming manager folder wasn't possible</warning>");
                 return 0;
@@ -121,9 +126,10 @@ class InstallModxCommand extends BaseCommand
 
     /**
      * Asks the user to complete a bunch of details and creates a MODX CLI config xml file
+     * @param array $providedConfig
      * @return array
      */
-    protected function createMODXConfig(): array
+    protected function createMODXConfig(array $providedConfig): array
     {
         $directory = GITIFY_WORKING_DIR;
 
@@ -132,77 +138,128 @@ class InstallModxCommand extends BaseCommand
 
         $helper = $this->getHelper('question');
 
-        $defaultDbHost = 'localhost';
-        $question = new Question("Database Host [{$defaultDbHost}]: ", $defaultDbHost);
-        $dbHost = $helper->ask($this->input, $this->output, $question);
+        $dbHost = $providedConfig['database_server'] ?? '';
+        if (!$dbHost) {
+            $defaultDbHost = 'localhost';
+            $question = new Question("Database Host [{$defaultDbHost}]: ", $defaultDbHost);
+            $dbHost = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $defaultDbName = basename(GITIFY_WORKING_DIR);
-        $question = new Question("Database Name [{$defaultDbName}]: ", $defaultDbName);
-        $dbName = $helper->ask($this->input, $this->output, $question);
+        $dbName = $providedConfig['database'] ?? '';
+        if (!$dbName) {
+            $defaultDbName = basename(GITIFY_WORKING_DIR);
+            $question = new Question("Database Name [{$defaultDbName}]: ", $defaultDbName);
+            $dbName = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $question = new Question('Database User [root]: ', 'root');
-        $dbUser = $helper->ask($this->input, $this->output, $question);
+        $dbUser = $providedConfig['database_user'] ?? '';
+        if (!$dbUser) {
+            $question = new Question('Database User [root]: ', 'root');
+            $dbUser = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $question = new Question('Database Password: ');
-        $question->setHidden(true);
-        $dbPass = $helper->ask($this->input, $this->output, $question);
+        $dbPass = $providedConfig['database_password'] ?? '';
+        if (!$dbPass) {
+            $question = new Question('Database Password: ');
+            $question->setHidden(true);
+            $dbPass = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $question = new Question('Database Prefix [modx_]: ', 'modx_');
-        $dbPrefix = $helper->ask($this->input, $this->output, $question);
+        $dbConnectionCharset = $providedConfig['database_connection_charset'] ?? '';
+        if (!$dbConnectionCharset) {
+            $question = new Question('Database Connection Charset [utf8]: ', 'utf8');
+            $dbConnectionCharset = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $question = new Question('Hostname [' . gethostname() . ']: ', gethostname());
-        $host = $helper->ask($this->input, $this->output, $question);
-        $host = rtrim(trim($host), '/');
+        $dbCharset = $providedConfig['database_charset'] ?? '';
+        if (!$dbCharset) {
+            $question = new Question('Database Charset [utf8]: ', 'utf8');
+            $dbCharset = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $defaultBaseUrl = '/';
-        $question = new Question('Base URL [' . $defaultBaseUrl . ']: ', $defaultBaseUrl);
-        $baseUrl = $helper->ask($this->input, $this->output, $question);
-        $baseUrl = '/' . trim(trim($baseUrl), '/') . '/';
-        $baseUrl = str_replace('//', '/', $baseUrl);
+        $dbCollation = $providedConfig['database_collation'] ?? '';
+        if (!$dbCollation) {
+            $question = new Question('Database Collation [utf8_general_ci]: ', 'utf8_general_ci');
+            $dbCollation = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $question = new Question('Manager Language [en]: ', 'en');
-        $language = $helper->ask($this->input, $this->output, $question);
+        $dbPrefix = $providedConfig['table_prefix'] ?? '';
+        if (!$dbPrefix) {
+            $question = new Question('Database Prefix [modx_]: ', 'modx_');
+            $dbPrefix = $helper->ask($this->input, $this->output, $question);
+        }
 
-        $defaultMgrUser = basename(GITIFY_WORKING_DIR) . '_admin';
-        $question = new Question('Manager User [' . $defaultMgrUser . ']: ', $defaultMgrUser);
-        $managerUser = $helper->ask($this->input, $this->output, $question);
+        $host = $providedConfig['http_host'] ?? '';
+        if (!$host) {
+            $question = new Question('Hostname [' . gethostname() . ']: ', gethostname());
+            $host = $helper->ask($this->input, $this->output, $question);
+            $host = rtrim(trim($host), '/');
+        }
 
-        $question = new Question('Manager User Password [generated]: ', 'generate');
-        $question->setHidden(true);
-        $question->setValidator(function ($value) {
-            if (empty($value) || strlen($value) < 8) {
-                throw new \RuntimeException(
-                    'Please specify a password of at least 8 characters to continue.'
-                );
-            }
+        $baseUrl = $providedConfig['context_web_url'] ?? '';
+        if (!$baseUrl) {
+            $defaultBaseUrl = '/';
+            $question = new Question('Base URL [' . $defaultBaseUrl . ']: ', $defaultBaseUrl);
+            $baseUrl = $helper->ask($this->input, $this->output, $question);
+            $baseUrl = '/' . trim(trim($baseUrl), '/') . '/';
+            $baseUrl = str_replace('//', '/', $baseUrl);
+        }
 
-            return $value;
-        });
-        $managerPass = $helper->ask($this->input, $this->output, $question);
+        $language = $providedConfig['language'] ?? '';
+        if (!$language) {
+            $question = new Question('Manager Language [en]: ', 'en');
+            $language = $helper->ask($this->input, $this->output, $question);
+        }
+
+        $managerUser = $providedConfig['cmsadmin'] ?? '';
+        if (!$managerUser) {
+            $defaultMgrUser = basename(GITIFY_WORKING_DIR) . '_admin';
+            $question = new Question('Manager User [' . $defaultMgrUser . ']: ', $defaultMgrUser);
+            $managerUser = $helper->ask($this->input, $this->output, $question);
+        }
+
+        $managerPass = $providedConfig['cmspassword'] ?? '';
+        if (!$managerPass) {
+            $question = new Question('Manager User Password [generated]: ', 'generate');
+            $question->setHidden(true);
+            $question->setValidator(function ($value) {
+                if (empty($value) || strlen($value) < 8) {
+                    throw new \RuntimeException(
+                        'Please specify a password of at least 8 characters to continue.'
+                    );
+                }
+
+                return $value;
+            });
+            $managerPass = $helper->ask($this->input, $this->output, $question);
+        }
 
         if ($managerPass == 'generate') {
             $managerPass = substr(str_shuffle(md5(microtime(true))), 0, rand(8, 15));
             $this->output->writeln("<info>Generated Manager Password: {$managerPass}</info>");
         }
 
-        $question = new Question('Manager Email: ');
-        $managerEmail = $helper->ask($this->input, $this->output, $question);
+        $managerEmail = $providedConfig['cmsadminemail'] ?? '';
+        if (!$managerEmail) {
+            $question = new Question('Manager Email: ');
+            $managerEmail = $helper->ask($this->input, $this->output, $question);
+        }
 
-
-        // Ask the user for the core directory
+        $corePath = $providedConfig['core_path'] ?? '';
         $defaultCorePath = 'core/';
-        $question = new Question('Please enter the path of the core directory, can be renamed and relative to working dir (defaults to '. $defaultCorePath .'): ', $defaultCorePath);
-        $corePathEntry = $helper->ask($this->input, $this->output, $question);
+        if (!$corePath) {
+            $question = new Question('Core Path [' . $defaultCorePath . ']: ', $defaultCorePath);
+            $corePath = $helper->ask($this->input, $this->output, $question);
+        }
+        $corePathData = $this->buildPath($corePath, $directory, $defaultCorePath);
 
-        $corePathData = $this->buildPath($corePathEntry, $directory, $defaultCorePath);
-
-
-        // Ask the user for the manager directory
+        $managerPath = $providedConfig['context_mgr_url'] ?? '';
         $defaultManagerPath = 'manager/';
-        $question = new Question('Please enter the name of the manager directory, it must be relative to working dir (defaults to '. $defaultManagerPath .'): ', $defaultManagerPath);
-        $managerPathEntry = $helper->ask($this->input, $this->output, $question);
-
-        $managerPathData = $this->buildPath($managerPathEntry, $directory, $defaultManagerPath);
+        if (!$managerPath) {
+            $question = new Question('Manager Directory [' . $defaultManagerPath . ']: ', $defaultManagerPath);
+            $managerPath = $helper->ask($this->input, $this->output, $question);
+        }
+        $managerPathData = $this->buildPath(trim($managerPath, '/'), $directory, $defaultManagerPath);
         $managerUrl = $baseUrl . trim($managerPathData['name'], '/') . '/';
 
         $config = [
@@ -211,9 +268,9 @@ class InstallModxCommand extends BaseCommand
             'database' => $dbName,
             'database_user' => $dbUser,
             'database_password' => $dbPass,
-            'database_connection_charset' => 'utf8',
-            'database_charset' => 'utf8',
-            'database_collation' => 'utf8_general_ci',
+            'database_connection_charset' => $dbConnectionCharset,
+            'database_charset' => $dbCharset,
+            'database_collation' => $dbCollation,
             'table_prefix' => $dbPrefix,
             'https_port' => 443,
             'http_host' => $host,
