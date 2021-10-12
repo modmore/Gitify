@@ -1,10 +1,10 @@
 <?php
 
 // In a git-based install, the autoloader can be found in the root
-if (file_exists(__DIR__ . '/vendor/autsoload.php')) {
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 } // In a composer-based install, it's a few levels up.
-elseif (file_exists(dirname(__DIR__, 3) . '/vendor/autsoload.php')) {
+elseif (file_exists(dirname(__DIR__, 3) . '/vendor/autoload.php')) {
     require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 }
 
