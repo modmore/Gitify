@@ -5,9 +5,34 @@ The goal of Gitify is to provide a **two-way sync** of data typically stored in 
 
 The project configuration, which determines what data is written to file and build to the database, is stored in a `.gitify` file in the project root.
 
-## Quick Installation
+## Upgrading to v2 (:warn: in development)
 
-```` shell
+Gitify v2 brings updated dependencies, additional functionality, and easier installation/updates via Composer.
+
+The data file structure is unchanged, so you can safely update to v2. 
+
+1. To upgrade **with the intention of contributing to Gitify**, you can keep your installation. Bring it up to date with the master branch (`git fetch origin && git reset --hard origin/master`, or `git fetch upstream && git reset --hard upstream/master`), install the updated dependencies (`composer install`), and you're ready to go. You'll need to repeat these steps to upgrade to newer versions.
+2. To upgrade **simply to use Gitify**, it's recommended to remove the v1 git-based installation complete, and instead install Gitify globally with Composer as described in the installation below.
+
+**Important to know:**
+
+- Gitify v2 is not yet compatible with Gitify Watch. This will be restored in a future update of Gitify Watch.
+- The minimum PHP version has been increased to 7.2.5.
+- Documentation has not yet been updated for v2. This will happen soon.
+
+## Installation
+
+````bash 
+composer global require modmore/gitify
+````
+
+If that does not make gitify available on your path, add the output of `composer global config bin-dir --absolute` to your path (i.e. in the `~/.bash_profile` or `~/.zshrc` file on Mac/Linux).
+
+To update, use `composer global update modmore/gitify`. 
+
+### Manual Installation
+
+````bash
 $ git clone https://github.com/modmore/Gitify.git Gitify
 $ cd Gitify
 $ composer install --no-dev
