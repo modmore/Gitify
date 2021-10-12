@@ -23,12 +23,14 @@ The data file structure is unchanged, so you can safely update to v2.
 ## Installation
 
 ````bash 
-composer global require modmore/gitify
+composer global require modmore/gitify:^2
 ````
 
 If that does not make gitify available on your path, add the output of `composer global config bin-dir --absolute` to your path (i.e. in the `~/.bash_profile` or `~/.zshrc` file on Mac/Linux).
 
 To update, use `composer global update modmore/gitify`. 
+
+Alternatively, you can install Gitify local to a project with `composer require modmore/gitify:^2`. In that case you'll need to use `vendor/bin/gitify` as the command. 
 
 ### Manual Installation
 
