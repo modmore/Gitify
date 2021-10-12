@@ -70,9 +70,7 @@ use modmore\Gitify\Command\RestoreCommand;
 use modmore\Gitify\Command\UpgradeModxCommand;
 use modmore\Gitify\Gitify;
 
-$composerData = file_get_contents(__DIR__ . "/composer.json");
-$composerData = json_decode($composerData, true);
-$version = $composerData['version'];
+$version = trim(@file_get_contents(__DIR__ . '/VERSION'));
 
 $application = new Gitify('Gitify', $version);
 $application->add(new InitCommand);
