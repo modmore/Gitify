@@ -104,27 +104,6 @@ class Gitify extends Application
     }
 
     /**
-     * @return GitRepo|bool
-     */
-    public function getGitRepository()
-    {
-        try {
-            if (!$this->repository) {
-                $gitPath = self::loadMODX()->getOption('gitify.git_path', null, '/usr/bin/git');
-                if (!empty($gitPath)) {
-                    Git::setBin($gitPath);
-                }
-                $repositoryPath = self::loadMODX()->getOption('gitify.repository_path', null, MODX_BASE_PATH, true);
-                $this->repository = Git::open($repositoryPath);
-            }
-        } catch (\Exception $e) {
-            return $e->getMessage();
-        }
-
-        return $this->repository;
-    }
-
-    /**
      * Returns the current environment based on the HTTP HOST.
      *
      * @return array

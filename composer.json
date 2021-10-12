@@ -3,25 +3,11 @@
     "description": "Command line toolkit to make managing a MODX site in git a lot easier",
     "license": "MIT",
     "require": {
-        "kbjr/git.php": "*",
+        "php": ">=7.2.5",
         "symfony/console": "5.3.*",
         "symfony/yaml": "5.3.*",
         "symfony/process": "5.3.*"
     },
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "kbjr/git.php",
-                "version": "0.2.0",
-                "source": {
-                    "type": "git",
-                    "url": "https://github.com/kbjr/git.php",
-                    "reference": "master"
-                }
-            }
-        }
-    ],
     "autoload": {
         "psr-4": {
             "modmore\\Gitify\\": "src/"

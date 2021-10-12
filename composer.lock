@@ -4,18 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "224fe1ff2ed4c59ed6916ef56f3b663e",
+    "content-hash": "458f105c53c88fe7307b1d032233fcce",
     "packages": [
-        {
-            "name": "kbjr/git.php",
-            "version": "0.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kbjr/git.php",
-                "reference": "master"
-            },
-            "type": "library"
-        },
         {
             "name": "psr/container",
             "version": "1.1.1",
@@ -1022,7 +1012,9 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=7.2.5"
+    },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }
