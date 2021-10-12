@@ -34,6 +34,8 @@ Alternatively, you can install Gitify local to a project with `composer require 
 
 ### Manual Installation
 
+Use the manual installation to build from source, useful if you intend to help make Gitify better.
+
 ````bash
 $ git clone https://github.com/modmore/Gitify.git Gitify
 $ cd Gitify
