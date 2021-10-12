@@ -6,7 +6,7 @@
 $file = $file = dirname(__FILE__) . '/vendor/autoload.php';
 if (file_exists($file)) {
     require $file;
-} else if (!class_exists(modmore\Gitify\Gitify, false)) {
+} else if (!class_exists(modmore\Gitify\Gitify::class, false)) {
     throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
 }
 
