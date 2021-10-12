@@ -12,5 +12,5 @@
 
 use modmore\Gitify\Gitify;
 
-$application = include dirname(__FILE__) . '/application.php';
+$application = include dirname(__DIR__) . '/application.php';
 $application->run();

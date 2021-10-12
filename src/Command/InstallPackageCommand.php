@@ -13,7 +13,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  *
  * Installs a package
  *
- * @package modmore\Gitify\Command
+ * @package modmore\gitify\Command
  */
 class InstallPackageCommand extends BaseCommand
 {

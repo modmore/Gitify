@@ -27,7 +27,7 @@ class BackupCommand extends BaseCommand
     {
         $this
             ->setName('backup')
-            ->setDescription('Creates a quick backup of the entire MODX database. Runs automatically when using `Gitify build --force`, but can also be used manually.')
+            ->setDescription('Creates a quick backup of the entire MODX database. Runs automatically when using `gitify build --force`, but can also be used manually.')
             ->addArgument(
                 'name',
                 InputArgument::OPTIONAL,

@@ -15,7 +15,7 @@ use Symfony\Component\Console\Question\Question;
 /**
  * Class RestoreCommand
  *
- * Used for restoring database backups created with `Gitify backup` (or possibly any other type of mysql backup).
+ * Used for restoring database backups created with `gitify backup` (or possibly any other type of mysql backup).
  *
  * @package modmore\Gitify\Command
  */
@@ -28,7 +28,7 @@ class RestoreCommand extends BaseCommand
     {
         $this
             ->setName('restore')
-            ->setDescription('Restores the MODX database from a database dump created by `Gitify backup`')
+            ->setDescription('Restores the MODX database from a database dump created by `gitify backup`')
 
             ->addArgument(
                 'file',

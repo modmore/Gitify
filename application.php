@@ -87,7 +87,7 @@ $application->add(new BackupCommand);
 $application->add(new RestoreCommand);
 $application->add(new ClearCacheCommand);
 /**
- * We return it so the CLI controller in /Gitify can run it, or for other integrations to
- * work with the Gitify api directly.
+ * We return it so the CLI controller in /bin/gitify can run it, or for other integrations to
+ * work with the gitify api directly.
  */
 return $application;

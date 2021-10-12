@@ -11,14 +11,18 @@ Gitify v2 brings updated dependencies, additional functionality, and easier inst
 
 The data file structure is unchanged, so you can safely update to v2. 
 
-1. To upgrade **with the intention of contributing to Gitify**, you can keep your installation. Bring it up to date with the master branch (`git fetch origin && git reset --hard origin/master`, or `git fetch upstream && git reset --hard upstream/master`), install the updated dependencies (`composer install`), and you're ready to go. You'll need to repeat these steps to upgrade to newer versions.
-2. To upgrade **simply to use Gitify**, it's recommended to remove the v1 git-based installation complete, and instead install Gitify globally with Composer as described in the installation below.
+1. To upgrade **with the intention of contributing to Gitify**, you can keep your exiting git installation. 
+   1. Bring it up to date with the master branch (`git fetch origin && git reset --hard origin/master`, or `git fetch upstream && git reset --hard upstream/master`)
+   2. Install updated dependencies (`composer install`)
+   3. Update your `$PATH` to point to the `bin` directory. This may be in your `~/.bash_profile` or `~/.zshrc` file. 
+2. To upgrade **simply to use Gitify**, it's recommended to remove the v1 git-based installation completely, and instead install Gitify globally with Composer as described in the installation section below.
 
 **Important to know:**
 
 - Gitify v2 is not yet compatible with Gitify Watch. This will be restored in a future update of Gitify Watch.
 - The minimum PHP version has been increased to 7.2.5.
 - Documentation has not yet been updated for v2. This will happen soon.
+- `Gitify` has changed to `gitify` and is now in a /bin subdirectory.
 
 ## Installation
 
@@ -26,7 +30,7 @@ The data file structure is unchanged, so you can safely update to v2.
 composer global require modmore/gitify:^2
 ````
 
-If that does not make gitify available on your path, add the output of `composer global config bin-dir --absolute` to your path (i.e. in the `~/.bash_profile` or `~/.zshrc` file on Mac/Linux).
+If that does not make `gitify` available on your path, add the output of `composer global config bin-dir --absolute` to your path (i.e. in the `~/.bash_profile` or `~/.zshrc` file on Mac/Linux).
 
 To update, use `composer global update modmore/gitify`. 
 
@@ -40,7 +44,7 @@ Use the manual installation to build from source, useful if you intend to help m
 $ git clone https://github.com/modmore/Gitify.git Gitify
 $ cd Gitify
 $ composer install --no-dev
-$ chmod +x Gitify
+$ chmod +x gitify
 ````
 
 Please see [the Installation documentation](https://docs.modmore.com/en/Open_Source/Gitify/Installation/index.html) for more details.
