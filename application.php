@@ -1,19 +1,22 @@
 <?php
 
-/**
- * Make sure dependencies have been installed, and load the autoloader.
- */
-$file = $file = dirname(__FILE__) . '/vendor/autoload.php';
-if (file_exists($file)) {
-    require $file;
-} else if (!class_exists(modmore\Gitify\Gitify::class, false)) {
-    throw new \Exception('Uh oh, it looks like dependencies have not yet been installed with Composer. Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation');
+// In a git-based install, the autoloader can be found in the root
+if (file_exists(__DIR__ . '/vendor/autsoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+} // In a composer-based install, it's a few levels up.
+elseif (file_exists(dirname(__DIR__, 3) . '/vendor/autsoload.php')) {
+    require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+}
+
+if (!class_exists(modmore\Gitify\Gitify::class)) {
+    echo "Error: Unable to find autoloader. Please follow the installation instructions at https://github.com/modmore/Gitify/wiki/1.-Installation\n";
+    exit(1);
 }
 
 /**
  * Ensure the timezone is set; otherwise you'll get a shit ton (that's a technical term) of errors.
  */
-if (version_compare(phpversion(),'5.3.0') >= 0) {
+if (version_compare(phpversion(), '5.3.0') >= 0) {
     $tz = @ini_get('date.timezone');
     if (empty($tz)) {
         date_default_timezone_set(@date_default_timezone_get());
@@ -26,14 +29,13 @@ if (version_compare(phpversion(),'5.3.0') >= 0) {
 if (!defined('GITIFY_WORKING_DIR')) {
     $cwd = getcwd() . DIRECTORY_SEPARATOR;
     $cwd = str_replace('\\', '/', $cwd);
-    define ('GITIFY_WORKING_DIR', $cwd);
+    define('GITIFY_WORKING_DIR', $cwd);
 }
 
 /**
  * Specify the user home directory, for save cache folder of gitify
  */
 if (!defined('GITIFY_CACHE_DIR')) {
-
     $cacheDir = '.gitify';
 
     $home = rtrim(getenv('HOME'), DIRECTORY_SEPARATOR);
@@ -58,6 +60,7 @@ if (!defined('GITIFY_CACHE_DIR')) {
 /**
  * Load all the commands and create the Gitify instance
  */
+
 use modmore\Gitify\Command\BackupCommand;
 use modmore\Gitify\Command\BuildCommand;
 use modmore\Gitify\Command\ClearCacheCommand;
