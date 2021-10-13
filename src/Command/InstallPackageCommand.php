@@ -39,12 +39,6 @@ class InstallPackageCommand extends BaseCommand
                 'When specified, all packages defined in the .gitify config will be installed.'
             )
             ->addOption(
-                'local',
-                'l',
-                InputOption::VALUE_NONE,
-                'When specified, any packages inside the /core/packages folder will be installed.'
-            )
-            ->addOption(
                 'interactive',
                 'i',
                 InputOption::VALUE_NONE,
@@ -110,92 +104,6 @@ class InstallPackageCommand extends BaseCommand
             }
 
             $this->output->writeln("<info>Done!</info>");
-            return 0;
-        }
-
-        // check for packages that were manually added to the core/packages folder
-        if ($input->getOption('local')) {
-            // most of this code is copied from:
-            // core/model/modx/processors/workspace/packages/scanlocal.class.php
-            $corePackagesDirectory = $this->modx->getOption('core_path').'packages/';
-            $corePackagesDirectoryObject = dir($corePackagesDirectory);
-
-            while (false !== ($name = $corePackagesDirectoryObject->read())) {
-                if (in_array($name,array('.','..','.svn','.git','_notes'))) continue;
-                $packageFilename = $corePackagesDirectory.'/'.$name;
-
-                // dont add in unreadable files or directories
-                if (!is_readable($packageFilename) || is_dir($packageFilename)) continue;
-
-                // must be a .transport.zip file
-                if (strlen($name) < 14 || substr($name,strlen($name)-14,strlen($name)) != '.transport.zip') continue;
-                $packageSignature = substr($name,0,strlen($name)-14);
-
-                // must have a name and version at least
-                $p = explode('-',$packageSignature);
-                if (count($p) < 2) continue;
-
-                // install if package was not found in database
-                if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $packageSignature))) {
-                    $this->output->writeln("Package $packageSignature is already installed.");
-
-                } else {
-                    $this->output->writeln("<comment>Installing $packageSignature...</comment>");
-
-                    $package = $this->modx->newObject('transport.modTransportPackage');
-                    $package->set('signature', $packageSignature);
-                    $package->set('state', 1);
-                    $package->set('created',strftime('%Y-%m-%d %H:%M:%S'));
-                    $package->set('workspace', 1);
-
-                    // set package version data
-                    $sig = explode('-',$packageSignature);
-                    if (is_array($sig)) {
-                        $package->set('package_name',$sig[0]);
-                        if (!empty($sig[1])) {
-                            $v = explode('.',$sig[1]);
-                            if (isset($v[0])) $package->set('version_major',$v[0]);
-                            if (isset($v[1])) $package->set('version_minor',$v[1]);
-                            if (isset($v[2])) $package->set('version_patch',$v[2]);
-                        }
-                        if (!empty($sig[2])) {
-                            $r = preg_split('/([0-9]+)/',$sig[2],-1,PREG_SPLIT_DELIM_CAPTURE);
-                            if (is_array($r) && !empty($r)) {
-                                $package->set('release',$r[0]);
-                                $package->set('release_index',(isset($r[1]) ? $r[1] : '0'));
-                            } else {
-                                $package->set('release',$sig[2]);
-                            }
-                        }
-                    }
-
-                    // Determine if there are any package dependencies
-                    $package->getTransport();
-                    $package->getOne('Workspace');
-                    $wc = isset($package->Workspace->config) && is_array($package->Workspace->config) ? $package->Workspace->config : [];
-                    $at = is_array($package->get('attributes')) ? $package->get('attributes') : [];
-                    $attributes = array_merge($wc, $at);
-                    $requires = isset($attributes['requires']) && is_array($attributes['requires'])
-                        ? $attributes['requires']
-                        : [];
-                    $unsatisfied = $package->checkDependencies($requires);
-
-                    if (empty($unsatisfied)) {
-                        $package->save();
-                        $package->install();
-                        $this->output->writeln("<info>Package $packageSignature successfully installed.</info>");
-                    }
-                    // If dependencies exist, output an error message and list the packages needed.
-                    else {
-                        $this->output->writeln("\n<info>Unable to install $packageSignature! There are currently unmet dependencies:</info>");
-                        foreach ($unsatisfied as $dependency => $v) {
-                            $this->output->writeln("<info> - $dependency</info>");
-                        }
-                        $this->output->writeln("\n<info>$packageSignature has been added to the MODX package management grid, but is not yet installed.</info>\n");
-                    }
-                }
-            }
-
             return 0;
         }
 
@@ -269,70 +177,140 @@ class InstallPackageCommand extends BaseCommand
         $provider->getClient();
         $this->output->writeln("Searching <comment>{$provider->get('name')}</comment> for <comment>$packageName</comment>...");
 
+        // The droid we are looking for
+        $packageName = strtolower($packageName);
+
+        // Collect potential matches in array
         $packages = array();
 
-        // first try to find an exact match via signature from the chosen package provider
+        // First try to find an exact match via signature from the chosen package provider
         $response = $provider->request('package', 'GET', array(
             'supports' => $product_version,
             'signature' => $packageName,
         ));
 
-        // when we got a match (non 404), extract package information
+        //$this->output->writeln(print_r(simplexml_load_string($response->response)));
+
+        // When we got a match (non 404), extract package information
         if (!$response->isError()) {
 
-            $foundPkg = simplexml_load_string ( $response->response );
+            $foundPkg = simplexml_load_string($response->response);
 
-            // no matches, skip empty package name
-            if ($foundPkg->name) {
+            // Verify that signature matches (mismatches are known to occur!)
+            if ($foundPkg->signature == $packageName) {
+                $packages[strtolower((string) $foundPkg->name)] = array (
+                    'name' => (string) $foundPkg->name,
+                    'version' => (string) $foundPkg->version,
+                    'location' => (string) $foundPkg->location,
+                    'signature' => (string) $foundPkg->signature
+                );
+            }
+            // Try again from a different angle
+            else {
+                $this->output->writeln("<error>Returned signature {$foundPkg->signature} doesn't match the package name.</error>");
+                $this->output->writeln("Trying again from a different angle...");
 
-              $packages [strtolower((string) $foundPkg->name)] = array (
-                  'name' => (string) $foundPkg->name,
-                  'version' => (string) $foundPkg->version,
-                  'location' => (string) $foundPkg->location,
-                  'signature' => (string) $foundPkg->signature
-              );
+                // Query for name instead, without version number
+                $name = explode('-', $packageName);
+                $response = $provider->request('package', 'GET', array(
+                    'supports' => $product_version,
+                    'query' => $name[0],
+                ));
 
+                if (!empty($response)) {
+                    $foundPackages = simplexml_load_string($response->response);
+
+                    foreach ($foundPackages as $foundPkg) {
+                        // Only accept exact match on signature
+                        if ($foundPkg->signature == $packageName) {
+                            $packages[strtolower((string) $foundPkg->name)] = array (
+                                'name' => (string) $foundPkg->name,
+                                'version' => (string) $foundPkg->version,
+                                'location' => (string) $foundPkg->location,
+                                'signature' => (string) $foundPkg->signature
+                            );
+                        }
+                    }
+                }
+
+                $this->output->writeln(print_r($packages, true));
             }
         }
 
-        // if no exact match, try it with via query
+        // If no exact match, try it via query
         if (empty($packages)) {
             $response = $provider->request('package', 'GET', array(
                 'supports' => $product_version,
                 'query' => $packageName,
             ));
 
+            //$this->output->writeln(print_r(simplexml_load_string($response->response)));
+
             // Check for a proper response
             if (!empty($response)) {
 
                 $foundPackages = simplexml_load_string($response->response);
-                // no matches, simply return
+
+                // No matches, simply return
                 if ($foundPackages['total'] == 0) {
                     return true;
                 }
 
+                // Collect multiple versions of the same package in array
+                $packageVersions = array();
+
                 foreach ($foundPackages as $foundPkg) {
-                    $packages[strtolower((string)$foundPkg->name)] = array(
-                        'name' => (string)$foundPkg->name,
-                        'version' => (string)$foundPkg->version,
-                        'location' => (string)$foundPkg->location,
-                        'signature' => (string)$foundPkg->signature,
-                    );
+                    $name = strtolower((string)$foundPkg->name);
+
+                    // Only accept exact match on name
+                    if ($name == $packageName) {
+                        $packages[$name] = array (
+                            'name' => (string) $foundPkg->name,
+                            'version' => (string) $foundPkg->version,
+                            'location' => (string) $foundPkg->location,
+                            'signature' => (string) $foundPkg->signature
+                        );
+                        $packageVersions[(string)$foundPkg->version] = array (
+                            'name' => (string) $foundPkg->name,
+                            'version' => (string) $foundPkg->version,
+                            'release' => (string) $foundPkg->release,
+                            'location' => (string) $foundPkg->location,
+                            'signature' => (string) $foundPkg->signature
+                        );
+                    }
                 }
+
+                // If there are multiple versions of the same package, use the latest
+                if (count($packageVersions) > 1) {
+                    $packageLatest = max(array_keys($packageVersions));
+                    $packages[$packageName] = $packageVersions[$packageLatest];
+
+                    $this->output->writeln("Available versions:");
+                    $this->output->writeln(print_r($packageVersions, true));
+                }
+
+                // If there's still no match, revisit the response and just grab all hits...
+                if (empty($packages)) {
+                    foreach ($foundPackages as $foundPkg) {
+                        $packages[strtolower((string)$foundPkg->name)] = array(
+                            'name' => (string)$foundPkg->name,
+                            'version' => (string)$foundPkg->version,
+                            'location' => (string)$foundPkg->location,
+                            'signature' => (string)$foundPkg->signature,
+                        );
+                    }
+                }
+
+                $this->output->writeln(print_r($packages, true));
             }
         }
 
-        // process found packages
+        // Process found packages
         if (!empty($packages)) {
 
             $this->output->writeln('Found ' . count($packages) . ' package(s).');
 
             $helper = $this->getHelper('question');
-
-            // Ensure the exact match is always first
-            if (isset($packages[strtolower($packageName)])) {
-                $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;
-            }
 
             foreach ($packages as $package) {
                 if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $package['signature']))) {
