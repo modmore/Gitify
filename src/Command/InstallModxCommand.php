@@ -73,7 +73,7 @@ class InstallModxCommand extends BaseCommand
 
         // Create the XML config and config array
         if ($configFile && !file_exists($configFile)) {
-            $output->writeln("<error>Could not find a valid config file.</error>");
+            $output->writeln("<error>Unable to load specified config file.</error>");
             return 1;
         }
 
@@ -167,19 +167,19 @@ class InstallModxCommand extends BaseCommand
 
         $dbConnectionCharset = $providedConfig['database_connection_charset'] ?? '';
         if (!$dbConnectionCharset) {
-            $question = new Question('Database Connection Charset [utf8]: ', 'utf8');
+            $question = new Question('Database Connection Charset [utf8mb4]: ', 'utf8mb4');
             $dbConnectionCharset = $helper->ask($this->input, $this->output, $question);
         }
 
         $dbCharset = $providedConfig['database_charset'] ?? '';
         if (!$dbCharset) {
-            $question = new Question('Database Charset [utf8]: ', 'utf8');
+            $question = new Question('Database Charset [utf8mb4]: ', 'utf8mb4');
             $dbCharset = $helper->ask($this->input, $this->output, $question);
         }
 
         $dbCollation = $providedConfig['database_collation'] ?? '';
         if (!$dbCollation) {
-            $question = new Question('Database Collation [utf8_general_ci]: ', 'utf8_general_ci');
+            $question = new Question('Database Collation [utf8mb4_general_ci]: ', 'utf8mb4_general_ci');
             $dbCollation = $helper->ask($this->input, $this->output, $question);
         }
 
