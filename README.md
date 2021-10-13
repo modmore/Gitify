@@ -44,7 +44,7 @@ Use the manual installation to build from source, useful if you intend to help m
 $ git clone https://github.com/modmore/Gitify.git Gitify
 $ cd Gitify
 $ composer install --no-dev
-$ chmod +x gitify
+$ chmod +x bin/gitify
 ````
 
 Please see [the Installation documentation](https://docs.modmore.com/en/Open_Source/Gitify/Installation/index.html) for more details.
