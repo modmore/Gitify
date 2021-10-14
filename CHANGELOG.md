@@ -12,6 +12,9 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 - Remove deprecated CLI install arguments
 - Add "local" option to package:install (thanks @hugopeek) (#261)
 - Check for unmet dependencies when installing local packages.
+- Allow for custom core path and a renamed manager directory. (thanks @it-scripter) (#223)
+- Add ability to install using a config xml file via the --config parameter. (thanks @hugopeek) (#219)
+- Use --core-path param for all installs to ensure the correct core path is used in config.inc.php.
 
 ## 0.12.0 - 2015-12-17
 - Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
