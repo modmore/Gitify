@@ -91,7 +91,7 @@ class InstallModxCommand extends BaseCommand
         $output->writeln("Running MODX Setup...");
 
         // Move core to alternative location if specified
-        $corePathParameter = '';
+        $corePathParameter = '--core_path=' . $config['core_path_full'];
         if ($config['core_path_full'] !== $wd . 'core/') {
             if (!file_exists($config['core_path'])) {
                 mkdir($config['core_path'], 0777, true);
