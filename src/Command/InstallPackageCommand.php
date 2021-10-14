@@ -269,70 +269,140 @@ class InstallPackageCommand extends BaseCommand
         $provider->getClient();
         $this->output->writeln("Searching <comment>{$provider->get('name')}</comment> for <comment>$packageName</comment>...");
 
+        // The droid we are looking for
+        $packageName = strtolower($packageName);
+
+        // Collect potential matches in array
         $packages = array();
 
-        // first try to find an exact match via signature from the chosen package provider
+        // First try to find an exact match via signature from the chosen package provider
         $response = $provider->request('package', 'GET', array(
             'supports' => $product_version,
             'signature' => $packageName,
         ));
 
-        // when we got a match (non 404), extract package information
+        //$this->output->writeln(print_r(simplexml_load_string($response->response)));
+
+        // When we got a match (non 404), extract package information
         if (!$response->isError()) {
 
-            $foundPkg = simplexml_load_string ( $response->response );
+            $foundPkg = simplexml_load_string($response->response);
 
-            // no matches, skip empty package name
-            if ($foundPkg->name) {
+            // Verify that signature matches (mismatches are known to occur!)
+            if ($foundPkg->signature == $packageName) {
+                $packages[strtolower((string) $foundPkg->name)] = array (
+                    'name' => (string) $foundPkg->name,
+                    'version' => (string) $foundPkg->version,
+                    'location' => (string) $foundPkg->location,
+                    'signature' => (string) $foundPkg->signature
+                );
+            }
+            // Try again from a different angle
+            else {
+                $this->output->writeln("<error>Returned signature {$foundPkg->signature} doesn't match the package name.</error>");
+                $this->output->writeln("Trying again from a different angle...");
 
-              $packages [strtolower((string) $foundPkg->name)] = array (
-                  'name' => (string) $foundPkg->name,
-                  'version' => (string) $foundPkg->version,
-                  'location' => (string) $foundPkg->location,
-                  'signature' => (string) $foundPkg->signature
-              );
+                // Query for name instead, without version number
+                $name = explode('-', $packageName);
+                $response = $provider->request('package', 'GET', array(
+                    'supports' => $product_version,
+                    'query' => $name[0],
+                ));
 
+                if (!empty($response)) {
+                    $foundPackages = simplexml_load_string($response->response);
+
+                    foreach ($foundPackages as $foundPkg) {
+                        // Only accept exact match on signature
+                        if ($foundPkg->signature == $packageName) {
+                            $packages[strtolower((string) $foundPkg->name)] = array (
+                                'name' => (string) $foundPkg->name,
+                                'version' => (string) $foundPkg->version,
+                                'location' => (string) $foundPkg->location,
+                                'signature' => (string) $foundPkg->signature
+                            );
+                        }
+                    }
+                }
+
+                $this->output->writeln(print_r($packages, true));
             }
         }
 
-        // if no exact match, try it with via query
+        // If no exact match, try it via query
         if (empty($packages)) {
             $response = $provider->request('package', 'GET', array(
                 'supports' => $product_version,
                 'query' => $packageName,
             ));
 
+            //$this->output->writeln(print_r(simplexml_load_string($response->response)));
+
             // Check for a proper response
             if (!empty($response)) {
 
                 $foundPackages = simplexml_load_string($response->response);
-                // no matches, simply return
+
+                // No matches, simply return
                 if ($foundPackages['total'] == 0) {
                     return true;
                 }
 
+                // Collect multiple versions of the same package in array
+                $packageVersions = array();
+
                 foreach ($foundPackages as $foundPkg) {
-                    $packages[strtolower((string)$foundPkg->name)] = array(
-                        'name' => (string)$foundPkg->name,
-                        'version' => (string)$foundPkg->version,
-                        'location' => (string)$foundPkg->location,
-                        'signature' => (string)$foundPkg->signature,
-                    );
+                    $name = strtolower((string)$foundPkg->name);
+
+                    // Only accept exact match on name
+                    if ($name == $packageName) {
+                        $packages[$name] = array (
+                            'name' => (string) $foundPkg->name,
+                            'version' => (string) $foundPkg->version,
+                            'location' => (string) $foundPkg->location,
+                            'signature' => (string) $foundPkg->signature
+                        );
+                        $packageVersions[(string)$foundPkg->version] = array (
+                            'name' => (string) $foundPkg->name,
+                            'version' => (string) $foundPkg->version,
+                            'release' => (string) $foundPkg->release,
+                            'location' => (string) $foundPkg->location,
+                            'signature' => (string) $foundPkg->signature
+                        );
+                    }
                 }
+
+                // If there are multiple versions of the same package, use the latest
+                if (count($packageVersions) > 1) {
+                    $packageLatest = max(array_keys($packageVersions));
+                    $packages[$packageName] = $packageVersions[$packageLatest];
+
+                    $this->output->writeln("Available versions:");
+                    $this->output->writeln(print_r($packageVersions, true));
+                }
+
+                // If there's still no match, revisit the response and just grab all hits...
+                if (empty($packages)) {
+                    foreach ($foundPackages as $foundPkg) {
+                        $packages[strtolower((string)$foundPkg->name)] = array(
+                            'name' => (string)$foundPkg->name,
+                            'version' => (string)$foundPkg->version,
+                            'location' => (string)$foundPkg->location,
+                            'signature' => (string)$foundPkg->signature,
+                        );
+                    }
+                }
+
+                $this->output->writeln(print_r($packages, true));
             }
         }
 
-        // process found packages
+        // Process found packages
         if (!empty($packages)) {
 
             $this->output->writeln('Found ' . count($packages) . ' package(s).');
 
             $helper = $this->getHelper('question');
-
-            // Ensure the exact match is always first
-            if (isset($packages[strtolower($packageName)])) {
-                $packages = array($packageName => $packages[strtolower($packageName)]) + $packages;
-            }
 
             foreach ($packages as $package) {
                 if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $package['signature']))) {
