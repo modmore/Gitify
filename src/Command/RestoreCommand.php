@@ -79,7 +79,7 @@ class RestoreCommand extends BaseCommand
             /** @var \SplFileInfo $info */
             $name = $info->getBasename();
             // Ignore dotfiles/folders
-            if (substr($name, 0, 1) == '.') {
+            if (substr($name, 0, 1) === '.') {
                 continue;
             }
 
@@ -111,6 +111,9 @@ class RestoreCommand extends BaseCommand
             elseif (array_key_exists($fileInput . '.sql', $backups)) {
                 $file = $fileInput . '.sql';
             }
+            elseif (array_key_exists($fileInput . '.sql.gz', $backups)) {
+                $file = $fileInput . '.sql.gz';
+            }
             elseif ($fileInput === 'last') {
                 $file = reset(array_keys($backups));
             }
@@ -132,7 +135,14 @@ class RestoreCommand extends BaseCommand
         $output->writeln('Restoring from backup <info>' . $file . '</info>...');
 
         $database_password = str_replace("'", '\'', $database_password);
-        exec("mysql -u {$database_user} -p'{$database_password}' -h {$database_server} {$dbase} < \"{$targetDirectory}{$file}\" ");
+
+        if (substr($file, -3) !== '.gz') {
+            exec("mysql -u {$database_user} -p'{$database_password}' -h {$database_server} {$dbase} < \"{$targetDirectory}{$file}\" ");
+        }
+        else {
+            exec("zcat \"{$targetDirectory}{$file}\" | mysql -u {$database_user} -p'{$database_password}' -h {$database_server} {$dbase}");
+        }
+
         return 0;
     }
 }

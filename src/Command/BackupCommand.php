@@ -39,12 +39,17 @@ class BackupCommand extends BaseCommand
                 InputOption::VALUE_NONE,
                 'When specified, a backup with the same name will be overwritten if it exists.'
             )
-            ->addOption(
-            // https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-21.html#mysqld-8-0-21-security
+            ->addOption( // https://dev.mysql.com/doc/relnotes/mysql/8.0/en/news-8-0-21.html#mysqld-8-0-21-security
                 'no-tablespaces',
                 'ntbs',
                 InputOption::VALUE_NONE,
                 'As of MySQL 8.0.21 (and MySQL 5.7.31), the PROCESS privilege is required to backup tablespaces. To ignore tablespaces in your backup, include this option.'
+            )
+            ->addOption(
+                'compress',
+                'c',
+                InputOption::VALUE_NONE,
+                'When specified, resulting backup file will be gzip compressed.'
             );
     }
 
@@ -89,11 +94,17 @@ class BackupCommand extends BaseCommand
         $file = $input->getArgument('name');
         if (!empty($file)) {
             $file = $this->modx->filterPathSegment($file);
-        } else {
+        }
+        else {
             $file = str_replace(':', '', date(DATE_ATOM));
         }
-        if (substr($file, -4) != '.sql') {
+
+        if (substr($file, -4) !== '.sql') {
             $file .= '.sql';
+        }
+
+        if ($input->getOption('compress') && substr($file, -3) !== '.gz') {
+            $file .= '.gz';
         }
 
         // Full target directory and file
@@ -119,9 +130,12 @@ class BackupCommand extends BaseCommand
             $password_parameter = "-p'{$database_password}'";
         }
 
-        $tablespaces = $input->getOption('no-tablespaces') ? '--no-tablespaces' : '';
+        $tablespaces = $input->getOption('no-tablespaces') ? ' --no-tablespaces' : '';
+        $gzip = $input->getOption('compress') ? '| gzip - ' : '';
 
-        exec("mysqldump $tablespaces -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} > \"{$targetFile}\" ");
+        exec("mysqldump{$tablespaces} -u {$database_user} {$password_parameter} -h {$database_server} {$dbase} {$gzip}> {$targetFile} ");
+
+
         return 0;
     }
 }
