@@ -66,17 +66,17 @@ class InstallPackageCommand extends BaseCommand
 
         if ($input->getOption('all')) {
             // check list and run install for each
-            $packages = isset($this->config['packages']) ? $this->config['packages'] : array();
+            $packages = isset($this->config['packages']) ? $this->config['packages'] : [];
             foreach ($packages as $provider_name => $provider_data) {
                 // Try to load the provider from the database
-                $provider = $this->modx->getObject('transport.modTransportProvider', array("name" => $provider_name));
+                $provider = $this->modx->getObject('transport.modTransportProvider', ["name" => $provider_name]);
 
                 // If no provider found, then we'll create it
                 if (!$provider) {
-                    $credentials = array(
+                    $credentials = [
                         'username' => isset($provider_data['username']) ? $provider_data['username'] : '',
                         'api_key' => ''
-                    );
+                    ];
 
                     // Try to look for a file with the API Key from a file within the gitify working directory
                     if (!empty($provider_data['api_key']) && file_exists(GITIFY_WORKING_DIR . '/' . $provider_data['api_key'])) {
@@ -91,13 +91,13 @@ class InstallPackageCommand extends BaseCommand
 
                     /** @var \modTransportProvider $provider */
                     $provider = $this->modx->newObject('transport.modTransportProvider');
-                    $provider->fromArray(array(
+                    $provider->fromArray([
                         'name' => $provider_name,
                         'service_url' => $provider_data['service_url'],
                         'description' => isset($provider_data['description']) ? $provider_data['description'] : '',
                         'username' => $credentials['username'],
                         'api_key' => $credentials['api_key'],
-                    ));
+                    ]);
                     $provider->save();
                 }
 
@@ -121,7 +121,7 @@ class InstallPackageCommand extends BaseCommand
             $corePackagesDirectoryObject = dir($corePackagesDirectory);
 
             while (false !== ($name = $corePackagesDirectoryObject->read())) {
-                if (in_array($name,array('.','..','.svn','.git','_notes'))) continue;
+                if (in_array($name,['.','..','.svn','.git','_notes'])) continue;
                 $packageFilename = $corePackagesDirectory.'/'.$name;
 
                 // dont add in unreadable files or directories
@@ -136,7 +136,7 @@ class InstallPackageCommand extends BaseCommand
                 if (count($p) < 2) continue;
 
                 // install if package was not found in database
-                if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $packageSignature))) {
+                if ($this->modx->getCount('transport.modTransportPackage', ['signature' => $packageSignature])) {
                     $this->output->writeln("Package $packageSignature is already installed.");
 
                 } else {
@@ -211,7 +211,7 @@ class InstallPackageCommand extends BaseCommand
      * @param array $installOptions
      * @return bool
      */
-    private function install($package, $provider = 0, array $installOptions = array())
+    private function install($package, $provider = 0, array $installOptions = [])
     {
         $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
 
@@ -251,7 +251,7 @@ class InstallPackageCommand extends BaseCommand
      * @param array $options
      * @return bool
      */
-    private function download($packageName, $provider, $options = array()) {
+    private function download($packageName, $provider, $options = []) {
         $this->modx->getVersionData();
         $product_version = $this->modx->version['code_name'] . '-' . $this->modx->version['full_version'];
 
@@ -273,15 +273,13 @@ class InstallPackageCommand extends BaseCommand
         $packageName = strtolower($packageName);
 
         // Collect potential matches in array
-        $packages = array();
+        $packages = [];
 
         // First try to find an exact match via signature from the chosen package provider
-        $response = $provider->request('package', 'GET', array(
+        $response = $provider->request('package', 'GET', [
             'supports' => $product_version,
             'signature' => $packageName,
-        ));
-
-        //$this->output->writeln(print_r(simplexml_load_string($response->response)));
+        ]);
 
         // When we got a match (non 404), extract package information
         if (!$response->isError()) {
@@ -290,12 +288,12 @@ class InstallPackageCommand extends BaseCommand
 
             // Verify that signature matches (mismatches are known to occur!)
             if ($foundPkg->signature == $packageName) {
-                $packages[strtolower((string) $foundPkg->name)] = array (
+                $packages[strtolower((string) $foundPkg->name)] = [
                     'name' => (string) $foundPkg->name,
                     'version' => (string) $foundPkg->version,
                     'location' => (string) $foundPkg->location,
                     'signature' => (string) $foundPkg->signature
-                );
+                ];
             }
             // Try again from a different angle
             else {
@@ -304,10 +302,10 @@ class InstallPackageCommand extends BaseCommand
 
                 // Query for name instead, without version number
                 $name = explode('-', $packageName);
-                $response = $provider->request('package', 'GET', array(
+                $response = $provider->request('package', 'GET', [
                     'supports' => $product_version,
                     'query' => $name[0],
-                ));
+                ]);
 
                 if (!empty($response)) {
                     $foundPackages = simplexml_load_string($response->response);
@@ -315,28 +313,24 @@ class InstallPackageCommand extends BaseCommand
                     foreach ($foundPackages as $foundPkg) {
                         // Only accept exact match on signature
                         if ($foundPkg->signature == $packageName) {
-                            $packages[strtolower((string) $foundPkg->name)] = array (
+                            $packages[strtolower((string) $foundPkg->name)] = [
                                 'name' => (string) $foundPkg->name,
                                 'version' => (string) $foundPkg->version,
                                 'location' => (string) $foundPkg->location,
                                 'signature' => (string) $foundPkg->signature
-                            );
+                            ];
                         }
                     }
                 }
-
-                $this->output->writeln(print_r($packages, true));
             }
         }
 
         // If no exact match, try it via query
         if (empty($packages)) {
-            $response = $provider->request('package', 'GET', array(
+            $response = $provider->request('package', 'GET', [
                 'supports' => $product_version,
                 'query' => $packageName,
-            ));
-
-            //$this->output->writeln(print_r(simplexml_load_string($response->response)));
+            ]);
 
             // Check for a proper response
             if (!empty($response)) {
@@ -349,7 +343,7 @@ class InstallPackageCommand extends BaseCommand
                 }
 
                 // Collect multiple versions of the same package in array
-                $packageVersions = array();
+                $packageVersions = [];
 
                 foreach ($foundPackages as $foundPkg) {
                     $name = strtolower((string)$foundPkg->name);
@@ -362,13 +356,13 @@ class InstallPackageCommand extends BaseCommand
                             'location' => (string) $foundPkg->location,
                             'signature' => (string) $foundPkg->signature
                         );
-                        $packageVersions[(string)$foundPkg->version] = array (
+                        $packageVersions[(string)$foundPkg->version] = [
                             'name' => (string) $foundPkg->name,
                             'version' => (string) $foundPkg->version,
                             'release' => (string) $foundPkg->release,
                             'location' => (string) $foundPkg->location,
                             'signature' => (string) $foundPkg->signature
-                        );
+                        ];
                     }
                 }
 
@@ -376,24 +370,19 @@ class InstallPackageCommand extends BaseCommand
                 if (count($packageVersions) > 1) {
                     $packageLatest = max(array_keys($packageVersions));
                     $packages[$packageName] = $packageVersions[$packageLatest];
-
-                    $this->output->writeln("Available versions:");
-                    $this->output->writeln(print_r($packageVersions, true));
                 }
 
                 // If there's still no match, revisit the response and just grab all hits...
                 if (empty($packages)) {
                     foreach ($foundPackages as $foundPkg) {
-                        $packages[strtolower((string)$foundPkg->name)] = array(
+                        $packages[strtolower((string)$foundPkg->name)] = [
                             'name' => (string)$foundPkg->name,
                             'version' => (string)$foundPkg->version,
                             'location' => (string)$foundPkg->location,
                             'signature' => (string)$foundPkg->signature,
-                        );
+                        ];
                     }
                 }
-
-                $this->output->writeln(print_r($packages, true));
             }
         }
 
@@ -405,7 +394,7 @@ class InstallPackageCommand extends BaseCommand
             $helper = $this->getHelper('question');
 
             foreach ($packages as $package) {
-                if ($this->modx->getCount('transport.modTransportPackage', array('signature' => $package['signature']))) {
+                if ($this->modx->getCount('transport.modTransportPackage', ['signature' => $package['signature']])) {
                     $this->output->writeln("<info>Package {$package['name']} {$package['version']} is already installed.</info>");
 
                     if ($this->interactive) {
@@ -432,10 +421,10 @@ class InstallPackageCommand extends BaseCommand
 
                 // Run the core processor to download the package from the provider
                 $this->output->writeln("<comment>Downloading {$package['name']} ({$package['version']})...</comment>");
-                $response = $this->modx->runProcessor('workspace/packages/rest/download', array(
+                $response = $this->modx->runProcessor('workspace/packages/rest/download', [
                     'provider' => $provider->get('id'),
-                    'info' => join('::', array($package['location'], $package['signature']))
-                ));
+                    'info' => join('::', [$package['location'], $package['signature']])
+                ]);
 
                 // If we have an error, show it and cancel.
                 if ($response->isError()) {
@@ -447,7 +436,7 @@ class InstallPackageCommand extends BaseCommand
 
                 // Grab the package object
                 $obj = $response->getObject();
-                if ($package = $this->modx->getObject('transport.modTransportPackage', array('signature' => $obj['signature']))) {
+                if ($package = $this->modx->getObject('transport.modTransportPackage', ['signature' => $obj['signature']])) {
                     // Install the package
                     return $package->install($options);
                 }
