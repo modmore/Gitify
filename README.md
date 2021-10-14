@@ -36,6 +36,13 @@ To update, use `composer global update modmore/gitify`.
 
 Alternatively, you can install Gitify local to a project with `composer require modmore/gitify:^2`. In that case you'll need to use `vendor/bin/gitify` as the command. 
 
+When installing an alpha/dev version, if you haven't modified your global composer config before, it's possible you'll 
+get an error message pertaining to your minimum-stability setting. (Composer defaults to stable, and we want an unstable version!)
+To fix this, you'll need to set your global minimum stability with the following command:
+```
+composer global config minimum-stability alpha
+```
+
 ### Manual Installation
 
 Use the manual installation to build from source, useful if you intend to help make Gitify better.
