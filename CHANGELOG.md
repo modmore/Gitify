@@ -16,6 +16,7 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 - Add ability to install using a config xml file via the --config parameter. (thanks @hugopeek) (#219)
 - Use --core-path param for all installs to ensure the correct core path is used in config.inc.php.
 - Download the latest versions of packages more reliably. (thanks @hugopeek) (#327)
+- Backup and restore commands can now handle compressed gzip files. (thanks @rchouinard) (#378)
 
 ## 0.12.0 - 2015-12-17
 - Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
