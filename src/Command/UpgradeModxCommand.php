@@ -59,7 +59,6 @@ class UpgradeModxCommand extends BaseCommand
 
         // Actually run the CLI setup
         exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=upgrade --config={$config}", $setupOutput);
-        $output->writeln($setupOutput[0]);
 
         // Try to clean up the config file
         if (!unlink($config)) {
