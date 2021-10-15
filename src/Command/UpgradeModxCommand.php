@@ -66,6 +66,11 @@ class UpgradeModxCommand extends BaseCommand
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
         }
 
+        // Remove setup directory if upgrade process left it there.
+        if (is_dir("{$wd}setup/")) {
+            exec("rm -rf {$wd}setup/");
+        }
+
         $output->writeln('Done! ' . $this->getRunStats());
 
         return 0;
