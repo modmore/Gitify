@@ -164,6 +164,11 @@ trait DownloadModx
                 // Now copy remaining contents
                 exec("cp -r $path/* ./");
 
+                // Hard wipe cache
+                if (is_dir(MODX_CORE_PATH . 'cache/')) {
+                    exec('rm -rf ' . MODX_CORE_PATH . 'cache/*');
+                }
+
                 // Re-extract package to source dir, so it's ready for another run.
                 $this->unzip($path . '.zip');
             }
