@@ -19,6 +19,7 @@ class UpgradeModxCommand extends BaseCommand
 
     public $loadConfig = false;
     public $loadModx = true;
+    public $isUpgrade = true;
 
     protected function configure()
     {

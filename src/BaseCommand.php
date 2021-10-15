@@ -26,6 +26,7 @@ abstract class BaseCommand extends Command
 
     public $loadConfig = true;
     public $loadMODX = true;
+    public $isUpgrade = false;
 
     /**
      * Initializes the command just after the input has been validated.
