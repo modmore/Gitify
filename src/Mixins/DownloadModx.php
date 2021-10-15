@@ -109,7 +109,7 @@ trait DownloadModx
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_NOBODY, 1);
         curl_exec($ch);
@@ -147,14 +147,20 @@ trait DownloadModx
                 $paths = [
                     'core' => MODX_CORE_PATH,
                     'connectors' => MODX_CONNECTORS_PATH,
-                    'manager' => MODX_MANAGER_PATH,
-                    'assets' => MODX_ASSETS_PATH
+                    'manager' => MODX_MANAGER_PATH
                 ];
                 foreach ($paths as $k => $customPath) {
+                    // Throw out default config files
+                    if (file_exists("$path/$k/config.core.php")) {
+                        unlink("$path/$k/config.core.php");
+                    }
                     // Copy each dir to path specified in config file then remove that dir from source
                     exec("cp -r $path/$k/* $customPath");
                     exec("rm -rf $path/$k");
                 }
+
+                unlink("$path/config.core.php");
+
                 // Now copy remaining contents
                 exec("cp -r $path/* ./");
 
