@@ -378,7 +378,7 @@ class InstallPackageCommand extends BaseCommand
                             $latest = $version;
                         } else {
                             // Replace latest version with current one if it's higher
-                            if (version_compare($version, $latest) == 1) {
+                            if (version_compare($version, $latest, '>=')) {
                                 $latest = $version;
                             }
                         }
