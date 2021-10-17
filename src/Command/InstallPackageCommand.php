@@ -356,7 +356,7 @@ class InstallPackageCommand extends BaseCommand
                             'location' => (string) $foundPkg->location,
                             'signature' => (string) $foundPkg->signature
                         );
-                        $packageVersions[(string)$foundPkg->version] = [
+                        $packageVersions[(string)$foundPkg->signature] = [
                             'name' => (string) $foundPkg->name,
                             'version' => (string) $foundPkg->version,
                             'release' => (string) $foundPkg->release,
@@ -368,8 +368,25 @@ class InstallPackageCommand extends BaseCommand
 
                 // If there are multiple versions of the same package, use the latest
                 if (count($packageVersions) > 1) {
-                    $packageLatest = max(array_keys($packageVersions));
-                    $packages[$packageName] = $packageVersions[$packageLatest];
+                    $i = 0;
+                    $latest = '';
+
+                    // Compare versions
+                    foreach (array_keys($packageVersions) as $version) {
+                        if ($i == 0) {
+                            // First iteration
+                            $latest = $version;
+                        } else {
+                            // Replace latest version with current one if it's higher
+                            if (version_compare($version, $latest) == 1) {
+                                $latest = $version;
+                            }
+                        }
+                        $i++;
+                    }
+
+                    // Use latest
+                    $packages[$packageName] = $packageVersions[$latest];
                 }
 
                 // If there's still no match, revisit the response and just grab all hits...
