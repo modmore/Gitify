@@ -2,9 +2,10 @@
 
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
-## Current development (master)
+## Current development (v1)
 - Prevent E_WARN errors in build
 - Fix fallback Gitify-Cache-Folder
+- Upgrade symfony/yaml to 3.3.* for PHP 8.0 compatability. Minimum PHP requirement is now ^5.5.9|>=7.0.8 (#381)
 
 ## 0.12.0 - 2015-12-17
 - Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
