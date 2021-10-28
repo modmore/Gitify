@@ -73,6 +73,7 @@ trait DownloadModx
      * Unzips the package zip to the current directory
      *
      * @param $package
+     * @throws \Exception
      */
     protected function unzip($package)
     {
@@ -131,14 +132,50 @@ trait DownloadModx
     {
         $version = 'modx-' . str_replace('modx-', '', $version);
 
-
         $path = GITIFY_CACHE_DIR . $version;
 
         if (!file_exists($path) || !is_dir($path)) {
             $this->download($version);
         }
 
-        exec("cp -r $path/* ./");
+        // Handle potential custom paths on upgrade
+        if ($this->isUpgrade) {
+            require_once './config.core.php';
+            if (MODX_CORE_PATH) {
+                require_once MODX_CORE_PATH . 'config/config.inc.php';
+                // Need to avoid the easier route with rsync as it may not be installed
+                $paths = [
+                    'core' => MODX_CORE_PATH,
+                    'connectors' => MODX_CONNECTORS_PATH,
+                    'manager' => MODX_MANAGER_PATH
+                ];
+                foreach ($paths as $k => $customPath) {
+                    // Throw out default config files
+                    if (file_exists("$path/$k/config.core.php")) {
+                        unlink("$path/$k/config.core.php");
+                    }
+                    // Copy each dir to path specified in config file then remove that dir from source
+                    exec("cp -r $path/$k/* $customPath");
+                    exec("rm -rf $path/$k");
+                }
+
+                unlink("$path/config.core.php");
+
+                // Now copy remaining contents
+                exec("cp -r $path/* ./");
+
+                // Hard wipe cache
+                if (is_dir(MODX_CORE_PATH . 'cache/')) {
+                    exec('rm -rf ' . MODX_CORE_PATH . 'cache/*');
+                }
+
+                // Re-extract package to source dir, so it's ready for another run.
+                $this->unzip($path . '.zip');
+            }
+        }
+        else {
+            exec("cp -r $path/* ./");
+        }
     }
 
     /**

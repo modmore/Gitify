@@ -19,6 +19,7 @@ class UpgradeModxCommand extends BaseCommand
 
     public $loadConfig = false;
     public $loadModx = true;
+    public $isUpgrade = true;
 
     protected function configure()
     {
@@ -58,11 +59,15 @@ class UpgradeModxCommand extends BaseCommand
 
         // Actually run the CLI setup
         exec("php -d date.timezone={$tz} {$wd}setup/index.php --installmode=upgrade --config={$config}", $setupOutput);
-        $output->writeln($setupOutput[0]);
 
         // Try to clean up the config file
         if (!unlink($config)) {
             $output->writeln("<warning>Warning:: could not clean up the setup config file, please remove this manually.</warning>");
+        }
+
+        // Remove setup directory if upgrade process left it there.
+        if (is_dir("{$wd}setup/")) {
+            exec("rm -rf {$wd}setup/");
         }
 
         $output->writeln('Done! ' . $this->getRunStats());
