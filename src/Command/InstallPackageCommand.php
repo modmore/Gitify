@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
@@ -266,6 +267,9 @@ class InstallPackageCommand extends BaseCommand
             return false;
         }
 
+        $helper = $this->getHelper('question');
+        $selectedFromMultiVersions = false;
+
         $provider->getClient();
         $this->output->writeln("Searching <comment>{$provider->get('name')}</comment> for <comment>$packageName</comment>...");
 
@@ -336,7 +340,7 @@ class InstallPackageCommand extends BaseCommand
             if (!empty($response)) {
 
                 $foundPackages = simplexml_load_string($response->response);
-
+                $this->output->writeln($foundPackages);
                 // No matches, simply return
                 if ($foundPackages['total'] == 0) {
                     return true;
@@ -349,7 +353,7 @@ class InstallPackageCommand extends BaseCommand
                     $name = strtolower((string)$foundPkg->name);
 
                     // Only accept exact match on name
-                    if ($name == $packageName) {
+                    if ($name === $packageName) {
                         $packages[$name] = array (
                             'name' => (string) $foundPkg->name,
                             'version' => (string) $foundPkg->version,
@@ -366,27 +370,47 @@ class InstallPackageCommand extends BaseCommand
                     }
                 }
 
-                // If there are multiple versions of the same package, use the latest
                 if (count($packageVersions) > 1) {
-                    $i = 0;
-                    $latest = '';
-
-                    // Compare versions
-                    foreach (array_keys($packageVersions) as $version) {
-                        if ($i == 0) {
-                            // First iteration
-                            $latest = $version;
-                        } else {
-                            // Replace latest version with current one if it's higher
-                            if (version_compare($version, $latest, '>=')) {
-                                $latest = $version;
-                            }
+                    if($this->interactive) {
+                        // If in interactive mode and more than one package, let user select which version to install.
+                        $selectPackages = [];
+                        foreach ($packageVersions as $k => $version) {
+                            $selectPackages[] = $k;
                         }
-                        $i++;
-                    }
+                        $question = new ChoiceQuestion(
+                            'Choose a package version to install...',
+                            $selectPackages,
+                            0
+                        );
+                        $question->setErrorMessage('Please select a valid option.');
+                        $answer = $helper->ask($this->input, $this->output, $question);
+                        $this->output->writeln('Installing: ' . $answer);
 
-                    // Use latest
-                    $packages[$packageName] = $packageVersions[$latest];
+                        $packages[$packageName] = $packageVersions[$answer];
+                        $selectedFromMultiVersions = true;
+                    }
+                    else {
+                        // If there are multiple versions of the same package and not interactive, use the latest
+                        $i = 0;
+                        $latest = '';
+
+                        // Compare versions
+                        foreach (array_keys($packageVersions) as $version) {
+                            if ($i === 0) {
+                                // First iteration
+                                $latest = $version;
+                            } else {
+                                // Replace latest version with current one if it's higher
+                                if (version_compare($version, $latest, '>=')) {
+                                    $latest = $version;
+                                }
+                            }
+                            $i++;
+                        }
+
+                        // Use latest
+                        $packages[$packageName] = $packageVersions[$latest];
+                    }
                 }
 
                 // If there's still no match, revisit the response and just grab all hits...
@@ -406,9 +430,9 @@ class InstallPackageCommand extends BaseCommand
         // Process found packages
         if (!empty($packages)) {
 
-            $this->output->writeln('Found ' . count($packages) . ' package(s).');
-
-            $helper = $this->getHelper('question');
+            if (!$selectedFromMultiVersions) {
+                $this->output->writeln('Found ' . count($packages) . ' package(s).');
+            }
 
             foreach ($packages as $package) {
                 if ($this->modx->getCount('transport.modTransportPackage', ['signature' => $package['signature']])) {
@@ -422,7 +446,7 @@ class InstallPackageCommand extends BaseCommand
                     }
                 }
 
-                if ($this->interactive) {
+                if ($this->interactive && !$selectedFromMultiVersions) {
                     if (!$helper->ask(
                         $this->input,
                         $this->output,
