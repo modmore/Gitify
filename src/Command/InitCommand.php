@@ -62,6 +62,12 @@ class InitCommand extends BaseCommand
             }
         }
 
+        // Make sure the working directory is writable
+        if (!is_writable(GITIFY_WORKING_DIR)) {
+            $output->writeln('<error>Error: the current directory is not writable!</error> Please check the directory\'s permissions.');
+            return 1;
+        }
+
         $helper = $this->getHelper('question');
 
         // Where we'll store the configuration
