@@ -340,7 +340,7 @@ class InstallPackageCommand extends BaseCommand
             if (!empty($response)) {
 
                 $foundPackages = simplexml_load_string($response->response);
-                $this->output->writeln($foundPackages);
+
                 // No matches, simply return
                 if ($foundPackages['total'] == 0) {
                     return true;
