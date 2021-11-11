@@ -46,7 +46,7 @@ if (!defined('GITIFY_CACHE_DIR')) {
         // compatibility to Windows
         $home = rtrim($_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'], DIRECTORY_SEPARATOR);
     }
-    if (!$home) {
+    if (!$home || !is_writable($home)) {
         // fallback to working directory, if home directory can not be determined
         $home = rtrim(GITIFY_WORKING_DIR, DIRECTORY_SEPARATOR);
         // in working directory .gitify file contains the main configuration,
@@ -54,7 +54,7 @@ if (!defined('GITIFY_CACHE_DIR')) {
         $cacheDir = '.gitify-cache';
     }
 
-    define('GITIFY_CACHE_DIR', implode(DIRECTORY_SEPARATOR, array($home, $cacheDir, '')));
+    define('GITIFY_CACHE_DIR', implode(DIRECTORY_SEPARATOR, [$home, $cacheDir, '']));
 }
 
 /**
