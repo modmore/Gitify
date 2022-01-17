@@ -5,7 +5,7 @@
     "require": {
         "php": ">=7.2.5",
         "symfony/console": "5.3.*",
-        "symfony/yaml": "5.3.*",
+        "symfony/yaml": "5.4.*",
         "symfony/process": "5.3.*"
     },
     "autoload": {
