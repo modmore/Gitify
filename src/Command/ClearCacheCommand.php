@@ -24,5 +24,7 @@ class ClearCacheCommand extends BaseCommand
             exec("rm -rf " . GITIFY_CACHE_DIR);
             $output->writeln('Cleared the Gitify cache.');
         }
+        
+        return 0;
     }
 }
