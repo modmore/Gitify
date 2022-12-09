@@ -290,7 +290,7 @@ class InstallPackageCommand extends BaseCommand
 
         // When we got a match (non 404), extract package information
         if ($this->isMODX3) {
-            $error = $response->getStatusCode() === 200;
+            $error = $response->getStatusCode() !== 200;
         }
         else {
             $error = $response->isError();
