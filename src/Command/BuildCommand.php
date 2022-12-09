@@ -282,6 +282,7 @@ class BuildCommand extends BaseCommand
      * @param bool $isConflictResolution
      */
     public function buildSingleResource($data, $isConflictResolution = false) {
+	$this->modx->setOption(\xPDO::OPT_SETUP, true);
         // Figure out the primary key - it's either uri or id in the case of a resource.
         if (!empty($data['uri'])) {
             $primary = array('uri' => $data['uri'], 'context_key' => $data['context_key']);
@@ -443,6 +444,7 @@ class BuildCommand extends BaseCommand
      * @param bool $isConflictResolution
      */
     public function buildSingleObject($data, $type, $isConflictResolution = false) {
+	$this->modx->setOption(\xPDO::OPT_SETUP, true);
         $primaryKey = !empty($type['primary']) ? $type['primary'] : 'id';
         $class = $type['class'];
 
