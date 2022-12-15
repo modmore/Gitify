@@ -1,5 +1,6 @@
 <?php namespace modmore\Gitify\Command;
 
+use GuzzleHttp\Psr7\Response;
 use modmore\Gitify\Gitify;
 use modmore\Gitify\BaseCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -214,7 +215,9 @@ class InstallPackageCommand extends BaseCommand
      */
     private function install($package, $provider = 0, array $installOptions = [])
     {
-        $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
+        if (!$this->isMODX3) {
+            $this->modx->addPackage('modx.transport', MODX_CORE_PATH . 'model/');
+        }
 
         if (!($provider instanceof \modTransportProvider) && is_numeric($provider) && $provider > 0)
         {
@@ -286,9 +289,16 @@ class InstallPackageCommand extends BaseCommand
         ]);
 
         // When we got a match (non 404), extract package information
-        if (!$response->isError()) {
+        if ($this->isMODX3) {
+            $error = $response->getStatusCode() !== 200;
+        }
+        else {
+            $error = $response->isError();
+        }
 
-            $foundPkg = simplexml_load_string($response->response);
+        if (!$error) {
+            $responseBody = $response instanceof Response ? $response->getBody()->getContents() : $response->response;
+            $foundPkg = simplexml_load_string($responseBody);
 
             // Verify that signature matches (mismatches are known to occur!)
             if ($foundPkg->signature == $packageName) {
@@ -312,7 +322,8 @@ class InstallPackageCommand extends BaseCommand
                 ]);
 
                 if (!empty($response)) {
-                    $foundPackages = simplexml_load_string($response->response);
+                    $responseBody = $response instanceof Response ? $response->getBody()->getContents() : $response->response;
+                    $foundPackages = simplexml_load_string($responseBody);
 
                     foreach ($foundPackages as $foundPkg) {
                         // Only accept exact match on signature
@@ -338,8 +349,8 @@ class InstallPackageCommand extends BaseCommand
 
             // Check for a proper response
             if (!empty($response)) {
-
-                $foundPackages = simplexml_load_string($response->response);
+                $responseBody = $response instanceof Response ? $response->getBody()->getContents() : $response->response;
+                $foundPackages = simplexml_load_string($responseBody);
 
                 // No matches, simply return
                 if ($foundPackages['total'] == 0) {
@@ -447,15 +458,9 @@ class InstallPackageCommand extends BaseCommand
                 }
 
                 if ($this->interactive && !$selectedFromMultiVersions) {
-                    if (!$helper->ask(
-                        $this->input,
-                        $this->output,
-                        new ConfirmationQuestion(
-                            "Do you want to install <info>{$package['name']} ({$package['version']})</info>? <comment>[Y/n]</comment>: ",
-                            true
-                        )
-                    )
-                    ) {
+                    $question = new ConfirmationQuestion(
+                        "Do you want to install <info>{$package['name']} ({$package['version']})</info>? <comment>[Y/n]</comment>: ", true);
+                    if (!$helper->ask($this->input, $this->output, $question)) {
                         continue;
                     }
                 }

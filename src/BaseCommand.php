@@ -2,6 +2,14 @@
 namespace modmore\Gitify;
 
 use modX;
+use MODX\Revolution\modCategory;
+use MODX\Revolution\modContext;
+use MODX\Revolution\modDashboardWidget;
+use MODX\Revolution\modElement;
+use MODX\Revolution\modStaticResource;
+use MODX\Revolution\modTemplateVar;
+use MODX\Revolution\Transport\modTransportPackage;
+use MODX\Revolution\Transport\modTransportProvider;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -27,6 +35,7 @@ abstract class BaseCommand extends Command
     public $loadConfig = true;
     public $loadMODX = true;
     public $isUpgrade = false;
+    public $isMODX3 = false;
 
     /**
      * Initializes the command just after the input has been validated.
@@ -50,6 +59,28 @@ abstract class BaseCommand extends Command
         if ($this->loadMODX)
         {
             $this->modx = Gitify::loadMODX();
+
+            $modxVersion = $this->modx->getVersionData();
+            if (version_compare($modxVersion['full_version'], '3.0.0-dev', '>=')) {
+                $this->isMODX3 = true;
+            }
+
+            // If we're on MODX 3, set up some class aliases.
+            if ($this->isMODX3) {
+                class_alias(modTransportProvider::class, 'modTransportProvider');
+                class_alias(modTransportPackage::class, 'modTransportPackage');
+                class_alias(modContext::class, 'modContext');
+                class_alias(modElement::class, 'modElement');
+                class_alias(modStaticResource::class, 'modStaticResource');
+                class_alias(modDashboardWidget::class, 'modDashboardWidget');
+                class_alias(modTemplateVar::class, 'modTemplateVar');
+                class_alias(modCategory::class, 'modCategory');
+
+                // Avoid warnings in xPDO 3.x if $_SESSION isn't available.
+                if (!isset($_SESSION)) {
+                    session_start();
+                }
+            }
         }
     }
 
