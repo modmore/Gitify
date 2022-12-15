@@ -14,6 +14,22 @@ if (!class_exists(modmore\Gitify\Gitify::class)) {
 }
 
 /**
+ * Preload Gitify dependencies, to avoid potential conflicts with MODX 3.x core dependencies.
+ */
+$classes = [
+    \Symfony\Component\Console\Input\InputArgument::class,
+    \Symfony\Component\Console\Input\InputInterface::class,
+    \Symfony\Component\Console\Input\InputOption::class,
+    \Symfony\Component\Console\Output\OutputInterface::class,
+    \Symfony\Component\Console\Helper\QuestionHelper::class,
+    \Symfony\Component\Console\Question\ChoiceQuestion::class,
+    \Symfony\Component\Console\Question\ConfirmationQuestion::class,
+];
+foreach ($classes as $className) {
+    $loaded = class_exists($className);
+}
+
+/**
  * Ensure the timezone is set; otherwise you'll get a shit ton (that's a technical term) of errors.
  */
 if (version_compare(phpversion(), '5.3.0') >= 0) {

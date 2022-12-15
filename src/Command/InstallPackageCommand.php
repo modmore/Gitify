@@ -297,7 +297,7 @@ class InstallPackageCommand extends BaseCommand
         }
 
         if (!$error) {
-            $responseBody = $response instanceof Response ? $response->getBody() : $response->response;
+            $responseBody = $response instanceof Response ? $response->getBody()->getContents() : $response->response;
             $foundPkg = simplexml_load_string($responseBody);
 
             // Verify that signature matches (mismatches are known to occur!)
@@ -322,7 +322,7 @@ class InstallPackageCommand extends BaseCommand
                 ]);
 
                 if (!empty($response)) {
-                    $responseBody = $response instanceof Response ? $response->getBody() : $response->response;
+                    $responseBody = $response instanceof Response ? $response->getBody()->getContents() : $response->response;
                     $foundPackages = simplexml_load_string($responseBody);
 
                     foreach ($foundPackages as $foundPkg) {
@@ -349,7 +349,7 @@ class InstallPackageCommand extends BaseCommand
 
             // Check for a proper response
             if (!empty($response)) {
-                $responseBody = $response instanceof Response ? $response->getBody() : $response->response;
+                $responseBody = $response instanceof Response ? $response->getBody()->getContents() : $response->response;
                 $foundPackages = simplexml_load_string($responseBody);
 
                 // No matches, simply return
@@ -458,15 +458,9 @@ class InstallPackageCommand extends BaseCommand
                 }
 
                 if ($this->interactive && !$selectedFromMultiVersions) {
-                    if (!$helper->ask(
-                        $this->input,
-                        $this->output,
-                        new ConfirmationQuestion(
-                            "Do you want to install <info>{$package['name']} ({$package['version']})</info>? <comment>[Y/n]</comment>: ",
-                            true
-                        )
-                    )
-                    ) {
+                    $question = new ConfirmationQuestion(
+                        "Do you want to install <info>{$package['name']} ({$package['version']})</info>? <comment>[Y/n]</comment>: ", true);
+                    if (!$helper->ask($this->input, $this->output, $question)) {
                         continue;
                     }
                 }
