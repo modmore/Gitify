@@ -17,6 +17,9 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 - Use --core-path param for all installs to ensure the correct core path is used in config.inc.php.
 - Download the latest versions of packages more reliably. (thanks @hugopeek) (#327)
 - Backup and restore commands can now handle compressed gzip files. (thanks @rchouinard) (#378)
+- Fix fatal type error in ClearCacheCommand. (thanks @jgullege19) (#414)
+- Trigger MODX into setup mode during build. (thanks @matdave) (#406)
+- Fix package:install not working for MODX 3.x (#415)
 
 ## 0.12.0 - 2015-12-17
 - Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
