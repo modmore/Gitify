@@ -201,6 +201,9 @@ class ExtractCommand extends BaseCommand
         if (!empty($criteria)) {
             $c->where(array($criteria));
         }
+        if (isset($options['limit']) && is_int($options['limit'])) {
+            $c->limit($options['limit']);
+        }
         $collection = $this->modx->getCollection($options['class'], $c);
 
         $this->modx->getCacheManager();
