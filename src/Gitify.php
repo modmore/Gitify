@@ -89,15 +89,18 @@ class Gitify extends Application
     /**
      * @throws \RuntimeException
      */
-    public static function loadConfig()
+    public static function loadConfig($file = null)
     {
-        if (!file_exists(GITIFY_WORKING_DIR . '.gitify')) {
+        if (null === $file) {
+            $file = '.gitify';
+        }
+        if (!file_exists(GITIFY_WORKING_DIR . $file)) {
             throw new \RuntimeException("Directory is not a Gitify directory: " . GITIFY_WORKING_DIR);
         }
 
-        $config = Gitify::fromYAML(file_get_contents(GITIFY_WORKING_DIR . '.gitify'));
+        $config = Gitify::fromYAML(file_get_contents(GITIFY_WORKING_DIR . $file));
         if (!$config || !is_array($config)) {
-            throw new \RuntimeException("Error: " . GITIFY_WORKING_DIR . ".gitify file is not valid YAML, or is empty.");
+            throw new \RuntimeException("Error: " . GITIFY_WORKING_DIR . "{$file} file is not valid YAML, or is empty.");
         }
 
         return $config;
@@ -166,6 +169,7 @@ class Gitify extends Application
             new InputOption('--help',           '-h', InputOption::VALUE_NONE, 'Display this help message.'),
             new InputOption('--verbose',        '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.'),
             new InputOption('--version',        '-V', InputOption::VALUE_NONE, 'Display the Gitify version.'),
+            new InputOption('--config',        '-c', InputOption::VALUE_REQUIRED, 'Gitify YAML file to use.', '.gitify'),
         ));
     }
 }
