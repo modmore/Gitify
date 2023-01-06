@@ -6,6 +6,7 @@ use modmore\Gitify\Gitify;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use xPDO\xPDOIterator;
 
 /**
  * Class BuildCommand
@@ -120,6 +121,9 @@ class ExtractCommand extends BaseCommand
             $c->where($contextCriteria);
             $c->sortby('uri', 'ASC');
             $resources = $this->modx->getIterator('modResource', $c);
+            if (isset($options['limit_per_parent'])) {
+                $resources = $this->limitPerParent($options['limit_per_parent'], $resources);
+            }
             foreach ($resources as $resource) {
                 /** @var \modResource $resource */
                 $file = $this->generate($resource, $options);
@@ -180,6 +184,57 @@ class ExtractCommand extends BaseCommand
     }
 
     /**
+     * @param array{limit?: int, sort_by?: string, sort_dir?: string} $options
+     *
+     * @return array|xPDOIterator
+     */
+    private function limitPerParent(array $options, xPDOIterator $resources)
+    {
+        if (!is_numeric($options['limit']) || iterator_count($resources) === 0) {
+            return $resources;
+        }
+        $limit = $options['limit'];
+        $sortField = $options['order_by'] ?? 'id';
+        $sortDir = strtolower($options['order_dir'] ?? 'asc');
+        if (!in_array($sortDir, ['desc', 'asc'], true)) {
+            $sortDir = 'asc';
+        }
+        // group by parent
+        $grouped = [];
+        foreach ($resources as $resource) {
+            $grouped[$resource->get('parent')][] = $resource;
+        }
+        // sort
+        foreach ($grouped as &$toSort) {
+            uasort(
+                $toSort,
+                static function (\modResource $resourceA, \modResource $resourceB) use ($sortField, $sortDir): int {
+                    $fieldA = $resourceA->get($sortField);
+                    $fieldB = $resourceB->get($sortField);
+                    if ($fieldA === $fieldB) {
+                        return 0;
+                    }
+                    if ($sortDir === 'asc') {
+                        // a is "less", we want it first (so lower score)
+                        return $fieldA < $fieldB ? -1 : 1;
+                    }
+
+                    // a is less, we want it after (descending)
+                    return $fieldA < $fieldB ? 1 : -1;
+                }
+            );
+        }
+
+        // keep only needed amount
+        $kept = [];
+        foreach ($grouped as $children) {
+            array_push($kept, ...array_slice($children, 0, $limit));
+        }
+
+        return $kept;
+    }
+
+    /**
      * Loads all objects for a specified class, first clearing out the current data.
      *
      * @param $folder
@@ -200,9 +255,6 @@ class ExtractCommand extends BaseCommand
         $c = $this->modx->newQuery($options['class']);
         if (!empty($criteria)) {
             $c->where(array($criteria));
-        }
-        if (isset($options['limit']) && is_int($options['limit'])) {
-            $c->limit($options['limit']);
         }
         $collection = $this->modx->getCollection($options['class'], $c);
 
