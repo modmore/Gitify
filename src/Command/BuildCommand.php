@@ -434,6 +434,14 @@ class BuildCommand extends BaseCommand
         $this->removeOrphans($type);
 
         $this->resolveConflicts($folder, $type);
+
+        if (
+            class_exists('\modX\Revolution\modNamespace') &&
+            in_array($type['class'], ['modNamespace', '\modNamespace', '\modX\Revolution\modNamespace'], true)
+        ) {
+            $this->modx->getCacheManager()-> generateNamespacesCache('namespaces');
+            \modX\Revolution\modNamespace::loadCache($this->modx);
+        }
     }
 
     /**
