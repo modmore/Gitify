@@ -169,7 +169,7 @@ class Gitify extends Application
             new InputOption('--help',           '-h', InputOption::VALUE_NONE, 'Display this help message.'),
             new InputOption('--verbose',        '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.'),
             new InputOption('--version',        '-V', InputOption::VALUE_NONE, 'Display the Gitify version.'),
-            new InputOption('--config',        '-c', InputOption::VALUE_REQUIRED, 'Gitify YAML file to use.', '.gitify'),
+            new InputOption('--config',        null, InputOption::VALUE_REQUIRED, 'Gitify YAML file to use.', '.gitify'),
         ));
     }
 }
