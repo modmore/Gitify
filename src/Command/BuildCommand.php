@@ -594,14 +594,14 @@ class BuildCommand extends BaseCommand
             $runExtract = false;
             foreach ($this->conflictingObjects as $conflict) {
                 $showOriginalPrimary = is_array($conflict['existing_object_primary']) ? json_encode($conflict['existing_object_primary']) : $conflict['existing_object_primary'];
-                $this->output->writeln('- Attempting to resolve ID Conflict for <comment>' . $showOriginalPrimary . '</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
-
-
+                
                 // Get the original/master copy of this conflict
-                $getPrimary = $conflict['existing_object_primary'];
+                $getPrimary = $conflict['object_id'];
                 if (!is_array($getPrimary)) {
                     $getPrimary = array('id' => $getPrimary);
                 }
+                $this->output->writeln('- Attempting to resolve ID Conflict for <comment>' . $showOriginalPrimary . ' (ID: '.$getPrimary["id"].')</comment> with <comment>' . count($conflict['conflicts']) . '</comment> duplicate(s).');
+
                 $original = $this->modx->getObject($type['class'], $getPrimary);
                 if ($original instanceof \xPDOObject) {
                     // Get the primary key definition of the class
@@ -694,6 +694,7 @@ class BuildCommand extends BaseCommand
         if (!isset($this->conflictingObjects[$internalPrimary])) {
             $this->conflictingObjects[$internalPrimary] = array(
                 'existing_object_primary' => $primary,
+                'object_id' => $internalPrimary,
                 'conflicts' => array(),
             );
         }
