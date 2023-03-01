@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use xPDOTransport;
 
 /**
  * Class InstallPackageCommand
@@ -233,6 +234,37 @@ class InstallPackageCommand extends BaseCommand
         {
             $this->output->writeln("<error>Cannot load Provider to install $package</error>");
             return false;
+        }
+
+        $verbosity = $this->input->getOption('all') ? OutputInterface::VERBOSITY_VERBOSE : OutputInterface::VERBOSITY_NORMAL;
+
+        $installed = $this->modx->getObject('transport.modTransportPackage', [
+            'signature' => $package,
+            'provider' => $provider->get('id'),
+        ]);
+        if ($installed) {
+            $this->output->writeln("- <info>$package</info> is already installed, skipping", $verbosity);
+            return true;
+        }
+
+        [$name, $version] = xPDOTransport::parseSignature($package);
+        $c = $this->modx->newQuery('transport.modTransportPackage');
+        $c->where([
+            'provider' => $provider->get('id'),
+            'signature:LIKE' => $name . '-%',
+        ]);
+        $c->sortby('installed', 'DESC'); // @todo is this sufficient to get highest installed version
+
+        /** @var \modTransportPackage $lastVersion */
+        $lastVersion = $this->modx->getObject('transport.modTransportPackage', $c);
+        if ($lastVersion) {
+            $sig = xPDOTransport::parseSignature($lastVersion->get('signature'));
+            $installedVersion = $sig[1];
+
+            if (version_compare($installedVersion, $version, '>=')) {
+                $this->output->writeln("- <info>$package</info>, found higher version {$installedVersion} already installed", $verbosity);
+                return true;
+            }
         }
 
         // Download and install the package from the chosen provider
@@ -482,6 +514,7 @@ class InstallPackageCommand extends BaseCommand
 
                 // Grab the package object
                 $obj = $response->getObject();
+                /** @var \modTransportPackage $package */
                 if ($package = $this->modx->getObject('transport.modTransportPackage', ['signature' => $obj['signature']])) {
                     // Install the package
                     return $package->install($options);
