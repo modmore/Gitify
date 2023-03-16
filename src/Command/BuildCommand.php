@@ -435,12 +435,16 @@ class BuildCommand extends BaseCommand
 
         $this->resolveConflicts($folder, $type);
 
-        if (
-            class_exists('\modX\Revolution\modNamespace') &&
-            in_array($type['class'], ['modNamespace', '\modNamespace', '\modX\Revolution\modNamespace'], true)
-        ) {
-            $this->modx->getCacheManager()-> generateNamespacesCache('namespaces');
-            \modX\Revolution\modNamespace::loadCache($this->modx);
+        // Due to autoloading via namespaces (bootstrap.php) in MODX 3.x, rebuild namespace cache.
+        $namespaces = [
+            'modNamespace',
+            '\modNamespace',
+            'MODX\Revolution\modNamespace',
+            '\MODX\Revolution\modNamespace',
+        ];
+        if (class_exists('\MODX\Revolution\modNamespace') && in_array($type['class'], $namespaces, true)) {
+            $this->modx->getCacheManager()->generateNamespacesCache('namespaces');
+            \MODX\Revolution\modNamespace::loadCache($this->modx);
         }
     }
 
