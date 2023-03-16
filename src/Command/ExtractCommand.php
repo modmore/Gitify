@@ -91,7 +91,7 @@ class ExtractCommand extends BaseCommand
         }
 
         if ($input->getOption('packages')) {
-            $this->extractPackages();
+            $this->extractPackages($input->getOption('config'));
         }
 
         $output->writeln('Done! ' . $this->getRunStats());
@@ -519,11 +519,11 @@ class ExtractCommand extends BaseCommand
         return \modResource::filterPathSegment($this->modx, $path, $options);
     }
 
-    private function extractPackages(): void
+    private function extractPackages($file = null): void
     {
         $this->output->writeln('<info>Extracting installed packages...</info>');
-        $file = GITIFY_WORKING_DIR . '.gitify';
-        $data = Yaml::parseFile($file);
+        $data = Gitify::loadConfig($file);
+        $file = GITIFY_WORKING_DIR . $file;
 
         $result = $this->modx->call('transport.modTransportPackage', 'listPackages', [
             &$this->modx,
