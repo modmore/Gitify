@@ -54,7 +54,7 @@ abstract class BaseCommand extends Command
 
         if ($this->loadConfig)
         {
-            $this->config = Gitify::loadConfig();
+            $this->config = Gitify::loadConfig($input->getOption('config'));
         }
         if ($this->loadMODX)
         {
