@@ -519,7 +519,7 @@ class ExtractCommand extends BaseCommand
         return \modResource::filterPathSegment($this->modx, $path, $options);
     }
 
-    private function extractPackages($file = null): void
+    private function extractPackages(string $file = null): void
     {
         $this->output->writeln('<info>Extracting installed packages...</info>');
         $data = Gitify::loadConfig($file);
