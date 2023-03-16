@@ -285,6 +285,7 @@ class ExtractCommand extends BaseCommand
             $content = $object->getContent();
 
             if (!empty($content)) {
+                unset($data['content']);
                 foreach ($data as $key => $value) {
                     if ($value === $content) unset($data[$key]);
                 }
