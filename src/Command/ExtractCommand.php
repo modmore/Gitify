@@ -185,10 +185,10 @@ class ExtractCommand extends BaseCommand
 
     /**
      * @param array{limit?: int, sort_by?: string, sort_dir?: string} $options
-     *
-     * @return array|xPDOIterator
+     * @param \xPDOIterator|xPDOIterator $resources
+     * @return array|\xPDOIterator|xPDOIterator
      */
-    private function limitPerParent(array $options, xPDOIterator $resources)
+    private function limitPerParent(array $options, $resources)
     {
         if (!is_numeric($options['limit']) || iterator_count($resources) === 0) {
             return $resources;
