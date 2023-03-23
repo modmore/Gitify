@@ -194,8 +194,8 @@ class ExtractCommand extends BaseCommand
             return $resources;
         }
         $limit = $options['limit'];
-        $sortField = $options['order_by'] ?? 'id';
-        $sortDir = strtolower($options['order_dir'] ?? 'asc');
+        $sortField = $options['sort_by'] ?? 'id';
+        $sortDir = strtolower($options['sort_dir'] ?? 'asc');
         if (!in_array($sortDir, ['desc', 'asc'], true)) {
             $sortDir = 'asc';
         }
