@@ -3,10 +3,13 @@ namespace modmore\Gitify\Command;
 
 use modmore\Gitify\BaseCommand;
 use modmore\Gitify\Gitify;
+use modTransportPackage;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use xPDO\xPDOIterator;
+use xPDOTransport;
 
 /**
  * Class BuildCommand
@@ -32,6 +35,13 @@ class ExtractCommand extends BaseCommand
                 'partitions',
                 InputArgument::IS_ARRAY | InputArgument::OPTIONAL,
                 'Specify the data partition key (folder name), or keys separated by a space, that you want to extract. '
+            )
+            ->addOption(
+                'packages',
+                'p',
+                InputOption::VALUE_NEGATABLE,
+                'Skip extracting installed package when set.',
+                true
             )
         ;
     }
@@ -76,6 +86,10 @@ class ExtractCommand extends BaseCommand
 
                     break;
             }
+        }
+
+        if ($input->getOption('packages')) {
+            $this->extractPackages($input->getOption('config'));
         }
 
         $output->writeln('Done! ' . $this->getRunStats());
@@ -501,5 +515,56 @@ class ExtractCommand extends BaseCommand
             return $this->_resource->cleanAlias($path, $options);
         }
         return \modResource::filterPathSegment($this->modx, $path, $options);
+    }
+
+    private function extractPackages(string $file = null): void
+    {
+        $this->output->writeln('<info>Extracting installed packages...</info>');
+        $data = Gitify::loadConfig($file);
+        $file = GITIFY_WORKING_DIR . $file;
+
+        $result = $this->modx->call('transport.modTransportPackage', 'listPackages', [
+            &$this->modx,
+            1,
+            0,
+            0,
+            ''
+        ]);
+
+        $providers = [];
+        /** @var modTransportPackage $package */
+        foreach ($result['collection'] as $package) {
+            $signature = $package->get('signature');
+            $sig = xPDOTransport::parseSignature($signature);
+
+            if (!$provider = $package->getOne('Provider')) {
+                $this->output->writeln("- <comment>Package {$sig[0]} is not assigned to a provider, skipping</comment>");
+                continue;
+            }
+
+            $providerKey = $provider->get('name');
+            if (!isset($providers[$providerKey])) {
+                $providers[$providerKey] = [
+                    'service_url' => $provider->get('service_url')
+                ];
+                if ($provider->get('description')) {
+                    $providers[$providerKey]['description'] = $provider->get('description');
+                }
+                if ($provider->get('username')) {
+                    $providers[$providerKey]['username'] = $provider->get('username');
+                }
+                if ($provider->get('api_key') && !file_exists(GITIFY_WORKING_DIR . '.' . $providerKey . '.key')) {
+                    $key = $provider->get('api_key');
+                    file_put_contents(GITIFY_WORKING_DIR . '.' . $providerKey . '.key', $key);
+                    $providers[$providerKey]['api_key'] = '.' . $providerKey . '.key';
+                }
+            }
+
+            $providers[$providerKey]['packages'][] = $signature;
+        }
+        $data['packages'] = $providers;
+
+        file_put_contents($file, Gitify::toYAML($data));
+        $this->output->writeln('<info>Packages updated.</info>');
     }
 }
