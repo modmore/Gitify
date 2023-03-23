@@ -5,7 +5,7 @@ The goal of Gitify is to provide a **two-way sync** of data typically stored in 
 
 The project configuration, which determines what data is written to file and build to the database, is stored in a `.gitify` file in the project root.
 
-## Upgrading to v2 (:warn: in development)
+## Upgrading to v2
 
 Gitify v2 brings updated dependencies, additional functionality, and easier installation/updates via Composer.
 

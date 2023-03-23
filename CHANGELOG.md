@@ -2,7 +2,7 @@
 
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
-## Current development (master)
+## 2.0.0 - 2023-03-23 (master)
 - Prevent E_WARN errors in build
 - Fix fallback Gitify-Cache-Folder
 - Bump symfony/console to 5.3.7
@@ -20,6 +20,12 @@ Changes that may have an impact on backwards compatibility (i.e. they may break 
 - Fix fatal type error in ClearCacheCommand. (thanks @jgullege19) (#414)
 - Trigger MODX into setup mode during build. (thanks @matdave) (#406)
 - Fix package:install not working for MODX 3.x (#415)
+- Add ability to specify a config file to use (thanks @rtripault) (#417)
+- Add ability to limit number of extracted resources per parent (thanks @rtripault) (#418)
+- Force refreshing namespace cache after build (thanks @rtripault) (#422)
+- Prevent content attribute being added/removed intermittently, by unsetting content for static elements when extracting (thanks @rtripault) (#423)
+- Fix undefined array key 'service' warning on PHP 8.x (thanks @hugopeek) (#427)
+- Automatically update the list of packages with versions during extract + improve install (#430)
 
 ## 0.12.0 - 2015-12-17
 - Add `exclude_tvs` option to the `content` data type to allow excluding certain TVs
