@@ -21,7 +21,6 @@ The data file structure is unchanged, so you can safely update to v2.
 
 - Gitify v2 is now compatible with Gitify Watch v2. Make sure you've upgraded to the latest version.
 - The minimum PHP version has been increased to 7.2.5.
-- Documentation has not yet been updated for v2. This will happen soon.
 - `Gitify` has changed to `gitify` and is now in a /bin subdirectory.
 
 ## Installation

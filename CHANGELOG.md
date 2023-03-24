@@ -2,7 +2,10 @@
 
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
-## 2.0.0 - 2023-03-23 (master)
+## 2.0.1 - 2023-03-24
+- Switch base 'config' option (introduced in 2.0.0) to 'dotfile', to prevent conflict with 'config' option in modx:install command. (26f6c3c)
+
+## 2.0.0 - 2023-03-23
 - Prevent E_WARN errors in build
 - Fix fallback Gitify-Cache-Folder
 - Bump symfony/console to 5.3.7
