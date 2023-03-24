@@ -89,7 +89,7 @@ class ExtractCommand extends BaseCommand
         }
 
         if ($input->getOption('packages')) {
-            $this->extractPackages($input->getOption('config'));
+            $this->extractPackages($input->getOption('dotfile'));
         }
 
         $output->writeln('Done! ' . $this->getRunStats());
