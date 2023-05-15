@@ -168,7 +168,7 @@ class BuildCommand extends BaseCommand
         $directory = new \DirectoryIterator($folder);
         foreach ($directory as $path => $info) {
             /** @var \SplFileInfo $info */
-            $name = $info->getBasename();
+            $name = $info->getFilename();
 
             // Ignore dotfiles/folders
             if (substr($name, 0, 1) == '.') continue;
@@ -228,7 +228,7 @@ class BuildCommand extends BaseCommand
         $resources = array();
         $parents = array();
         foreach ($iterator as $fileInfo) {
-            if (substr($fileInfo->getBasename(), 0, 1) == '.') {
+            if (substr($fileInfo->getFilename(), 0, 1) == '.') {
                 continue;
             }
             /** @var \SplFileInfo $fileInfo */
@@ -258,7 +258,7 @@ class BuildCommand extends BaseCommand
             try {
                 $data = Gitify::fromYAML($rawData);
             } catch (ParseException $Exception) {
-                $this->output->writeln('<error>Could not parse ' . $resource->getBasename() . ': ' . $Exception->getMessage() .'</error>');
+                $this->output->writeln('<error>Could not parse ' . $resource->getFilename() . ': ' . $Exception->getMessage() .'</error>');
                 continue;
             }
             if (!empty($content)) {
@@ -397,7 +397,7 @@ class BuildCommand extends BaseCommand
 
         foreach ($directory as $file) {
             /** @var \SplFileInfo $file */
-            $name = $file->getBasename();
+            $name = $file->getFilename();
 
             // Ignore dotfiles/folders
             if (substr($name, 0, 1) == '.') continue;

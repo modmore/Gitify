@@ -77,7 +77,7 @@ class RestoreCommand extends BaseCommand
         $directory = new \DirectoryIterator($targetDirectory);
         foreach ($directory as $path => $info) {
             /** @var \SplFileInfo $info */
-            $name = $info->getBasename();
+            $name = $info->getFilename();
             // Ignore dotfiles/folders
             if (substr($name, 0, 1) === '.') {
                 continue;
