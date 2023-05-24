@@ -27,6 +27,7 @@ class BuildCommand extends BaseCommand
     public $updatedObjects;
     public $orphanedObjects;
     protected $_metaCache = array();
+    protected $_resourceIds = array();
 
     protected function configure()
     {
@@ -301,10 +302,21 @@ class BuildCommand extends BaseCommand
 
         // Grab the resource, or create a new one.
         $new = false;
+        $oldId = null;
         $object = ($this->isForce) ? false : $this->modx->getObject('modResource', $primary);
         if (!($object instanceof \modResource)) {
             $object = $this->modx->newObject('modResource');
             $new = true;
+
+            // Attempt to duplicate existing resource to another context or uri
+            if ($method === 'uri' && $this->modx->getCount('modResource', $data['id'])) {
+                $oldId = $data['id'];
+                unset($data['id']);
+
+                $data['parent'] = isset($data['parent'], $this->_resourceIds[$data['parent']])
+                    ? $this->_resourceIds[$data['parent']]
+                    : 0;
+            }
         }
 
         // Ensure all fields have a value
@@ -324,6 +336,9 @@ class BuildCommand extends BaseCommand
 
         // Save it!
         if ($object->save()) {
+            if ($oldId) {
+                $this->_resourceIds[$oldId] = $object->get('id');
+            }
             if ($this->output->isVerbose()) {
                 $new = ($new) ? 'Created new' : 'Updated';
                 $this->output->writeln("- {$new} resource from {$method}: {$data[$method]}");
@@ -573,16 +588,12 @@ class BuildCommand extends BaseCommand
             $iterator = $this->modx->getIterator($class, $criteria);
             foreach ($iterator as $object) {
                 /** @var \xPDOObject $object */
-                $key = $object->getPrimaryKey();
+                $key = $pk = $object->getPrimaryKey();
                 if (is_array($key)) {
                     $key = implode('--', $key);
-                }
-
-                $this->existingObjects[$key] = $object->toArray();
-                $pk = $object->getPrimaryKey();
-                if (is_array($pk)) {
                     $pk = json_encode($pk);
                 }
+                $this->existingObjects[$key] = $object->toArray();
                 $this->orphanedObjects[$pk] = 1;
             }
         }
