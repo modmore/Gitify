@@ -485,7 +485,6 @@ class ExtractCommand extends BaseCommand
                 }
                 break;
         }
-        }
 
         return $data;
     }
