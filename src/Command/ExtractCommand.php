@@ -385,12 +385,21 @@ class ExtractCommand extends BaseCommand
      * @param $package
      * @param array $options
      */
-    public function getPackage($package, array $options = array())
+    public function getPackage($package, array $options = []): void
     {
+        // Check if this package is specified to use the xPDO v3 model structure
+        $xpdo3 = !empty($options['xpdo3']) && $options['xpdo3'];
+
         $path = (isset($options['package_path'])) ? $options['package_path'] : false;
         if (!$path) {
             $path = $this->modx->getOption($package . '.core_path', null, $this->modx->getOption('core_path') . 'components/' . $package . '/', true);
-            $path .= 'model/';
+            $path .= $xpdo3 ? 'src/' : 'model/';
+        }
+
+        // If the package uses the xPDO v3 model structure, add package with namespace and model options.
+        if ($xpdo3) {
+            $this->modx->addPackage($options['model'], $path, null, $options['namespace'] . '\\');
+            return;
         }
 
         if (isset($options['service'])) {
