@@ -2,6 +2,14 @@
 
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
+## 2.1.0 - 2023-12-11
+- Bump symfony/console to 5.4.32
+- Bump symfony/yaml to 5.4.31
+- Fix non-English filename generation (thanks @livingroot) [#442]
+- Add new config option 'category_ids_in_elements' to extract category ids instead of category names (thanks @wuuti) [#443]
+- Add ability to duplicate contexts with resources (thanks @bezumkin) [#439]
+- Add handling for packages using the new xPDO v3 model structure when extracting and building [#444]
+
 ## 2.0.1 - 2023-03-24
 - Switch base 'config' option (introduced in 2.0.0) to 'dotfile', to prevent conflict with 'config' option in modx:install command. (26f6c3c)
 
