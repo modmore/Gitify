@@ -475,11 +475,13 @@ class ExtractCommand extends BaseCommand
                 ksort($tvs);
                 $data['tvs'] = $tvs;
                 break;
-
+            
             // Handle string-based categories automagically on elements
             case $object instanceof \modElement && !($object instanceof \modCategory):
-                if (isset($data['category']) && !empty($data['category']) && is_numeric($data['category'])) {
-                    $data['category'] = $this->getCategoryName($data['category']);
+                if (!(isset($this->config['category_ids_in_elements']) && $this->config['category_ids_in_elements'] === true)) {
+                    if (!empty($data['category']) && is_numeric($data['category'])) {
+                        $data['category'] = $this->getCategoryName($data['category']);
+                    }
                 }
                 break;
         }
