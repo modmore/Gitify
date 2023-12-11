@@ -136,4 +136,36 @@ abstract class BaseCommand extends Command
 
         return null;
     }
+
+    /**
+     * Loads a package (xPDO Model) by its name
+     *
+     * @param $package
+     * @param array $options
+     */
+    public function getPackage($package, array $options = []): void
+    {
+        // Check if this package is specified to use the newer xPDO v3 namespaced model structure
+        $xpdo3 = !empty($options['namespace']);
+
+        $path = (isset($options['package_path'])) ? $options['package_path'] : false;
+        if (!$path) {
+            $path = $this->modx->getOption($package . '.core_path', null, $this->modx->getOption('core_path') . 'components/' . $package . '/', true);
+            $path .= $xpdo3 ? 'src/' : 'model/';
+        }
+
+        // If the package uses the xPDO v3 namespaced model structure, add package with namespace and model options.
+        if ($xpdo3) {
+            $this->modx->addPackage($options['model'], $path, null, $options['namespace'] . '\\');
+            return;
+        }
+
+        // Load packages using the older model structure
+        if (isset($options['service'])) {
+            $path .= $package . '/';
+            $this->modx->getService($package, $options['service'], $path);
+        } else {
+            $this->modx->addPackage($package, $path);
+        }
+    }
 }

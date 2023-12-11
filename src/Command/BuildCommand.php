@@ -197,28 +197,6 @@ class BuildCommand extends BaseCommand
     }
 
     /**
-     * Loads a package (xPDO Model) by its name
-     *
-     * @param $package
-     * @param array $options
-     */
-    public function getPackage($package, array $options = array())
-    {
-        $path = (isset($options['package_path'])) ? $options['package_path'] : false;
-        if (!$path) {
-            $path = $this->modx->getOption($package . '.core_path', null, $this->modx->getOption('core_path') . 'components/' . $package . '/', true);
-            $path .= 'model/';
-        }
-
-        if (isset($options['service'])) {
-            $path .= $package . '/';
-            $this->modx->getService($package, $options['service'], $path);
-        } else {
-            $this->modx->addPackage($package, $path);
-        }
-    }
-
-    /**
      * Loops over resource files to create the resources.
      *
      * @param $context
