@@ -55,6 +55,31 @@ $ chmod +x bin/gitify
 
 Please see [the Installation documentation](https://docs.modmore.com/en/Open_Source/Gitify/Installation/index.html) for more details.
 
+## Docker Usage
+
+### Example usage:
+
+```
+docker build -t gitify docker
+docker run --rm -v "src:/var/www/html" gitify help
+```
+
+### Example docker-compose configuration:
+
+``` yaml
+version: '3.1'
+
+services:
+
+  [...]
+
+  gitify:
+    build: docker 
+    volumes:
+      - "./src:/var/www/html"
+```
+
+Notice: gitify's container needs to be able to access the database and the sourcecode of ModX.
 
 ## Documentation
 
