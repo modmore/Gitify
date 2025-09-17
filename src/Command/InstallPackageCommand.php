@@ -52,6 +52,12 @@ class InstallPackageCommand extends BaseCommand
                 'i',
                 InputOption::VALUE_NONE,
                 'When --all and --interactive are specified, all packages defined in the .gitify config will be installed interactively.'
+            )
+            ->addOption(
+                'upgrade',
+                'u',
+                InputOption::VALUE_NONE,
+                'When specified, the package provider is queried to check if a newer version of the package is available.'
             );
     }
 
@@ -243,7 +249,9 @@ class InstallPackageCommand extends BaseCommand
             'provider' => $provider->get('id'),
         ]);
         if ($installed) {
-            $this->output->writeln("- <info>$package</info> is already installed, skipping", $verbosity);
+            if (!$this->checkForUpdates($package, $provider, $installOptions, true)) {
+                $this->output->writeln("- <info>$package</info> is already installed, skipping", $verbosity);
+            }
             return true;
         }
 
@@ -262,7 +270,9 @@ class InstallPackageCommand extends BaseCommand
             $installedVersion = $sig[1];
 
             if (version_compare($installedVersion, $version, '>=')) {
-                $this->output->writeln("- <info>$package</info>, found higher version {$installedVersion} already installed", $verbosity);
+                if (!$this->checkForUpdates($lastVersion->get('signature'), $provider, $installOptions)) {
+                    $this->output->writeln("- <info>$package</info>, found higher version {$installedVersion} already installed", $verbosity);
+                }
                 return true;
             }
         }
@@ -278,6 +288,67 @@ class InstallPackageCommand extends BaseCommand
         return true;
     }
 
+    /**
+     * Requests the package provider to check if a newer version of the package is available
+     *
+     * @param $package
+     * @param \modTransportProvider $provider
+     * @param array $installOptions
+     * @param bool $checkLocally
+     * @return bool
+     */
+    private function checkForUpdates($package, $provider, $installOptions, $checkLocally = false)
+    {
+        if ($this->input->getOption('upgrade')) {
+            // Check if a newer version of the package is locally installed
+            if ($checkLocally) {
+                [$name, $version] = xPDOTransport::parseSignature($package);
+                $c = $this->modx->newQuery('transport.modTransportPackage');
+                $c->where([
+                    'provider' => $provider->get('id'),
+                    'signature:LIKE' => $name . '-%',
+                ]);
+                $c->sortby('installed', 'DESC'); // @todo is this sufficient to get highest installed version
+
+                /** @var \modTransportPackage $lastVersion */
+                $lastVersion = $this->modx->getObject('transport.modTransportPackage', $c);
+                if ($lastVersion) {
+                    $sig = xPDOTransport::parseSignature($lastVersion->get('signature'));
+                    $installedVersion = $sig[1];
+
+                    if (version_compare($installedVersion, $version, '>')) {
+                        $package = $lastVersion->get('signature');
+                    }
+                }
+            }
+
+            // Check if a newer version of the package is available on the provider
+            $packages = $provider->latest($package);
+            if (is_array($packages) && count($packages) > 0) {
+                if (count($packages) > 1) {
+                    // Sort array to get the latest version
+                    usort($packages, [$this, "compareSignatures"]);
+                }
+
+                $package_signature = $packages[0]['signature'];
+                $this->output->writeln("Newer version <comment>{$package_signature}</comment> available for package <comment>$package</comment>.");
+                // Download and install the package from the chosen provider
+                $completed = $this->download($package_signature, $provider, $installOptions);
+                if (!$completed) {
+                    $this->output->writeln("<error>Cannot install package $package_signature.</error>");
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // For sorting the packages by their signature
+    private function compareSignatures($a, $b)
+    {
+        return version_compare($b['signature'], $a['signature']);
+    }
 
     /**
      * Download and install the package from the provider
