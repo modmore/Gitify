@@ -52,7 +52,7 @@ class BackupCommand extends BaseCommand
                 'When specified, resulting backup file will be gzip compressed.'
             )            
             ->addOption(
-                'ignoretables',
+                'ignore-table',
                 'ignore',
                 InputArgument::OPTIONAL,
                 'When specified, the tables are ignored. Separate multiple tables with commas.'
@@ -139,7 +139,8 @@ class BackupCommand extends BaseCommand
         $tablespaces = $input->getOption('no-tablespaces') ? ' --no-tablespaces' : '';
         $gzip = $input->getOption('compress') ? '| gzip - ' : '';
         
-        $ignoretables = $input->getOption('ignoretables');
+        // Specified tables are ignored from dump
+        $ignoretables = $input->getOption('ignore-table');
         $ignoretables_parameter = '';
         if ($ignoretables) {
             $ignoretables_parameters = [];
