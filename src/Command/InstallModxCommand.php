@@ -297,7 +297,7 @@ class InstallModxCommand extends BaseCommand
         $modx = $xml->createElement('modx');
 
         foreach ($config as $key => $value) {
-            $modx->appendChild($xml->createElement($key, htmlentities($value, ENT_QUOTES|ENT_XML1)));
+            $modx->appendChild($xml->createElement($key, htmlentities($value ?? '', ENT_QUOTES|ENT_XML1)));
         }
 
         $xml->appendChild($modx);
