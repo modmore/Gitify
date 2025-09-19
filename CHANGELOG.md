@@ -2,6 +2,12 @@
 
 Changes that may have an impact on backwards compatibility (i.e. they may break existing workflows) are marked with `[BC]`.
 
+## 2.2.0 - 2025-09-19
+- Bump symfony/console to 5.4.36
+- Bump symfony/yaml to 5.4.35
+- Optionally check and upgrade existing packages listed in the .gitify file when running package:install (thanks @halftrainedharry) [#458]
+- Add --ignore-table option to the backup command (thanks @jenswittmann) [#455]
+
 ## 2.1.0 - 2023-12-11
 - Bump symfony/console to 5.4.32
 - Bump symfony/yaml to 5.4.31
