@@ -225,8 +225,11 @@ class BuildCommand extends BaseCommand
             $file = file_get_contents($resource->getRealPath());
 
             // Normalize line-endings to \n to ensure consistency
+            /* this causes file modifications when comparing with afterwards extraction
             $file = str_replace("\r\n", "\n", $file);
             $file = str_replace("\r", "\n", $file);
+            */
+
             // Check if delimiter exists, otherwise add it to avoid WARN in explode()
             // (WARN @ Gitify/src/Command/BuildCommand.php : 246) PHP notice: Undefined offset: 1
             if (strpos($file, Gitify::$contentSeparator) === false) {
