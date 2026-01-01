@@ -18,7 +18,7 @@ class ClearCacheCommand extends BaseCommand
             ->setDescription('Clears the internal Gitify cache.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (file_exists(GITIFY_CACHE_DIR)) {
             exec("rm -rf " . GITIFY_CACHE_DIR);

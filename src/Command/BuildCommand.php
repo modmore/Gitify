@@ -78,10 +78,18 @@ class BuildCommand extends BaseCommand
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->isForce = $input->getOption('force');
         if ($this->isForce && !$input->getOption('no-backup')) {
+            // Ensure Gitify's ArrayInput class is loaded first to avoid autoloader conflicts
+            if (!class_exists('Symfony\Component\Console\Input\ArrayInput', false)) {
+                $arrayInputPath = __DIR__ . '/../../vendor/symfony/console/Input/ArrayInput.php';
+                if (file_exists($arrayInputPath)) {
+                    require_once $arrayInputPath;
+                }
+            }
+
             $backup = $this->getApplication()->find('backup');
             $arguments = array(
                 'command' => 'backup'

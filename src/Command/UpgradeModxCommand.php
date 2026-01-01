@@ -40,7 +40,7 @@ class UpgradeModxCommand extends BaseCommand
             );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $version = $this->input->getArgument('version');
         $forced = $this->input->getOption('download');

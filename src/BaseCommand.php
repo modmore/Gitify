@@ -67,14 +67,16 @@ abstract class BaseCommand extends Command
 
             // If we're on MODX 3, set up some class aliases.
             if ($this->isMODX3) {
-                class_alias(modTransportProvider::class, 'modTransportProvider');
-                class_alias(modTransportPackage::class, 'modTransportPackage');
-                class_alias(modContext::class, 'modContext');
-                class_alias(modElement::class, 'modElement');
-                class_alias(modStaticResource::class, 'modStaticResource');
-                class_alias(modDashboardWidget::class, 'modDashboardWidget');
-                class_alias(modTemplateVar::class, 'modTemplateVar');
-                class_alias(modCategory::class, 'modCategory');
+                if (!class_exists('modTransportProvider', false)) {
+                    class_alias(modTransportProvider::class, 'modTransportProvider');
+                    class_alias(modTransportPackage::class, 'modTransportPackage');
+                    class_alias(modContext::class, 'modContext');
+                    class_alias(modElement::class, 'modElement');
+                    class_alias(modStaticResource::class, 'modStaticResource');
+                    class_alias(modDashboardWidget::class, 'modDashboardWidget');
+                    class_alias(modTemplateVar::class, 'modTemplateVar');
+                    class_alias(modCategory::class, 'modCategory');
+                }
 
                 // Avoid warnings in xPDO 3.x if $_SESSION isn't available.
                 if (!isset($_SESSION)) {

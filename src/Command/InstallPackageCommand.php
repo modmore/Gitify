@@ -68,7 +68,7 @@ class InstallPackageCommand extends BaseCommand
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->modx->setLogTarget('ECHO');
         $this->modx->setLogLevel(\modX::LOG_LEVEL_INFO);

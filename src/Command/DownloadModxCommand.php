@@ -49,7 +49,7 @@ class DownloadModxCommand extends BaseCommand
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $version = $this->input->getArgument('version');
         $forced = $this->input->getOption('download');

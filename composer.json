@@ -3,10 +3,10 @@
     "description": "Command line toolkit to make managing a MODX site in git a lot easier",
     "license": "MIT",
     "require": {
-        "php": ">=7.2.5",
-        "symfony/console": "5.4.*",
-        "symfony/yaml": "5.4.*",
-        "symfony/process": "5.3.*"
+        "php": ">=8.2",
+        "symfony/console": "7.4.*",
+        "symfony/yaml": "7.4.*",
+        "symfony/process": "7.4.*"
     },
     "autoload": {
         "psr-4": {

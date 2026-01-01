@@ -44,7 +44,7 @@ class InitCommand extends BaseCommand
      * @param OutputInterface $output
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Make sure we're not overwriting existing configuration by checking for existing .gitify files
         if (file_exists(GITIFY_WORKING_DIR . '.gitify'))
